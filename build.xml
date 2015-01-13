@@ -1,0 +1,63 @@
+<project name="mvpipe" default="jar">
+    <property name="version" value="0.2"/>
+    <property name="lib.dir" value="lib"/>
+    <property name="build.dir" value="build"/>
+    <property name="dist.dir" value="dist"/>
+    <property name="src.dir" value="src"/>
+	
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+
+	<path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    </path>
+
+	<target name="compile">
+        <mkdir dir="${build.dir}/classes"/>
+        <javac srcdir="${src.dir}/java" destdir="${build.dir}/classes" classpathref="classpath" debug="true" debuglevel="lines,vars,source"/>
+    </target>
+
+	<target name="jar" depends="compile, git.revision">
+        <delete file="${build.dir}/classes/VERSION"/>
+ 		<echo file="${build.dir}/classes/VERSION" message="${project.name}-${version}-${repository.version}"/>
+
+		<mkdir dir="${dist.dir}"/>
+	    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
+	        classpath="${lib.dir}/jarjar-1.4.jar"/>
+        <jar destfile="${dist.dir}/${project.name}-${version}-${repository.version}.jar" basedir="${build.dir}/classes"/>
+	    <jarjar jarfile="${dist.dir}/${project.name}.jar.tmp">
+            <manifest>
+                <attribute name="Main-Class" value="org.ngsutils.mvpipe.MVPipe"/>
+            </manifest>
+	        <fileset dir="${build.dir}/classes"/>
+	    </jarjar>
+        <delete file="${dist.dir}/${project.name}"/>
+ 		<concat destfile="${dist.dir}/${project.name}" binary="true">
+ 		     <fileset file="${src.dir}/scripts/stub.sh" />
+ 		     <fileset file="${dist.dir}/${project.name}.jar.tmp" />
+ 		</concat>
+        <delete file="${dist.dir}/${project.name}.jar.tmp"/>
+		<chmod file="${dist.dir}/${project.name}" perm="755"/>
+	</target>
+
+	<!-- See http://stackoverflow.com/questions/2974106/how-to-lookup-the-latest-git-commit-hash-from-an-ant-build-script -->
+	<available file=".git" type="dir" property="git.present"/>
+	<target name="git.revision" description="Store git revision in ${repository.version}" if="git.present">
+	    <exec executable="git" outputproperty="git.revision" failifexecutionfails="false" errorproperty="">
+	        <arg value="describe"/>
+	        <arg value="--tags"/>
+	        <arg value="--always"/>
+	        <arg value="HEAD"/>
+	    </exec>
+	    <condition property="repository.version" value="${git.revision}" else="unknown">
+	        <and>
+	            <isset property="git.revision"/>
+	            <length string="${git.revision}" trim="yes" length="0" when="greater"/>
+	        </and>
+	    </condition>
+	</target>
+
+</project>
+
