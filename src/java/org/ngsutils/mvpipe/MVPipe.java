@@ -5,12 +5,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ngsutils.mvpipe.context.ExecContext;
 import org.ngsutils.mvpipe.parser.Parser;
+import org.ngsutils.mvpipe.parser.SyntaxException;
+import org.ngsutils.mvpipe.parser.context.ExecContext;
+import org.ngsutils.mvpipe.parser.variable.VarBool;
+import org.ngsutils.mvpipe.parser.variable.VarTypeException;
+import org.ngsutils.mvpipe.parser.variable.VarValue;
 
 public class MVPipe {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws VarTypeException {
 		ExecContext global = new ExecContext();
 		String fname = null;
 		boolean verbose = false;
@@ -38,11 +42,11 @@ public class MVPipe {
 				dryrun = true;
 			} else if (arg.startsWith("--")) {
 				if (k != null) {
-					global.set(k, "true");
+					global.set(k, VarBool.TRUE);
 				}
 				k = arg.substring(2);
 			} else if (k != null) {
-				global.set(k, arg);
+				global.set(k, VarValue.parseString(arg));
 			} else if (args[0].charAt(0) != '-'){
 				targets.add(arg);
 			}
@@ -51,8 +55,11 @@ public class MVPipe {
 		Parser parser = new Parser(global, verbose, dryrun);
 		try {
 			parser.parse(fname);
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (IOException | SyntaxException e) {
+			System.err.println("MVPIPE ERROR: " + e.getMessage());
+			if (verbose) {
+//				e.printStackTrace();
+			}
 			System.exit(1);
 		}
 		

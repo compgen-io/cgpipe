@@ -1,0 +1,16 @@
+a = "foo"
+b = "bar"
+echo a+b
+
+c = "${a}${b}"
+echo c
+
+
+foo = "foo"
+foo ?= "baz"
+
+echo foo
+
+bar ?= "bar"
+
+echo bar

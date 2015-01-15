@@ -21,25 +21,24 @@
 
 	<target name="jar" depends="compile, git.revision">
         <delete file="${build.dir}/classes/VERSION"/>
- 		<echo file="${build.dir}/classes/VERSION" message="${project.name}-${version}-${repository.version}"/>
+ 		<echo file="${build.dir}/classes/VERSION" message="${ant.project.name}-${version}-${repository.version}"/>
 
 		<mkdir dir="${dist.dir}"/>
-	    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
-	        classpath="${lib.dir}/jarjar-1.4.jar"/>
-        <jar destfile="${dist.dir}/${project.name}-${version}-${repository.version}.jar" basedir="${build.dir}/classes"/>
-	    <jarjar jarfile="${dist.dir}/${project.name}.jar.tmp">
+	    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="${lib.dir}/jarjar-1.4.jar"/>
+        <jar destfile="${dist.dir}/${ant.project.name}-${version}-${repository.version}.jar" basedir="${build.dir}/classes"/>
+	    <jarjar jarfile="${dist.dir}/${ant.project.name}.jar.tmp">
             <manifest>
                 <attribute name="Main-Class" value="org.ngsutils.mvpipe.MVPipe"/>
             </manifest>
 	        <fileset dir="${build.dir}/classes"/>
 	    </jarjar>
         <delete file="${dist.dir}/${project.name}"/>
- 		<concat destfile="${dist.dir}/${project.name}" binary="true">
+ 		<concat destfile="${dist.dir}/${ant.project.name}" binary="true">
  		     <fileset file="${src.dir}/scripts/stub.sh" />
- 		     <fileset file="${dist.dir}/${project.name}.jar.tmp" />
+ 		     <fileset file="${dist.dir}/${ant.project.name}.jar.tmp" />
  		</concat>
-        <delete file="${dist.dir}/${project.name}.jar.tmp"/>
-		<chmod file="${dist.dir}/${project.name}" perm="755"/>
+        <delete file="${dist.dir}/${ant.project.name}.jar.tmp"/>
+		<chmod file="${dist.dir}/${ant.project.name}" perm="755"/>
 	</target>
 
 	<!-- See http://stackoverflow.com/questions/2974106/how-to-lookup-the-latest-git-commit-hash-from-an-ant-build-script -->

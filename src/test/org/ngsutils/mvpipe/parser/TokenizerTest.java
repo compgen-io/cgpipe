@@ -23,9 +23,17 @@ public class TokenizerTest {
 		assertListEquals(listBuild("a", "=", "b"), Tokenizer.tokenize("a = b"));
 		assertListEquals(listBuild("a", "=", "b"), Tokenizer.tokenize("a=b"));
 		assertListEquals(listBuild("a", "=", "b"), Tokenizer.tokenize(" a  =  b  "));
-		assertListEquals(listBuild("a", "=", "abc"), Tokenizer.tokenize(" a  = \"abc\""));
-		assertListEquals(listBuild("a", "=", "a b c"), Tokenizer.tokenize(" a  = \"a b c\""));
-	}
+		assertListEquals(listBuild("a", "=", "\"abc\""), Tokenizer.tokenize(" a  = \"abc\""));
+		assertListEquals(listBuild("a", "=", "\"a b c\""), Tokenizer.tokenize(" a  = \"a b c\""));
+		assertListEquals(listBuild("out1", ":", "in1"), Tokenizer.tokenize("out1:in1"));
+		assertListEquals(listBuild("out1", ":", "in1"), Tokenizer.tokenize("out1: in1"));
+		assertListEquals(listBuild("out1", "out2", ":", "in1"), Tokenizer.tokenize("out1 out2: in1"));
+		assertListEquals(listBuild("out1", ":", "in1", "in2"), Tokenizer.tokenize("out1: in1 in2"));
+		assertListEquals(listBuild("out1", ":"), Tokenizer.tokenize("out1 :"));
+
+		assertListEquals(listBuild("a", "+", "-b"), Tokenizer.tokenize("a + -b"));
+		assertListEquals(listBuild("-a", "+", "b"), Tokenizer.tokenize("-a+b"));
+}
 	
 	private List<String> listBuild(String... str) {
 		List<String> l = new ArrayList<String>();

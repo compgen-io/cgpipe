@@ -1,0 +1,22 @@
+# sink
+
+chunks = 4
+
+for i in 1..chunks
+    echo "i=${i}"
+done
+
+foo="bar"
+
+out1: in1 in2.@{1..chunk}
+    echo "${foo}"
+
+out2:
+    #$ foo = "baz"
+    echo "${foo}"
+
+in1:
+
+for i in 1..chunks
+    in2.${i}:
+done

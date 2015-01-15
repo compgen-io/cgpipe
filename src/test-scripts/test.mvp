@@ -1,0 +1,30 @@
+echo 1 == 1
+echo 1==2
+
+a="foo"
+echo a=="foo"
+
+b="bar"
+echo a==b
+
+# testing !=
+echo 1!=1
+echo a!=b
+
+
+# testing comparisons
+echo 2 > 1
+echo 1 < 2
+
+echo 2 >= 1
+echo 2 >= 2
+echo 1 <= 2
+echo 1 <= 1
+
+echo 1 > 2
+echo 2 < 1
+
+
+echo "a" < "aa"
+echo "a" < "b"
+echo "foo" > "bar"

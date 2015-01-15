@@ -4,12 +4,12 @@ if [ "$?" -gt 0 ]; then
 	MYSELF="./$0"
 fi
 
-if [ -e $(dirname $0)/.mvpiperc ]; then
-    . $(dirname $0)/.mvpiperc
-fi
-if [ -e $HOME/.mvpiperc ]; then
-    . $HOME/.mvpiperc
-fi
+#if [ -e $(dirname $0)/.mvpiperc ]; then
+#    . $(dirname $0)/.mvpiperc
+#fi
+#if [ -e $HOME/.mvpiperc ]; then
+#    . $HOME/.mvpiperc
+#fi
 
 #if [ ! -t 0 ]; then 
 #    JAVA_OPTS="${JAVA_OPTS} -Dorg.ngsutils.support.tty.fd0=F"
