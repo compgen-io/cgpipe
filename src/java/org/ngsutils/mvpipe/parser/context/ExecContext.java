@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.ngsutils.mvpipe.parser.Eval;
+import org.ngsutils.mvpipe.parser.SyntaxException;
+import org.ngsutils.mvpipe.parser.Tokens;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 
 public class ExecContext {
@@ -116,5 +119,9 @@ public class ExecContext {
 		}
 		
 		return out;
+	}
+
+	public ExecContext addTokenizedLine(Tokens tokens) throws SyntaxException {
+		return Eval.evalTokenLine(this,  tokens);
 	}
 }

@@ -5,15 +5,12 @@ import org.ngsutils.mvpipe.parser.context.ExecContext;
 import org.ngsutils.mvpipe.parser.variable.VarTypeException;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 
-public class Div implements Operator {
+public class Div extends BasicOp {
 
 	@Override
-	public VarValue eval(ExecContext context, String lstr, VarValue rval) 
-			throws SyntaxException {
-		VarValue left = VarValue.parseString(lstr, context);
-			
+	public VarValue eval(ExecContext context, VarValue lval, VarValue rval) throws SyntaxException {
 		try {
-			return left.div(rval);
+			return lval.div(rval);
 		} catch (VarTypeException e) {
 			throw new SyntaxException(e);
 		}

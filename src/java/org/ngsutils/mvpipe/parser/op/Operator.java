@@ -5,5 +5,6 @@ import org.ngsutils.mvpipe.parser.context.ExecContext;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 
 public interface Operator {
-	public VarValue eval(ExecContext context, String lstr, VarValue rstr) throws SyntaxException;
+	public VarValue eval(ExecContext context, VarValue lstr, VarValue rstr) throws SyntaxException;
+	public boolean evalLeft();
 }

@@ -1,10 +1,15 @@
 package org.ngsutils.mvpipe.parser.variable;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.ngsutils.mvpipe.parser.SyntaxException;
 import org.ngsutils.mvpipe.parser.context.ExecContext;
 
 public abstract class VarValue {
 	final protected Object obj;
-	VarValue(Object obj) {
+	protected VarValue(Object obj) {
 		this.obj = obj;
 	}
 
@@ -93,6 +98,10 @@ public abstract class VarValue {
 			return new VarString(s);
 		}
 		
+		if (val.equals("[]")) {
+			return new VarList();
+		}
+		
 		if (cxt != null) {
 			if (cxt.contains(val)) {
 				return cxt.get(val);
@@ -119,4 +128,13 @@ public abstract class VarValue {
 		return new VarFloat(val);
 	}
 
+	public Iterable<VarValue> iterate() throws SyntaxException {
+		List<VarValue> list = new ArrayList<VarValue>();
+		list.add(this);
+		return Collections.unmodifiableList(list);
+	}
+
+	public static VarValue range(VarValue from, VarValue to) {
+		return new VarRange(from, to);
+	}
 }

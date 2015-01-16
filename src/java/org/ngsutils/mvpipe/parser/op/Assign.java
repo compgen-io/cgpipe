@@ -7,9 +7,12 @@ import org.ngsutils.mvpipe.parser.variable.VarValue;
 public class Assign implements Operator {
 
 	@Override
-	public VarValue eval(ExecContext context, String lstr, VarValue rval)
-			throws SyntaxException {
-		context.set(lstr, rval);
+	public VarValue eval(ExecContext context, VarValue lstr, VarValue rval) throws SyntaxException {
+		context.set(lstr.toString(), rval);
 		return rval;
+	}
+	@Override
+	public boolean evalLeft() {
+		return false;
 	}
 }

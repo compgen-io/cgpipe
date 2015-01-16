@@ -4,10 +4,13 @@ import org.ngsutils.mvpipe.parser.SyntaxException;
 import org.ngsutils.mvpipe.parser.context.ExecContext;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 
-public class Gte extends BasicOp {
+public abstract class BasicOp implements Operator {
+
+	@Override	
+	abstract public VarValue eval(ExecContext context, VarValue lstr, VarValue rval) throws SyntaxException;
 
 	@Override
-	public VarValue eval(ExecContext context, VarValue lval, VarValue rval) throws SyntaxException {
-		return lval.gte(rval);
+	public boolean evalLeft() {
+		return true;
 	}
 }

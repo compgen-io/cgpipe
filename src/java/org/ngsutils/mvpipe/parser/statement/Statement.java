@@ -1,10 +1,9 @@
 package org.ngsutils.mvpipe.parser.statement;
 
-import java.util.List;
-
-import org.ngsutils.mvpipe.parser.Parser;
 import org.ngsutils.mvpipe.parser.SyntaxException;
+import org.ngsutils.mvpipe.parser.Tokens;
+import org.ngsutils.mvpipe.parser.context.ExecContext;
 
 public interface Statement {
-	public void eval(Parser parser, List<String> tokens) throws SyntaxException;
+	public ExecContext eval(ExecContext context, Tokens tokens) throws SyntaxException;
 }

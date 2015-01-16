@@ -5,12 +5,11 @@ import org.ngsutils.mvpipe.parser.context.ExecContext;
 import org.ngsutils.mvpipe.parser.variable.VarBool;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 
-public class Not implements Operator {
+public class Not extends BasicOp {
 
 	@Override
-	public VarValue eval(ExecContext context, String lstr, VarValue rval)
-			throws SyntaxException {
-
+	public VarValue eval(ExecContext context, VarValue lval, VarValue rval) throws SyntaxException {
+		
 		if (rval.isTrue()) {
 			return VarBool.FALSE;
 		}

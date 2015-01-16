@@ -54,7 +54,7 @@ public class MVPipe {
 		
 		Parser parser = new Parser(global, verbose, dryrun);
 		try {
-			parser.parse(fname);
+			parser.parseFile(fname);
 		} catch (IOException | SyntaxException e) {
 			System.err.println("MVPIPE ERROR: " + e.getMessage());
 			if (verbose) {

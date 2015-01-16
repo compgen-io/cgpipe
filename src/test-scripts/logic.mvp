@@ -1,0 +1,39 @@
+if true
+    echo "foo"
+else
+    echo "baz"
+endif
+
+if true && true
+    echo "foo"
+else
+    echo "baz"
+endif
+
+if true && false
+    echo "baz"
+else
+    echo "foo"
+endif
+
+if true || false
+    echo "foo"
+else
+    echo "baz"
+endif
+
+
+foo = "bar"
+bar = 2
+
+if (foo == "bar") && (bar == 2)
+    echo "hello"
+else
+    echo "nope"
+endif
+
+if foo == "bar" && bar == 2
+    echo "hello"
+else
+    echo "nope"
+endif

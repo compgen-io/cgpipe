@@ -1,6 +1,5 @@
 package org.ngsutils.mvpipe.parser;
 
-import org.ngsutils.mvpipe.parser.variable.VarTypeException;
 
 public class SyntaxException extends Exception {
 
@@ -11,7 +10,7 @@ public class SyntaxException extends Exception {
 		super(msg);
 	}
 
-	public SyntaxException(VarTypeException e) {
+	public SyntaxException(Exception e) {
 		super(e);
 	}
 

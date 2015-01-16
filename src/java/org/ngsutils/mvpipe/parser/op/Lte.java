@@ -4,12 +4,10 @@ import org.ngsutils.mvpipe.parser.SyntaxException;
 import org.ngsutils.mvpipe.parser.context.ExecContext;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 
-public class Lte implements Operator {
+public class Lte extends BasicOp {
 
 	@Override
-	public VarValue eval(ExecContext context, String lstr, VarValue rval)
-			throws SyntaxException {
-		VarValue left = VarValue.parseString(lstr, context);
-		return left.lte(rval);
+	public VarValue eval(ExecContext context, VarValue lval, VarValue rval) throws SyntaxException {
+		return lval.lte(rval);
 	}
 }
