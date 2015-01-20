@@ -1,22 +1,24 @@
 package org.ngsutils.mvpipe.parser;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ngsutils.mvpipe.MVPipe;
 import org.ngsutils.mvpipe.parser.context.BuildTarget;
 import org.ngsutils.mvpipe.parser.context.ExecContext;
 import org.ngsutils.mvpipe.support.StringUtils;
 
 public class Parser {
-	final public boolean verbose;
-	final public boolean dryrun;
+	private static boolean verbose=false;
 
-	final private List<BuildTarget> targets = new ArrayList<BuildTarget>();
-
+	public static void setVerbose(boolean val) {
+		verbose = val;
+	}
 	
 	private ExecContext currentContext;
 	private BuildTarget curTarget = null;
@@ -25,14 +27,52 @@ public class Parser {
 		return currentContext;
 	}
 	
-	public Parser(ExecContext context, boolean verbose, boolean dryrun) {
+	public Parser(ExecContext context) {
 		this.currentContext = context;
-		this.verbose = verbose;
-		this.dryrun = dryrun;
 	}
 
+	protected File loadFile(String filename) throws IOException {
+		// check absolute files first.
+		
+		File f = new File(filename);
+		System.err.println("# Checking filename: "+f.getAbsolutePath());
+		if (f.exists()) {
+			return f;
+		}
+		
+		// check relative files first.
+		ExecContext cxt = currentContext;
+		while (cxt != null) {
+			String cwd = cxt.getCWD();
+			if (cwd != null) {
+				f = new File(cwd + File.separator + filename);
+				System.err.println("# Checking filename: "+f.getAbsolutePath());
+				if (f.exists()) {
+					return f;
+				}
+			}
+			cxt = cxt.getParent();
+		}
+
+		// check global path
+		f = new File(new File(MVPipe.RCFILE).getParent() + File.separator + filename);
+		System.err.println("# Checking filename: "+f.getAbsolutePath());
+		if (f.exists()) {
+			return f;
+		}
+		
+
+		throw new IOException("File: "+filename+" was not found!");
+	}
+	
 	public void parseFile(String filename) throws IOException, SyntaxException {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
+		File file = loadFile(filename);
+		parseFile(file);
+	}
+	
+	public void parseFile(File file) throws IOException, SyntaxException {
+		currentContext.setCWD(file.getParent());
+		BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
 		String priorLine=null;
 		String line;
 		int linenum = 0;
@@ -63,7 +103,7 @@ public class Parser {
 			}
 			
 			// Next tokenize the line and attempt to execute it
-			Tokens tokens = new Tokens(filename, linenum, line);
+			Tokens tokens = new Tokens(file.getAbsolutePath(), linenum, line);
 			if (verbose) {
 				System.err.println("#"+StringUtils.join(", ", tokens.getList()));
 			}
@@ -87,7 +127,7 @@ public class Parser {
 				
 				if (istarget) {
 					curTarget = new BuildTarget(pre, post, currentContext, BuildTarget.calcIndentLevel(line));
-					targets.add(curTarget);
+					currentContext.addTarget(curTarget);
 					continue;
 				} else {
 					try {
@@ -101,13 +141,5 @@ public class Parser {
 		}
 		
 		reader.close();
-	}
-
-	public void build(String target) {
-		
-	}
-
-	public void setContext(ExecContext cxt) {
-		currentContext = cxt;	
 	}
 }

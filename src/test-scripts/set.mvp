@@ -14,3 +14,7 @@ echo foo
 bar ?= "bar"
 
 echo bar
+
+
+foo.bar = "baz"
+echo foo.bar

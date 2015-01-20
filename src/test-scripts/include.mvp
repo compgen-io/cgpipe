@@ -1,0 +1,8 @@
+foo="bar"
+include "test.incl"
+echo foo
+
+echo baz
+
+include "global.incl"
+echo bar

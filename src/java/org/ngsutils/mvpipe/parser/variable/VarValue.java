@@ -21,7 +21,7 @@ public abstract class VarValue {
 		return obj.toString();
 	}
 	
-	public VarValue eq(VarValue val) {
+	public VarValue eq(VarValue val) throws VarTypeException {
 		return obj.equals(val.obj) ? VarBool.TRUE: VarBool.FALSE;
 	}
 
@@ -106,10 +106,11 @@ public abstract class VarValue {
 			if (cxt.contains(val)) {
 				return cxt.get(val);
 			}
-			// If the value is not set, then we'll assume it should be "false"
-			return VarBool.FALSE;
+			// If the value is not set, then we'll assume it should be "NULL"
+			return VarNull.NULL;
 		} else {
-			return new VarString(val);
+			throw new VarTypeException("Unknown variable: "+val);
+//			return new VarString(val);
 		}
 	}
 	

@@ -18,8 +18,11 @@ fi
 if [ "$1" == "" ]; then
     find src/test-scripts -name '*.mvp' -exec $0 $VERBOSE \{\} \;
 else
-    dist/mvpipe $VERBOSE -f $1 &> .testout
-    TEST=$(cat .testout | grep -v '^#' | grep -v '^$' | $MD)
+    mkdir -p test
+    echo "global_foo = \"bar\"" > test/.mvpiperc
+    echo "bar = \"baz\"" > test/global.incl
+    MVPIPE_HOME=test dist/mvpipe $VERBOSE -f $1 &> .testout
+    TEST=$(cat .testout | grep -v '^#' | grep -v '^$' | sed -e 's/MVPIPE ERROR.*/MVPIPE ERROR/g' | $MD)
     GOOD=$(cat $1.good | grep -v '^#' | grep -v '^$' | $MD)
     if [ "$TEST" != "$GOOD" ]; then
         echo "$1 ERROR"
@@ -30,4 +33,7 @@ else
         cat .testout
     fi
     rm .testout
+    rm test/global.incl
+    rm test/.mvpiperc
+    rmdir test
 fi

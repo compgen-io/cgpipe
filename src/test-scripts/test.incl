@@ -1,0 +1,2 @@
+foo="baz"
+include "test/test2.incl"

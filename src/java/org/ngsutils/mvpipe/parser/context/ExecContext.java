@@ -12,6 +12,8 @@ import org.ngsutils.mvpipe.parser.variable.VarValue;
 
 public class ExecContext {
 	protected final ExecContext parent;
+	protected String cwd = null;
+			
 	protected Map<String, VarValue> vars = new HashMap<String, VarValue>();
 
 	private Pattern varPattern = Pattern.compile("^(.*?)\\$\\{([A-Za-z_\\.][a-zA-Z0-9_\\.]*?)\\}(.*?)$");
@@ -38,7 +40,20 @@ public class ExecContext {
 		}
 	}
 
-
+	public void setCWD(String cwd) {
+		System.err.println("#CWD:"+cwd);
+		this.cwd = cwd;
+	}
+	
+	public String getCWD() {
+		if (cwd !=null) {
+			return cwd;
+		} else if (parent != null) {
+			return parent.getCWD();
+		}
+		return null;
+	}
+	
 	public ExecContext getParent() {
 		return parent;
 	}
@@ -163,13 +178,17 @@ public class ExecContext {
 			}
 		}
 		
-		// TODO: Add support for lists @{foo} (separates to space-delimited string)
-		
 		System.err.println("#         => "+tmp);
 		return tmp;
 	}
 
 	public ExecContext addTokenizedLine(Tokens tokens) throws SyntaxException {
 		return Eval.evalTokenLine(this,  tokens);
+	}
+
+	public void addTarget(BuildTarget target) {
+		if (this.parent!=null) {
+			parent.addTarget(target);
+		}
 	}
 }

@@ -33,6 +33,7 @@ import org.ngsutils.mvpipe.parser.statement.Else;
 import org.ngsutils.mvpipe.parser.statement.EndIf;
 import org.ngsutils.mvpipe.parser.statement.ForLoop;
 import org.ngsutils.mvpipe.parser.statement.If;
+import org.ngsutils.mvpipe.parser.statement.Include;
 import org.ngsutils.mvpipe.parser.statement.Statement;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 import org.ngsutils.mvpipe.support.StringUtils;
@@ -57,6 +58,8 @@ public class Eval {
 		statements.put("endif", new EndIf());
 
 		statements.put("for", new ForLoop());
+
+		statements.put("include", new Include());
 
 		addOp("=", new Assign());
 		addOp("+=", new AddAssign());

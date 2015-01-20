@@ -7,18 +7,19 @@ import java.util.List;
 
 import org.ngsutils.mvpipe.parser.Parser;
 import org.ngsutils.mvpipe.parser.SyntaxException;
-import org.ngsutils.mvpipe.parser.context.ExecContext;
+import org.ngsutils.mvpipe.parser.context.RootContext;
 import org.ngsutils.mvpipe.parser.variable.VarBool;
 import org.ngsutils.mvpipe.parser.variable.VarTypeException;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 
 public class MVPipe {
+	public static final String RCFILE = (System.getenv("MVPIPE_HOME") != null ? System.getenv("MVPIPE_HOME") : System.getenv("user.home"))  + File.separator + ".mvpiperc";  
 
 	public static void main(String[] args) throws VarTypeException {
-		ExecContext global = new ExecContext();
+		RootContext global = new RootContext();
+
 		String fname = null;
 		boolean verbose = false;
-		boolean dryrun = false;
 		
 		List<String> targets = new ArrayList<String>();
 		
@@ -39,7 +40,7 @@ public class MVPipe {
 			if (arg.equals("-v")) {
 				verbose = true;
 			} else if (arg.equals("-dr")) {
-				dryrun = true;
+				global.setDryRun(true);
 			} else if (arg.startsWith("--")) {
 				if (k != null) {
 					global.set(k, VarBool.TRUE);
@@ -52,8 +53,14 @@ public class MVPipe {
 			}
 		}
 		
-		Parser parser = new Parser(global, verbose, dryrun);
+		Parser.setVerbose(verbose);
+		
+		Parser parser = new Parser(global);
 		try {
+			File rc = new File(RCFILE);
+			if (rc.exists()) {
+				parser.parseFile(rc);
+			}
 			parser.parseFile(fname);
 		} catch (IOException | SyntaxException e) {
 			System.err.println("MVPIPE ERROR: " + e.getMessage());
@@ -64,7 +71,7 @@ public class MVPipe {
 		}
 		
 		for (String target:targets) {
-			parser.build(target);
+			global.build(target);
 		}
 	}
 
