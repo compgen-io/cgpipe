@@ -66,9 +66,15 @@ public abstract class VarValue {
 	}
 	
 	public static VarValue parseString(String val) throws VarTypeException {
-		return parseString(val, null);
+		return parseString(val, null, false);
+	}
+	public static VarValue parseString(String val, boolean allowRaw) throws VarTypeException {
+		return parseString(val, null, allowRaw);
 	}
 	public static VarValue parseString(String val, ExecContext cxt) throws VarTypeException {
+		return parseString(val, cxt, false);
+	}
+	public static VarValue parseString(String val, ExecContext cxt, boolean allowRaw) throws VarTypeException {
 		if (val.equals("true")) {
 			return VarBool.TRUE;
 		}
@@ -108,9 +114,10 @@ public abstract class VarValue {
 			}
 			// If the value is not set, then we'll assume it should be "NULL"
 			return VarNull.NULL;
+		} else if (allowRaw) {
+			return new VarString(val);
 		} else {
 			throw new VarTypeException("Unknown variable: "+val);
-//			return new VarString(val);
 		}
 	}
 	

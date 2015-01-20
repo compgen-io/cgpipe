@@ -1,2 +1,20 @@
-Usage: mvpipe -f script
+MVpipe - HPC/HTC analysis pipelines 
+
+Usage: mvpipe {opts} {args} {target1 target2...}
+
+Options:
+    -f filename   Pipeline script filename (required)
+    -l logfile    Log debug messages here
+    -dr           Dry run (Don't actually build targets)
+    -v            Verbose logging
+    
+
+    Additional pipeline-specific arguments can be set by using the format:
+        --foo bar --arg one --arg two
+    
+    This will set the variable "foo" to be "bar", and "arg" to be a list:
+    ["one", "two"]. These variables can then be used by the pipeline script.
+    
+
+Note: If no target is specified, then the first target in the file will be used
 

@@ -10,8 +10,10 @@ import org.ngsutils.mvpipe.parser.Parser;
 import org.ngsutils.mvpipe.parser.SyntaxException;
 import org.ngsutils.mvpipe.parser.context.RootContext;
 import org.ngsutils.mvpipe.parser.variable.VarBool;
+import org.ngsutils.mvpipe.parser.variable.VarList;
 import org.ngsutils.mvpipe.parser.variable.VarTypeException;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
+import org.ngsutils.mvpipe.support.StringUtils;
 
 public class MVPipe {
 	public static final String RCFILE = (System.getenv("MVPIPE_HOME") != null ? System.getenv("MVPIPE_HOME") : System.getenv("user.home"))  + File.separator + ".mvpiperc";  
@@ -48,7 +50,20 @@ public class MVPipe {
 				}
 				k = arg.substring(2);
 			} else if (k != null) {
-				global.set(k, VarValue.parseString(arg));
+				if (global.contains(k)) {
+					VarValue val = global.get(k);
+					if (val.getClass().equals(VarList.class)) {
+						((VarList) val).add(VarValue.parseString(arg, true));
+					} else {
+						VarList list = new VarList();
+						list.add(val);
+						list.add(VarValue.parseString(arg, true));
+						global.set(k, list);
+					}
+				} else {
+					global.set(k, VarValue.parseString(arg, true));
+				}
+				k = null;
 			} else if (args[0].charAt(0) != '-'){
 				targets.add(arg);
 			}
@@ -67,7 +82,11 @@ public class MVPipe {
 			if (rc.exists()) {
 				parser.parseFile(rc);
 			}
-			parser.parseFile(fname);
+			if (fname.equals("-")) {
+				parser.parseInputStream(System.in);
+			} else {
+				parser.parseFile(fname);
+			}
 		} catch (IOException | SyntaxException e) {
 			System.err.println("MVPIPE ERROR: " + e.getMessage());
 //			if (verbose) {
