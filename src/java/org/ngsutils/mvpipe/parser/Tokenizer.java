@@ -10,7 +10,7 @@ public class Tokenizer {
 		List<String> tokens = extractQuotedStrings(str);
 		
 		tokens = correctNegNumbers(tokens);
-		tokens = mergeOps(tokens);
+//		tokens = mergeOps(tokens);
 //		tokens = correctDollarExp(tokens);
 		tokens = removeComments(tokens);
 		
@@ -82,40 +82,40 @@ public class Tokenizer {
 	}
 
 	
-	private static List<String> mergeOps(List<String> in) {
-		List<String> out = new ArrayList<String>();
-		String last = null;
-		
-		String[] validOps = new String[] {
-				"**", "==", "?=", "!=", ">=", "<=", "..", "+="
-		};
-		
-		for (String s: in) {
-			if (last == null) {
-				last = s;
-				continue;
-			}
-			
-			String pair = last + s;
-			for (String op: validOps) {
-				if (op.equals(pair)) {
-					out.add(op);
-					last = null;
-					break;
-				}
-			}
-			
-			if (last != null) {
-				out.add(last);
-				last = s;
-			}
-		}
-		
-		if (last != null) {
-			out.add(last);
-		}
-		return out;
-	}
+//	private static List<String> mergeOps(List<String> in) {
+//		List<String> out = new ArrayList<String>();
+//		String last = null;
+//		
+//		String[] validOps = new String[] {
+//				"**", "==", "?=", "!=", ">=", "<=", "..", "+="
+//		};
+//		
+//		for (String s: in) {
+//			if (last == null) {
+//				last = s;
+//				continue;
+//			}
+//			
+//			String pair = last + s;
+//			for (String op: validOps) {
+//				if (op.equals(pair)) {
+//					out.add(op);
+//					last = null;
+//					break;
+//				}
+//			}
+//			
+//			if (last != null) {
+//				out.add(last);
+//				last = s;
+//			}
+//		}
+//		
+//		if (last != null) {
+//			out.add(last);
+//		}
+//		return out;
+//	}
 
 //	private static List<String> correctDollarExp(List<String> in) {
 //		List<String> out = new ArrayList<String>();
@@ -160,6 +160,7 @@ public class Tokenizer {
 //
 //		return out;
 //	}
+
 private static List<String> extractQuotedStrings(String str) {
 		List<String> tokens = new ArrayList<String>();
 
@@ -193,7 +194,8 @@ private static List<String> extractQuotedStrings(String str) {
 			}
 
 			boolean found = false;
-			for (String op: Eval.ops.keySet()) {
+			
+			for (String op: Eval.opsParseOrder) {
 				if (i+op.length() < str.length() && str.substring(i, i+op.length()).equals(op)) {
 					if (!buf.equals("")) {
 						tokens.add(buf);
@@ -231,15 +233,15 @@ private static List<String> extractQuotedStrings(String str) {
 				continue;
 			}
 			
-			// remove all comments
-			if (str.charAt(i) == '#') {
-				if (!buf.equals("")) {
-					tokens.add(buf);
-					buf = "";
-				}
-				i = str.length();
-				continue;
-			}
+//			// remove all comments
+//			if (str.charAt(i) == '#') {
+//				if (!buf.equals("")) {
+//					tokens.add(buf);
+//					buf = "";
+//				}
+//				i = str.length();
+//				continue;
+//			}
 			
 			buf += str.charAt(i);
 			i++;

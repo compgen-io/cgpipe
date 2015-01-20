@@ -83,6 +83,7 @@ public class Parser {
 			
 			if (priorLine != null) {
 				line = priorLine + line;
+				priorLine = null;
 			}
 
 			if (line.endsWith("\\")) {

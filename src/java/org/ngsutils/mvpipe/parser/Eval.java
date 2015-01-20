@@ -1,6 +1,7 @@
 package org.ngsutils.mvpipe.parser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,11 +42,17 @@ import org.ngsutils.mvpipe.support.StringUtils;
 public class Eval {
 	final public static Map<String, Operator> ops = new HashMap<String, Operator>();
 	final public static List<String> opsOrder = new ArrayList<String>();
+	final public static List<String> opsParseOrder = new ArrayList<String>();
 	final public static Map<String, Statement> statements = new HashMap<String, Statement>();
 
 	private static void addOp(String op, Operator obj) {
+		// Operations are added in priority
 		opsOrder.add(op);
 		ops.put(op, obj);
+		
+		// parsing from the ops list requires matching "==" before "="
+		opsParseOrder.add(op);
+		Collections.sort(opsParseOrder, Collections.reverseOrder());
 	}
 	
 	static {
@@ -61,9 +68,9 @@ public class Eval {
 
 		statements.put("include", new Include());
 
-		addOp("=", new Assign());
 		addOp("+=", new AddAssign());
 		addOp("?=", new CondAssign());
+		addOp("=", new Assign());
 
 		addOp("!", new Not());
 		addOp("&&", new And());
@@ -82,7 +89,7 @@ public class Eval {
 		addOp("-", new Sub());
 		addOp("..", new Range());
 		
-		addOp(":", null); // placeholder
+		addOp(":", null); // placeholder to allow for tokenizing build targets on ':'
 	}
 
 	public static ExecContext evalTokenLine(ExecContext context, Tokens tokens) throws SyntaxException {
@@ -185,6 +192,6 @@ public class Eval {
 			}
 		}
 		
-		return evalTokenExpression(context, tokens);
+		throw new SyntaxException("Unknown syntax: "+ StringUtils.join(" ", tokens.getList()));
 	}
 }

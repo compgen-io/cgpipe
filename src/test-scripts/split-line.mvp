@@ -1,0 +1,10 @@
+if "foo" == "foo"
+    echo "foo"
+endif
+
+if "foo" == "foo" \
+    && "bar" == "baz"
+    echo "foo"
+else
+    echo "bar"
+endif
