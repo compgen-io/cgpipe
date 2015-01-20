@@ -196,7 +196,7 @@ private static List<String> extractQuotedStrings(String str) {
 			boolean found = false;
 			
 			for (String op: Eval.opsParseOrder) {
-				if (i+op.length() < str.length() && str.substring(i, i+op.length()).equals(op)) {
+				if (i+op.length() <= str.length() && str.substring(i, i+op.length()).equals(op)) {
 					if (!buf.equals("")) {
 						tokens.add(buf);
 					}
