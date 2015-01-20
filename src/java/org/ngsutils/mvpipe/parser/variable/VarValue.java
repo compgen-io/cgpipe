@@ -128,13 +128,14 @@ public abstract class VarValue {
 		return new VarFloat(val);
 	}
 
-	public Iterable<VarValue> iterate() throws SyntaxException {
+	public Iterable<VarValue> iterate() {
+		// the default for iterate is a single-member list
 		List<VarValue> list = new ArrayList<VarValue>();
 		list.add(this);
 		return Collections.unmodifiableList(list);
 	}
 
-	public static VarValue range(VarValue from, VarValue to) {
+	public static VarValue range(VarValue from, VarValue to) throws SyntaxException {
 		return new VarRange(from, to);
 	}
 }

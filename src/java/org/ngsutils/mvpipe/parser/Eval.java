@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.ngsutils.mvpipe.parser.context.ExecContext;
 import org.ngsutils.mvpipe.parser.op.Add;
+import org.ngsutils.mvpipe.parser.op.AddAssign;
 import org.ngsutils.mvpipe.parser.op.And;
 import org.ngsutils.mvpipe.parser.op.Assign;
 import org.ngsutils.mvpipe.parser.op.CondAssign;
@@ -33,7 +34,6 @@ import org.ngsutils.mvpipe.parser.statement.EndIf;
 import org.ngsutils.mvpipe.parser.statement.ForLoop;
 import org.ngsutils.mvpipe.parser.statement.If;
 import org.ngsutils.mvpipe.parser.statement.Statement;
-import org.ngsutils.mvpipe.parser.variable.VarString;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 import org.ngsutils.mvpipe.support.StringUtils;
 
@@ -59,6 +59,7 @@ public class Eval {
 		statements.put("for", new ForLoop());
 
 		addOp("=", new Assign());
+		addOp("+=", new AddAssign());
 		addOp("?=", new CondAssign());
 
 		addOp("!", new Not());
@@ -66,10 +67,10 @@ public class Eval {
 		addOp("||", new Or());
 		addOp("==", new Eq());
 		addOp("!=", new NotEq());
-		addOp(">", new Gt());
 		addOp(">=", new Gte());
-		addOp("<", new Lt());
 		addOp("<=", new Lte());
+		addOp(">", new Gt());
+		addOp("<", new Lt());
 		addOp("**", new Pow());
 		addOp("*", new Mul());
 		addOp("/", new Div());
@@ -84,6 +85,7 @@ public class Eval {
 	public static ExecContext evalTokenLine(ExecContext context, Tokens tokens) throws SyntaxException {
 		System.err.println("#evalTokens: " + StringUtils.join(", ", tokens.getList()));
 		if (statements.containsKey(tokens.get(0))) {
+			System.err.println("#statement: " + tokens.get(0));
 			List<String> right = new ArrayList<String>();
 			right.addAll(tokens.getList().subList(1, tokens.size()));
 			
@@ -163,17 +165,18 @@ public class Eval {
 						right = tokens.clone(new ArrayList<String>());
 					}
 
+					VarValue rval = evalTokenExpression(context, right);
+					VarValue ret;
 					VarValue lval = null;
 					if (ops.get(op).evalLeft()) {
 						if (left.size() > 0) {
 							lval = evalTokenExpression(context, left);
 						}
+						ret = ops.get(op).eval(context, lval, rval);
 					} else {
-						lval = new VarString(left.get(0));
+						ret = ops.get(op).eval(context, left, rval);
 					} 
 
-					VarValue rval = evalTokenExpression(context, right);
-					VarValue ret = ops.get(op).eval(context, lval, rval);
 					return ret;
 				}
 			}

@@ -87,7 +87,7 @@ public class Tokenizer {
 		String last = null;
 		
 		String[] validOps = new String[] {
-				"**", "==", "?=", "!=", ">=", "<=", ".."
+				"**", "==", "?=", "!=", ">=", "<=", "..", "+="
 		};
 		
 		for (String s: in) {

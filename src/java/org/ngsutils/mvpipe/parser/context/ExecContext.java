@@ -15,6 +15,7 @@ public class ExecContext {
 	protected Map<String, VarValue> vars = new HashMap<String, VarValue>();
 
 	private Pattern varPattern = Pattern.compile("^(.*?)\\$\\{([A-Za-z_\\.][a-zA-Z0-9_\\.]*?)\\}(.*?)$");
+	private Pattern listPattern = Pattern.compile("^(.*?)([^ \t]*)@\\{([A-Za-z_\\.][a-zA-Z0-9_\\.]*?)\\}([^ \t]*)(.*?)$");
 	private boolean active = true;
 	private boolean everActive = true;
 
@@ -99,26 +100,73 @@ public class ExecContext {
 	}
 
 	public String evalString(String msg) {
-		String out = "";
+		System.err.println("#evalString: "+msg);
+		String tmp = "";
+		
 		while (msg.length() > 0) {
 			Matcher m = varPattern.matcher(msg);
 			m = varPattern.matcher(msg);
 			if (m.matches()) {
-				out += m.group(1);
 				if (m.group(1).endsWith("\\")) {
-					out += "$";
+					tmp += m.group(1).substring(0,m.group(1).length()-1);
+					tmp += "$";
 					msg = m.group(2).substring(1) + m.group(3);
 				} else {
-					out += get(m.group(2));
+					tmp += m.group(1);
+					tmp += get(m.group(2));
 					msg = m.group(3);
 				}
 			} else {
-				out += msg;
+				tmp += msg;
 				msg = "";
 			}
 		}
 		
-		return out;
+		msg = tmp;
+		tmp = "";
+		
+		while (msg.length() > 0) {
+			Matcher m = listPattern.matcher(msg);
+			m = listPattern.matcher(msg);
+			if (m.matches()) {
+				System.err.println("# Match 1: \""+ m.group(1)+"\"");
+				System.err.println("# Match 2: \""+ m.group(2)+"\"");
+				System.err.println("# Match 3: \""+ m.group(3)+"\"");
+				System.err.println("# Match 4: \""+ m.group(4)+"\"");
+				System.err.println("# Match 5: \""+ m.group(5)+"\"");
+				tmp += m.group(1);
+				
+				if (m.group(2).endsWith("\\")) {
+					tmp += m.group(2).substring(0,m.group(2).length()-1);
+					tmp += "@";
+					msg = m.group(3).substring(1) + m.group(4) + m.group(5);
+				} else {
+					boolean first = true;
+					for (VarValue v: get(m.group(3)).iterate()) {
+						if (first) {
+							first = false;
+						} else {
+							tmp += " ";
+						}
+						
+						tmp += m.group(2);
+						tmp += v;
+						tmp += m.group(4);
+					}
+					
+					msg = m.group(5);
+				}
+				
+			} else {
+				tmp += msg;
+				msg = "";
+			}
+		}
+		
+		// TODO: Add support for lists @{foo} (separates to space-delimited string)
+		
+		System.err.println("#         => "+tmp);
+		return tmp;
 	}
 
 	public ExecContext addTokenizedLine(Tokens tokens) throws SyntaxException {

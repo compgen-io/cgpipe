@@ -1,0 +1,17 @@
+foo
+bar
+baz
+
+foo bar baz
+foo bar baz
+pre foo bar baz post
+
+quux.foo quux.bar quux.baz
+foo_suf bar_suf baz_suf
+pre quux.foo_suf quux.bar_suf quux.baz_suf post
+
+foo
+bar
+baz
+blah1
+blah2

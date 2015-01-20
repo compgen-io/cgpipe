@@ -3,24 +3,14 @@ package org.ngsutils.mvpipe.parser.variable;
 import java.util.Iterator;
 
 import org.ngsutils.mvpipe.parser.SyntaxException;
+import org.ngsutils.mvpipe.support.StringUtils;
 
 public class VarRange extends VarValue {
-	final private VarValue from;
-	final private VarValue to;
+	final private long start;
+	final private long end;
 
-	public VarRange(VarValue from, VarValue to) {
+	public VarRange(VarValue from, VarValue to) throws SyntaxException {
 		super(null);
-		this.from = from;
-		this.to = to;
-	}
-
-	public String toString() {
-		return "VarRange("+from+","+to+")";
-	}
-	
-	public Iterable<VarValue> iterate() throws SyntaxException {
-		final long start;
-		final long end;
 		
 		if (from.getClass().equals(VarInt.class)) {
 			start = (Long)from.obj;
@@ -38,6 +28,13 @@ public class VarRange extends VarValue {
 		} else {
 			throw new SyntaxException("Range needs to be on a number!");
 		}
+	}
+
+	public String toString() {
+		return StringUtils.join(" ", iterate());
+	}
+	
+	public Iterable<VarValue> iterate() {
 		
 		return new Iterable<VarValue>(){
 

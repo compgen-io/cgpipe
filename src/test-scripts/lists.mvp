@@ -1,0 +1,27 @@
+foo = []
+foo += "foo"
+foo += "bar"
+foo += "baz"
+
+for i in foo
+    echo i
+done
+
+echo foo
+echo "@{foo}"
+echo "pre @{foo} post"
+
+echo "quux.@{foo}"
+echo "@{foo}_suf"
+echo "pre quux.@{foo}_suf post"
+
+
+bar = []
+bar += "blah1"
+bar += "blah2"
+
+foo += bar
+
+for i in foo
+    echo i
+done

@@ -14,13 +14,13 @@ public class VarList extends VarValue {
 	}
 
 	public String toString() {
-		return "["
-				+ StringUtils.join(", ", vals)
-				+ "]";
+		return StringUtils.join(" ", vals);
 	}
 	
-	public VarValue add(VarValue val) {
-		vals.add(val);
+	public VarValue add(VarValue val) throws VarTypeException {
+		for (VarValue v: val.iterate()) {
+			vals.add(v);
+		}
 		return this;
 	}
 

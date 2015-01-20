@@ -8,6 +8,10 @@ public class VarTypeException extends SyntaxException {
 		super(msg);
 	}
 
+	public VarTypeException(Exception e) {
+		super(e);
+	}
+
 	/**
 	 * 
 	 */
