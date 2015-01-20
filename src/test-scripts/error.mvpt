@@ -1,0 +1,2 @@
+# this should result as a NULL value, which will throw an error
+foobar

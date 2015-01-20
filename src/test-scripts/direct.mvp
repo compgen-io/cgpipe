@@ -1,0 +1,2 @@
+#!dist/mvpipe
+echo "Hello world"

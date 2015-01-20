@@ -9,6 +9,7 @@ public class Tokens {
 	protected final List<String> tokens;
 	
 	public Tokens(String filename, int linenum, String line) {
+		// not sure if we need the filename / linenum here...
 		this.filename = filename;
 		this.linenum = linenum;
 		this.tokens = Tokenizer.tokenize(line);

@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,7 @@ public class Parser {
 	
 	private ExecContext currentContext;
 	private BuildTarget curTarget = null;
+	private String curFilename = null;
 
 	public ExecContext getContext() {
 		return currentContext;
@@ -72,9 +75,15 @@ public class Parser {
 	
 	public void parseFile(File file) throws IOException, SyntaxException {
 		currentContext.setCWD(file.getParent());
-		BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-		String priorLine=null;
+		curFilename = file.getAbsolutePath();
+		parseInputStream(new FileInputStream(file));
+	}
+	
+	public void parseInputStream(InputStream is) throws IOException, SyntaxException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 		String line;
+
+		String priorLine=null;
 		int linenum = 0;
 		while ((line = reader.readLine()) != null) {
 			line = StringUtils.rstrip(line);
@@ -104,7 +113,7 @@ public class Parser {
 			}
 			
 			// Next tokenize the line and attempt to execute it
-			Tokens tokens = new Tokens(file.getAbsolutePath(), linenum, line);
+			Tokens tokens = new Tokens(curFilename, linenum, line);
 			if (verbose) {
 				System.err.println("#"+StringUtils.join(", ", tokens.getList()));
 			}
@@ -135,6 +144,7 @@ public class Parser {
 						currentContext = currentContext.addTokenizedLine(tokens);
 					} catch (SyntaxException e) {
 						reader.close();
+						e.setErrorLine(curFilename, linenum);
 						throw e;
 					}
 				}

@@ -36,6 +36,7 @@ import org.ngsutils.mvpipe.parser.statement.ForLoop;
 import org.ngsutils.mvpipe.parser.statement.If;
 import org.ngsutils.mvpipe.parser.statement.Include;
 import org.ngsutils.mvpipe.parser.statement.Statement;
+import org.ngsutils.mvpipe.parser.variable.VarNull;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 import org.ngsutils.mvpipe.support.StringUtils;
 
@@ -93,6 +94,9 @@ public class Eval {
 	}
 
 	public static ExecContext evalTokenLine(ExecContext context, Tokens tokens) throws SyntaxException {
+		return evalTokenLine(context, tokens, false);
+	}
+	public static ExecContext evalTokenLine(ExecContext context, Tokens tokens, boolean print) throws SyntaxException {
 		System.err.println("#evalTokens: " + StringUtils.join(", ", tokens.getList()));
 		if (statements.containsKey(tokens.get(0))) {
 			System.err.println("#statement: " + tokens.get(0));
@@ -107,13 +111,21 @@ public class Eval {
 			
 			return statements.get(tokens.get(0)).eval(context, tokens.clone(right));
 		} else if (context.isActive()) {
-			evalTokenExpression(context, tokens);
+			VarValue ret = evalTokenExpression(context, tokens);
+			if (print) {
+				System.err.println(ret.toString());
+			} else if (ret == VarNull.NULL) {
+				// we only throw an error on NULL if we aren't in a print loop
+				throw new SyntaxException("NULL expression: "+ StringUtils.join(" ", tokens.getList()));
+			}
 		}
 		
 		return context;
 	}
 	
 	public static VarValue evalTokenExpression(ExecContext context, Tokens tokens) throws SyntaxException {
+		System.err.println("#evalTokenExpression: " + StringUtils.join(", ", tokens.getList()));
+
 		if (tokens.size() == 1) {
 			return VarValue.parseString(tokens.get(0), context);
 		}

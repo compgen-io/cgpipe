@@ -4,7 +4,7 @@ package org.ngsutils.mvpipe.parser;
 public class SyntaxException extends Exception {
 
 	private int linenum = -1;
-	private String filename = "<unknown>";
+	private String filename = null;
 	
 	public SyntaxException(String msg) {
 		super(msg);
@@ -20,6 +20,9 @@ public class SyntaxException extends Exception {
 	}
 
 	public String getMessage() {
+		if (filename == null) {
+			return "<stdin> ["+linenum+"]: "+ super.getMessage();
+		}
 		return filename+"["+linenum+"]: "+ super.getMessage();
 	}
 

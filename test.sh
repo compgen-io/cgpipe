@@ -1,5 +1,4 @@
 #!/bin/bash
-
 MD=$(which md5sum)
 if [ "$MD" == "" ]; then
     MD=$(which md5)
@@ -17,11 +16,18 @@ fi
 
 if [ "$1" == "" ]; then
     find src/test-scripts -name '*.mvp' -exec $0 $VERBOSE \{\} \;
+    find src/test-scripts -name '*.mvpt' -exec $0 $VERBOSE \{\} \;
 else
     mkdir -p test
     echo "global_foo = \"bar\"" > test/.mvpiperc
     echo "bar = \"baz\"" > test/global.incl
-    MVPIPE_HOME=test dist/mvpipe $VERBOSE -f $1 &> .testout
+
+    if [ "$(echo $1 | grep ".mvpt$")" != "" ]; then
+        MVPIPE_HOME=test dist/mvpipe $VERBOSE -f $1 &> .testout
+    else
+        MVPIPE_HOME=test $1 &> .testout
+    fi
+
     TEST=$(cat .testout | grep -v '^#' | grep -v '^$' | sed -e 's/MVPIPE ERROR.*/MVPIPE ERROR/g' | $MD)
     GOOD=$(cat $1.good | grep -v '^#' | grep -v '^$' | $MD)
     if [ "$TEST" != "$GOOD" ]; then

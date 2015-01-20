@@ -2,6 +2,7 @@ package org.ngsutils.mvpipe;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +16,7 @@ import org.ngsutils.mvpipe.parser.variable.VarValue;
 public class MVPipe {
 	public static final String RCFILE = (System.getenv("MVPIPE_HOME") != null ? System.getenv("MVPIPE_HOME") : System.getenv("user.home"))  + File.separator + ".mvpiperc";  
 
-	public static void main(String[] args) throws VarTypeException {
+	public static void main(String[] args) throws VarTypeException, IOException {
 		RootContext global = new RootContext();
 
 		String fname = null;
@@ -53,7 +54,12 @@ public class MVPipe {
 			}
 		}
 		
+		if (fname == null) {
+			usage();
+		}
+		
 		Parser.setVerbose(verbose);
+		
 		
 		Parser parser = new Parser(global);
 		try {
@@ -64,15 +70,26 @@ public class MVPipe {
 			parser.parseFile(fname);
 		} catch (IOException | SyntaxException e) {
 			System.err.println("MVPIPE ERROR: " + e.getMessage());
-			if (verbose) {
+//			if (verbose) {
 //				e.printStackTrace();
-			}
+//			}
 			System.exit(1);
 		}
 		
 		for (String target:targets) {
 			global.build(target);
 		}
+		System.exit(0);
+	}
+
+	private static void usage() throws IOException {
+		InputStream is = MVPipe.class.getClassLoader().getResourceAsStream("org/ngsutils/mvpipe/USAGE.txt");
+		int c;
+		while ((c = is.read()) > -1) {
+			System.err.print((char) c);
+		}
+		is.close();
+		System.exit(1);
 	}
 
 }
