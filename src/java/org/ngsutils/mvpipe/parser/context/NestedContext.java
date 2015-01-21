@@ -2,10 +2,10 @@ package org.ngsutils.mvpipe.parser.context;
 
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 
-public class SubContext extends ExecContext {
+public class NestedContext extends ExecContext {
 	private final boolean passthru;
 	
-	public SubContext(ExecContext parent, boolean active, boolean passthru) {
+	public NestedContext(ExecContext parent, boolean active, boolean passthru) {
 		super(parent, active);
 		this.passthru = passthru;
 	}

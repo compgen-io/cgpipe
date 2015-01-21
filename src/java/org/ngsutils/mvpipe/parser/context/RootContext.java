@@ -24,13 +24,15 @@ public class RootContext extends ExecContext {
 	public void build(String target, JobRunner runner) {
 		if (target == null) {
 			if (targets.size() > 0) {
-				targets.get(0).build();
+				targets.get(0).build(null);
 			}
 			return;
 		}
 		for (BuildTarget tgt: targets) {
-			if (tgt.matches(target)) {
-				tgt.build();
+			String[] wildcards = null;
+			if ((wildcards=tgt.matches(target)) != null) {
+				// recurse on inputs...
+				tgt.build(wildcards);
 				return;
 			}
 		}

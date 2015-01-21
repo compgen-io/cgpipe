@@ -103,12 +103,19 @@ public class ExecContext {
 	}
 
 	public Map<String, VarValue> cloneValues() {
+		return cloneValues(null);
+
+	}
+	
+	public Map<String, VarValue> cloneValues(String prefix) {
 		Map<String, VarValue> vars = new HashMap<String, VarValue>();
 
 		ExecContext cur = this;
 		while (cur != null) {
 			for (String k:cur.vars.keySet()) {
-				vars.put(k, cur.vars.get(k));
+				if (prefix==null || k.startsWith(prefix)) {
+					vars.put(k, cur.vars.get(k));
+				}
 			}
 			cur = cur.parent;
 		}

@@ -8,7 +8,7 @@ import org.ngsutils.mvpipe.parser.Tokens;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 import org.ngsutils.mvpipe.support.StringUtils;
 
-public class IteratingContext extends DeferredExecContext {
+public class IteratingContext extends ExecContext {
 	List<Tokens> lines = new ArrayList<Tokens>();
 
 	private String varname;
@@ -37,7 +37,7 @@ public class IteratingContext extends DeferredExecContext {
 					System.err.println("# ITERATING LINE: " + StringUtils.join(" ", line.getList()));
 				}
 				for (VarValue item: range.iterate()) {
-					ExecContext cxt = new SubContext(this, true, false);
+					ExecContext cxt = new NestedContext(this, true, false);
 					cxt.set(varname, item);
 					System.err.println("# " + varname + " => " + item);
 					for (Tokens line: lines) {

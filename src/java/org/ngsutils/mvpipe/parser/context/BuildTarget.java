@@ -49,17 +49,21 @@ public class BuildTarget {
 		return acc;
 	}
 
-	public boolean matches(String outputName) {
+	public String[] matches(String outputName) {
 		for (String out: outputs) {
 			if (out.equals(outputName)) {
-				return true;
+				
+				return new String[out.length()];
 			}
 		}
-		return false;
+		return null;
 	}
 
 	
-	public void build() {
+	public void build(String[] wildcards) {
+		if (wildcards == null) {
+			wildcards = new String[outputs.size()];
+		}
 	}
 
 }
