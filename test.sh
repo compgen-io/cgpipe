@@ -18,14 +18,13 @@ if [ "$1" == "" ]; then
     find src/test-scripts -name '*.mvp' -exec $0 $VERBOSE \{\} \;
     find src/test-scripts -name '*.mvpt' -exec $0 $VERBOSE \{\} \;
 else
-    mkdir -p test
-    echo "global_foo = \"bar\"" > test/.mvpiperc
-    echo "bar = \"baz\"" > test/global.incl
+    echo "global_foo = \"bar\"" > test/run/.mvpiperc
+    echo "bar = \"baz\"" > test/run/global.incl
 
     if [ "$(echo $1 | grep ".mvpt$")" != "" ]; then
-        MVPIPE_HOME=test dist/mvpipe $VERBOSE -f $1 &> .testout
+        MVPIPE_HOME=test/run dist/mvpipe $VERBOSE -f $1 &> .testout
     else
-        MVPIPE_HOME=test $1 &> .testout
+        MVPIPE_HOME=test/run $1 &> .testout
     fi
 
     TEST=$(cat .testout | grep -v '^#' | grep -v '^$' | sed -e 's/MVPIPE ERROR.*/MVPIPE ERROR/g' | $MD)
@@ -39,7 +38,5 @@ else
         cat .testout
     fi
     rm .testout
-    rm test/global.incl
-    rm test/.mvpiperc
-    rmdir test
+    rm test/run/*
 fi

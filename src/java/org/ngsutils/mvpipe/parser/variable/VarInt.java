@@ -1,5 +1,7 @@
 package org.ngsutils.mvpipe.parser.variable;
 
+import org.ngsutils.mvpipe.exceptions.VarTypeException;
+
 public class VarInt extends VarValue {
 	public VarInt(long val) {
 		super(val);

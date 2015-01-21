@@ -2,7 +2,8 @@ package org.ngsutils.mvpipe.parser.variable;
 
 import java.util.Iterator;
 
-import org.ngsutils.mvpipe.parser.SyntaxException;
+import org.ngsutils.mvpipe.exceptions.SyntaxException;
+import org.ngsutils.mvpipe.exceptions.VarTypeException;
 import org.ngsutils.mvpipe.support.StringUtils;
 
 public class VarRange extends VarValue {

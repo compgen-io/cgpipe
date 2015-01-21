@@ -1,4 +1,4 @@
-package org.ngsutils.mvpipe.parser;
+package org.ngsutils.mvpipe.exceptions;
 
 
 public class SyntaxException extends Exception {

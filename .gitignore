@@ -1,5 +1,6 @@
 build/
 dist/
+test/run/*
 .project
 .classpath
 .settings

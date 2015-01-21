@@ -3,7 +3,7 @@ package org.ngsutils.mvpipe.parser.context;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ngsutils.mvpipe.parser.SyntaxException;
+import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.parser.Tokens;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 import org.ngsutils.mvpipe.support.StringUtils;

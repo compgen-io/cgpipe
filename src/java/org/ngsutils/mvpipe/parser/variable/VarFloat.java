@@ -1,5 +1,7 @@
 package org.ngsutils.mvpipe.parser.variable;
 
+import org.ngsutils.mvpipe.exceptions.VarTypeException;
+
 public class VarFloat extends VarValue {
 	public VarFloat(double val) {
 		super(val);

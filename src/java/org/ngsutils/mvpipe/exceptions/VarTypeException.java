@@ -1,6 +1,5 @@
-package org.ngsutils.mvpipe.parser.variable;
+package org.ngsutils.mvpipe.exceptions;
 
-import org.ngsutils.mvpipe.parser.SyntaxException;
 
 public class VarTypeException extends SyntaxException {
 

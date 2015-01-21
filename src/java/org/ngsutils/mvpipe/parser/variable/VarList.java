@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.ngsutils.mvpipe.exceptions.VarTypeException;
 import org.ngsutils.mvpipe.support.StringUtils;
 
 public class VarList extends VarValue {

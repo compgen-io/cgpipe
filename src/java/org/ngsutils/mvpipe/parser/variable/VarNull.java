@@ -1,5 +1,7 @@
 package org.ngsutils.mvpipe.parser.variable;
 
+import org.ngsutils.mvpipe.exceptions.VarTypeException;
+
 public class VarNull extends VarValue {
 	public static final VarNull NULL = new VarNull();
 	

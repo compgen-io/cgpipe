@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.ngsutils.mvpipe.parser.SyntaxException;
+import org.ngsutils.mvpipe.exceptions.SyntaxException;
+import org.ngsutils.mvpipe.exceptions.VarTypeException;
+import org.ngsutils.mvpipe.parser.Eval;
 import org.ngsutils.mvpipe.parser.context.ExecContext;
 
 public abstract class VarValue {
@@ -99,7 +101,7 @@ public abstract class VarValue {
 		if (val.charAt(0) == '"' && val.charAt(val.length()-1) == '"') {
 			String s = val.substring(1, val.length()-1);
 			if (cxt != null) {
-				s = cxt.evalString(s);
+				s = Eval.evalString(s, cxt);
 			}
 			return new VarString(s);
 		}

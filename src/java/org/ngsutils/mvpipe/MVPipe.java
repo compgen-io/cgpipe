@@ -6,20 +6,22 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ngsutils.mvpipe.exceptions.RunnerException;
+import org.ngsutils.mvpipe.exceptions.SyntaxException;
+import org.ngsutils.mvpipe.exceptions.VarTypeException;
 import org.ngsutils.mvpipe.parser.Parser;
-import org.ngsutils.mvpipe.parser.SyntaxException;
 import org.ngsutils.mvpipe.parser.context.RootContext;
 import org.ngsutils.mvpipe.parser.variable.VarBool;
 import org.ngsutils.mvpipe.parser.variable.VarList;
-import org.ngsutils.mvpipe.parser.variable.VarTypeException;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
-import org.ngsutils.mvpipe.support.StringUtils;
+import org.ngsutils.mvpipe.runner.JobRunner;
 
 public class MVPipe {
 	public static final String RCFILE = (System.getenv("MVPIPE_HOME") != null ? System.getenv("MVPIPE_HOME") : System.getenv("user.home"))  + File.separator + ".mvpiperc";  
 
-	public static void main(String[] args) throws VarTypeException, IOException {
+	public static void main(String[] args) throws VarTypeException, IOException, RunnerException {
 		RootContext global = new RootContext();
+		JobRunner runner = JobRunner.load("bash", global);
 
 		String fname = null;
 		boolean verbose = false;
@@ -95,8 +97,12 @@ public class MVPipe {
 			System.exit(1);
 		}
 		
-		for (String target:targets) {
-			global.build(target);
+		if (targets.size() > 0) {
+			for (String target:targets) {
+				global.build(target, runner);
+			}
+		} else {
+			global.build(null, runner);
 		}
 		System.exit(0);
 	}

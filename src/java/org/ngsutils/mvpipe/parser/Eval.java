@@ -5,7 +5,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.parser.context.ExecContext;
 import org.ngsutils.mvpipe.parser.op.Add;
 import org.ngsutils.mvpipe.parser.op.AddAssign;
@@ -46,6 +49,9 @@ public class Eval {
 	final public static List<String> opsParseOrder = new ArrayList<String>();
 	final public static Map<String, Statement> statements = new HashMap<String, Statement>();
 
+	final private static Pattern varPattern = Pattern.compile("^(.*?)\\$\\{([A-Za-z_\\.][a-zA-Z0-9_\\.]*?)\\}(.*?)$");
+	final private static Pattern listPattern = Pattern.compile("^(.*?)([^ \t]*)@\\{([A-Za-z_\\.][a-zA-Z0-9_\\.]*?)\\}([^ \t]*)(.*?)$");
+	
 	private static void addOp(String op, Operator obj) {
 		// Operations are added in priority
 		opsOrder.add(op);
@@ -206,4 +212,73 @@ public class Eval {
 		
 		throw new SyntaxException("Unknown syntax: "+ StringUtils.join(" ", tokens.getList()));
 	}
+
+	public static String evalString(String msg, ExecContext cxt) {
+		System.err.println("#evalString: "+msg);
+		String tmp = "";
+		
+		while (msg.length() > 0) {
+			Matcher m = varPattern.matcher(msg);
+			m = varPattern.matcher(msg);
+			if (m.matches()) {
+				if (m.group(1).endsWith("\\")) {
+					tmp += m.group(1).substring(0,m.group(1).length()-1);
+					tmp += "$";
+					msg = m.group(2).substring(1) + m.group(3);
+				} else {
+					tmp += m.group(1);
+					tmp += cxt.get(m.group(2));
+					msg = m.group(3);
+				}
+			} else {
+				tmp += msg;
+				msg = "";
+			}
+		}
+		
+		msg = tmp;
+		tmp = "";
+		
+		while (msg.length() > 0) {
+			Matcher m = listPattern.matcher(msg);
+			m = listPattern.matcher(msg);
+			if (m.matches()) {
+				System.err.println("# Match 1: \""+ m.group(1)+"\"");
+				System.err.println("# Match 2: \""+ m.group(2)+"\"");
+				System.err.println("# Match 3: \""+ m.group(3)+"\"");
+				System.err.println("# Match 4: \""+ m.group(4)+"\"");
+				System.err.println("# Match 5: \""+ m.group(5)+"\"");
+				tmp += m.group(1);
+				
+				if (m.group(2).endsWith("\\")) {
+					tmp += m.group(2).substring(0,m.group(2).length()-1);
+					tmp += "@";
+					msg = m.group(3).substring(1) + m.group(4) + m.group(5);
+				} else {
+					boolean first = true;
+					for (VarValue v: cxt.get(m.group(3)).iterate()) {
+						if (first) {
+							first = false;
+						} else {
+							tmp += " ";
+						}
+						
+						tmp += m.group(2);
+						tmp += v;
+						tmp += m.group(4);
+					}
+					
+					msg = m.group(5);
+				}
+				
+			} else {
+				tmp += msg;
+				msg = "";
+			}
+		}
+		
+		System.err.println("#         => "+tmp);
+		return tmp;
+	}
+
 }

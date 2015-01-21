@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.ngsutils.mvpipe.parser.variable.VarValue;
+import org.ngsutils.mvpipe.support.StringUtils;
 
 public class BuildTarget {
 	private final List<String> outputs;
@@ -20,6 +21,14 @@ public class BuildTarget {
 		this.inputs = inputs;
 		capturedContext = cxt.cloneValues();
 		this.indentLevel = indentLevel;
+
+		System.err.println("inputs: " + StringUtils.join(" ", this.inputs));
+		System.err.println("outputs: " + StringUtils.join(" ", this.outputs));
+		
+		System.err.println("context:");
+		for (String k: capturedContext.keySet()) {
+			System.err.println("  "+k+" => "+capturedContext.get(k));
+		}
 	}
 	
 	public void addLine(String line) {
@@ -38,6 +47,19 @@ public class BuildTarget {
 			}
 		}
 		return acc;
+	}
+
+	public boolean matches(String outputName) {
+		for (String out: outputs) {
+			if (out.equals(outputName)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	
+	public void build() {
 	}
 
 }
