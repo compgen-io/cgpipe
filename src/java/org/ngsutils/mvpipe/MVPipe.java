@@ -41,7 +41,11 @@ public class MVPipe {
 				continue;
 			}
 			
-			if (arg.equals("-v")) {
+			if (arg.equals("-h")) {
+				usage();
+				license();
+				System.exit(1);
+			} else if (arg.equals("-v")) {
 				verbose = true;
 			} else if (arg.equals("-dr")) {
 				dryrun = true;
@@ -72,6 +76,7 @@ public class MVPipe {
 		
 		if (fname == null) {
 			usage();
+			System.exit(1);
 		}
 		
 		Parser.setVerbose(verbose);
@@ -108,14 +113,23 @@ public class MVPipe {
 		runner.done();
 	}
 
-	private static void usage() throws IOException {
-		InputStream is = MVPipe.class.getClassLoader().getResourceAsStream("org/ngsutils/mvpipe/USAGE.txt");
+	private static void showFile(String fname) throws IOException {
+		InputStream is = MVPipe.class.getClassLoader().getResourceAsStream(fname);
 		int c;
 		while ((c = is.read()) > -1) {
 			System.err.print((char) c);
 		}
 		is.close();
-		System.exit(1);
+		
+	}
+	
+	private static void usage() throws IOException {
+		showFile("org/ngsutils/mvpipe/USAGE.txt");
+	}
+
+	private static void license() throws IOException {
+		showFile("LICENSE");
+		showFile("INCLUDED");
 	}
 
 }
