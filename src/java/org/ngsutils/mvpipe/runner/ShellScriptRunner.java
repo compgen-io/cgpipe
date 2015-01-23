@@ -23,15 +23,19 @@ public class ShellScriptRunner extends JobRunner {
 
 		String out = "#!"+bin+"\n";
 		for (JobDefinition job: jobs) {
-			out += job.getJobId()+"() {\n";
-			out += job.getSrc();
-			out += "\n}\n\n";
+			if (!job.getSrc().equals("")) {
+				out += job.getJobId()+"() {\n";
+				out += job.getSrc();
+				out += "\n}\n\n";
+			}
 		}
 
 		out += "\n";
 		
 		for (JobDefinition job: jobs) {
-			out += job.getJobId()+"\n";
+			if (!job.getSrc().equals("")) {
+				out += job.getJobId()+"\n";
+			}
 		}
 		System.out.println(out);
 	}

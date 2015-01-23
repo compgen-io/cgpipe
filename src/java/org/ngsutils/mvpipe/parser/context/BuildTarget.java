@@ -47,13 +47,17 @@ public class BuildTarget {
 	private final String filename;
 
 	private final List<NumberedLine> lines = new ArrayList<NumberedLine>();
-	
-	
 
 	public BuildTarget(List<String> outputs, List<String> inputs, ExecContext cxt, String filename) {
+		// TODO: Eval.parseString outputs / inputs
+		
 		// this is a target context, capture the parent values
 		if (inputs != null) {
-			this.inputs = Collections.unmodifiableList(inputs);
+			List<String> tmp = new ArrayList<String>();
+			for (String input: inputs) {
+				tmp.add(Eval.evalString(input, cxt));
+			}
+			this.inputs = Collections.unmodifiableList(tmp);
 		} else {
 			this.inputs = null;
 		}
@@ -62,7 +66,7 @@ public class BuildTarget {
 
 		List<Output> tmp = new ArrayList<Output>();
 		for (String out:outputs) {
-			tmp.add(new Output(out));
+			tmp.add(new Output(Eval.evalString(out, cxt)));
 		}
 		this.outputs = Collections.unmodifiableList(tmp);
 
@@ -92,7 +96,7 @@ public class BuildTarget {
 	 */
 	public JobDefinition matches(String outputName) throws SyntaxException {
 		/* 
-		 * TODO: This needs to be a regex match to replace wildcards (%_foo)
+		 * TODO: This needs to be a regex match to replace wildcards in inputs (%.gzfoo)
 		 */
 		
 		System.err.println("# Looking for: "+outputName);
@@ -118,11 +122,11 @@ public class BuildTarget {
 			List<String> matchedInputs = new ArrayList<String>();
 
 			for (Output out:outputs) {
-				matchedOutputs.add(out.rawName.replace("%", wildcard));
+				matchedOutputs.add(Eval.evalStringWildcard(out.rawName, wildcard));
 			}
 			if (inputs!=null) {
 				for (String input:inputs) {
-					matchedInputs.add(input.replace("%", wildcard));
+					matchedInputs.add(Eval.evalStringWildcard(input, wildcard));
 				}
 			}
 			
@@ -139,7 +143,7 @@ public class BuildTarget {
 						continue;
 					}
 				}
-				src.add(Eval.evalString(nl.line, cxt));
+				src.add(Eval.evalString(nl.line, cxt, matchedOutputs, matchedInputs));
 			}
 			
 			Map<String, String> settings = new HashMap<String, String>();

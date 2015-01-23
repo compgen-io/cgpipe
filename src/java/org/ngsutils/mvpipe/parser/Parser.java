@@ -98,19 +98,9 @@ public class Parser {
 				priorLine = line.substring(0, line.length()-1);
 				continue;
 			}
-			
-			if (curTarget != null) {
-				if (StringUtils.strip(line).length() == 0 || curTarget.getIndentLevel() == -1 || StringUtils.calcIndentLevel(line) >= curTarget.getIndentLevel()) { // not blank
-					curTarget.addLine(line, linenum);
-					continue;
-				}
-				// we aren't indented... and have something... must be at the end of the target
-				curTarget = null;
-			}
-			
-			// Next tokenize the line and attempt to execute it
+
+			// check for a new target (out1 out2 : in1 in2)
 			if (StringUtils.strip(line).length() > 0) {
-				// check for a new target (out1 out2 : in1 in2)
 				List<String> targets = StringUtils.quotedSplit(line, ":", true);
 				System.err.println("#target test split: "+StringUtils.join(",", targets));
 				if (targets.size() > 1 && targets.get(1).equals(":")) {
@@ -122,19 +112,33 @@ public class Parser {
 					
 					curTarget = new BuildTarget(outputs, inputs, currentContext, curFilename);
 					currentContext.addTarget(curTarget);
-				} else {
-					Tokens tokens = new Tokens(curFilename, linenum, line);
-					if (verbose) {
-						System.err.println("#"+StringUtils.join(", ", tokens.getList()));
-					}
-					
-					try {
-						currentContext = currentContext.addTokenizedLine(tokens);
-					} catch (SyntaxException e) {
-						reader.close();
-						e.setErrorLine(curFilename, linenum);
-						throw e;
-					}
+					continue;
+				}
+			}
+			
+			// Try to add this to an existing target
+			if (curTarget != null) {
+				if (StringUtils.strip(line).length() == 0 || curTarget.getIndentLevel() == -1 || StringUtils.calcIndentLevel(line) >= curTarget.getIndentLevel()) { // not blank
+					curTarget.addLine(line, linenum);
+					continue;
+				}
+				// we aren't indented... and have something... must be at the end of the target
+				curTarget = null;
+			}
+			
+			// Finally tokenize the line and attempt to execute it
+			if (StringUtils.strip(line).length() > 0) {
+				Tokens tokens = new Tokens(curFilename, linenum, line);
+				if (verbose) {
+					System.err.println("#"+StringUtils.join(", ", tokens.getList()));
+				}
+				
+				try {
+					currentContext = currentContext.addTokenizedLine(tokens);
+				} catch (SyntaxException e) {
+					reader.close();
+					e.setErrorLine(curFilename, linenum);
+					throw e;
 				}
 			}
 		}
