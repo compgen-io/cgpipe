@@ -129,7 +129,7 @@ public class MVPipe {
 
 	private static void license() throws IOException {
 		showFile("LICENSE");
-		showFile("INCLUDED");
+		showFile("INCLUDES");
 	}
 
 }
