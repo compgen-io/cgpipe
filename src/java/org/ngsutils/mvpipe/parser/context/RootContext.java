@@ -1,40 +1,48 @@
 package org.ngsutils.mvpipe.parser.context;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.ngsutils.mvpipe.runner.JobRunner;
+import org.ngsutils.mvpipe.exceptions.SyntaxException;
+import org.ngsutils.mvpipe.parser.context.BuildTarget.Output;
+import org.ngsutils.mvpipe.parser.variable.VarString;
+import org.ngsutils.mvpipe.runner.JobDefinition;
 
 public class RootContext extends ExecContext {
 	protected List<BuildTarget> targets = new ArrayList<BuildTarget>();
-	protected boolean dryrun = false;
+	
+	// Map<output-filename, job-id>
+	protected Map<String, String> submittedJobs = new HashMap<String, String>();
 	
 	public RootContext() {
 		super();
+		set("mvpipe.runner", new VarString("shell"));
 	}
 
-	public void setDryRun(boolean dryrun) {
-		this.dryrun = dryrun;
-	}
-	
 	public void addTarget(BuildTarget target) {
 		this.targets.add(target);
 	}
 
-	public void build(String target, JobRunner runner) {
-		if (target == null) {
-			if (targets.size() > 0) {
-				targets.get(0).build(null);
-			}
-			return;
-		}
-		for (BuildTarget tgt: targets) {
-			String[] wildcards = null;
-			if ((wildcards=tgt.matches(target)) != null) {
-				// recurse on inputs...
-				tgt.build(wildcards);
-				return;
+	public List<String> getDefaultOutputs() {
+		List<String> l = new ArrayList<String>();
+		if (targets.size() > 0) {
+			for (Output out: targets.get(0).getOutputs()) {
+				l.add(out.rawName);
 			}
 		}
+		return l;
 	}
+
+	public JobDefinition findBuildTarget(String outputName) throws SyntaxException {
+		for (BuildTarget tgt: targets) {
+			JobDefinition match = tgt.matches(outputName);
+			if (match != null) {
+				return match;
+			}
+		}
+		return null;
+	}
+
 }

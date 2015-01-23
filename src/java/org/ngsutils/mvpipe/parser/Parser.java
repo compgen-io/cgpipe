@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.ngsutils.mvpipe.MVPipe;
@@ -101,45 +100,34 @@ public class Parser {
 			}
 			
 			if (curTarget != null) {
-				if (StringUtils.strip(line).length() > 0) { // not blank
-					if (BuildTarget.calcIndentLevel(line) <= curTarget.indentLevel) { // not whitespace at the first char
-						// we aren't indented... and have something... must be at the end of the target
-						curTarget = null;
-					} else {
-						curTarget.addLine(StringUtils.strip(line));
-						continue;
-					}
+				if (StringUtils.strip(line).length() == 0 || curTarget.getIndentLevel() == -1 || StringUtils.calcIndentLevel(line) >= curTarget.getIndentLevel()) { // not blank
+					curTarget.addLine(line, linenum);
+					continue;
 				}
+				// we aren't indented... and have something... must be at the end of the target
+				curTarget = null;
 			}
 			
 			// Next tokenize the line and attempt to execute it
-			Tokens tokens = new Tokens(curFilename, linenum, line);
-			if (verbose) {
-				System.err.println("#"+StringUtils.join(", ", tokens.getList()));
-			}
-			
-			if (tokens.size() > 0) {
+			if (StringUtils.strip(line).length() > 0) {
 				// check for a new target (out1 out2 : in1 in2)
-				List<String> pre = new ArrayList<String>();
-				List<String> post = new ArrayList<String>();
-				boolean istarget = false;
-				String last = "";
-				for (String tok: tokens.getList()) {
-					if (tok.equals(":") && !last.endsWith("\\")) {
-						istarget = true;
-					} else if (istarget) {
-						post.add(tok);
-					} else {
-						pre.add(tok);
-						last = tok;
+				List<String> targets = StringUtils.quotedSplit(line, ":", true);
+				System.err.println("#target test split: "+StringUtils.join(",", targets));
+				if (targets.size() > 1 && targets.get(1).equals(":")) {
+					List<String> outputs = StringUtils.quotedSplit(targets.get(0).replaceAll("\t",  " "), " ");
+					List<String> inputs = null;
+					if (targets.size()==3) {
+						inputs = StringUtils.quotedSplit(targets.get(2).replaceAll("\t",  " "), " ");
 					}
-				}
-				
-				if (istarget) {
-					curTarget = new BuildTarget(pre, post, currentContext, BuildTarget.calcIndentLevel(line));
+					
+					curTarget = new BuildTarget(outputs, inputs, currentContext, curFilename);
 					currentContext.addTarget(curTarget);
-					continue;
 				} else {
+					Tokens tokens = new Tokens(curFilename, linenum, line);
+					if (verbose) {
+						System.err.println("#"+StringUtils.join(", ", tokens.getList()));
+					}
+					
 					try {
 						currentContext = currentContext.addTokenizedLine(tokens);
 					} catch (SyntaxException e) {

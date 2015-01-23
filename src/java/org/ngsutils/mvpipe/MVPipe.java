@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.ngsutils.mvpipe.exceptions.RunnerException;
 import org.ngsutils.mvpipe.exceptions.SyntaxException;
-import org.ngsutils.mvpipe.exceptions.VarTypeException;
 import org.ngsutils.mvpipe.parser.Parser;
 import org.ngsutils.mvpipe.parser.context.RootContext;
 import org.ngsutils.mvpipe.parser.variable.VarBool;
@@ -19,12 +18,12 @@ import org.ngsutils.mvpipe.runner.JobRunner;
 public class MVPipe {
 	public static final String RCFILE = (System.getenv("MVPIPE_HOME") != null ? System.getenv("MVPIPE_HOME") : System.getenv("user.home"))  + File.separator + ".mvpiperc";  
 
-	public static void main(String[] args) throws VarTypeException, IOException, RunnerException {
+	public static void main(String[] args) throws IOException, RunnerException, SyntaxException {
 		RootContext global = new RootContext();
-		JobRunner runner = JobRunner.load("bash", global);
-
+		
 		String fname = null;
 		boolean verbose = false;
+		boolean dryrun = false;
 		
 		List<String> targets = new ArrayList<String>();
 		
@@ -45,7 +44,7 @@ public class MVPipe {
 			if (arg.equals("-v")) {
 				verbose = true;
 			} else if (arg.equals("-dr")) {
-				global.setDryRun(true);
+				dryrun = true;
 			} else if (arg.startsWith("--")) {
 				if (k != null) {
 					global.set(k, VarBool.TRUE);
@@ -77,7 +76,6 @@ public class MVPipe {
 		
 		Parser.setVerbose(verbose);
 		
-		
 		Parser parser = new Parser(global);
 		try {
 			File rc = new File(RCFILE);
@@ -97,14 +95,17 @@ public class MVPipe {
 			System.exit(1);
 		}
 		
+		JobRunner runner = JobRunner.load(global, verbose, dryrun);
+		
 		if (targets.size() > 0) {
 			for (String target:targets) {
-				global.build(target, runner);
+				runner.build(target);
 			}
 		} else {
-			global.build(null, runner);
+			runner.build(null);
 		}
-		System.exit(0);
+
+		runner.done();
 	}
 
 	private static void usage() throws IOException {

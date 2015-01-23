@@ -1,0 +1,23 @@
+val="test1"
+one: two three.foo
+    #$ echo "foo"
+    #$ echo val
+    touch one
+
+val="test2"
+two: three.foo
+    #$ echo "bar"
+    #$ echo val
+    touch two
+
+val="test3"
+%.foo:
+    #$ echo "baz"
+    #$ echo val
+    #$ job.extras = "extra"
+    touch three
+
+extra:
+    # extra job
+    touch four
+

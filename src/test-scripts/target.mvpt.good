@@ -1,0 +1,32 @@
+foo
+test1
+bar
+test2
+baz
+test3
+#!/bin/bash
+func_1() {
+touch three
+}
+
+func_2() {
+# extra job
+touch four
+
+}
+
+func_3() {
+touch two
+
+}
+
+func_4() {
+touch one
+
+}
+
+func_1
+func_2
+func_3
+func_4
+

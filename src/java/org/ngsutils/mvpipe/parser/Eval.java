@@ -103,6 +103,10 @@ public class Eval {
 		return evalTokenLine(context, tokens, false);
 	}
 	public static ExecContext evalTokenLine(ExecContext context, Tokens tokens, boolean print) throws SyntaxException {
+		if (tokens.size() == 0) {
+			return context;
+		}
+		
 		System.err.println("#evalTokens: " + StringUtils.join(", ", tokens.getList()));
 		if (statements.containsKey(tokens.get(0))) {
 			System.err.println("#statement: " + tokens.get(0));

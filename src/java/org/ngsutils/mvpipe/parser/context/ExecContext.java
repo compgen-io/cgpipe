@@ -98,6 +98,14 @@ public class ExecContext {
 		return vars.get(name);
 	}
 	
+	public String getString(String k) {
+		if (!contains(k)) {
+			return null;
+		}
+		Object obj = get(k);
+		return obj.toString();
+	}
+
 	public void set(String name, VarValue val) {
 		vars.put(name, val);
 	}
