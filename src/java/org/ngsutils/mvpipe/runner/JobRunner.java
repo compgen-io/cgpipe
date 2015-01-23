@@ -61,7 +61,7 @@ public abstract class JobRunner {
 	}
 
 	protected boolean jobDepsSubmitted(JobDefinition job) {
-		for (JobDefinition dep: job.getDependencies()) {
+		for (JobDependency dep: job.getDependencies()) {
 			if (dep.getJobId() == null) {
 				return false;
 			}
@@ -70,33 +70,34 @@ public abstract class JobRunner {
 		return true;
 	}
 
-	public boolean submitAll(List<JobDefinition> jobs) throws RunnerException {
+	public void submitAll(List<JobDefinition> jobs) throws RunnerException {
 		int jobsToSubmit = 1;
-		boolean aborted = false;
-		
-		while (jobsToSubmit > 0 && !aborted) {
+		boolean submittedAJob = false;
+
+		while (jobsToSubmit > 0) {
 			jobsToSubmit = 0;
+			submittedAJob = false;
+			
 			for (JobDefinition job: jobs) {
 				if (job.getJobId() != null) {
 					continue;
 				}
 				if (jobDepsSubmitted(job)) {
 					if (!submit(job)) {
-						aborted = true;
-						break;
+						abort();
+						throw new RunnerException("Unable to submit job: "+job);
 					}
+					submittedAJob = true;
 				} else {
 					jobsToSubmit ++;
 				}
 			}
+			
+			if (!submittedAJob && jobsToSubmit > 0) {
+				abort();
+				throw new RunnerException("Unable to build dependency tree!");
+			}
 		}
-		
-		if (aborted) {
-			abort();
-			return false;
-		}
-		
-		return true;
 	}
 	
 	public void build(String output) throws RunnerException, SyntaxException {

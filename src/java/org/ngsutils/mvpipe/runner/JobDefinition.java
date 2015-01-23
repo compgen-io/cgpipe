@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.ngsutils.mvpipe.support.StringUtils;
 
-public class JobDefinition {
+public class JobDefinition implements JobDependency {
 	private String jobId = null;
 	private String name = "";
 
@@ -17,7 +17,7 @@ public class JobDefinition {
 	final private List<String> requiredInputs;
 	final private List<String> extraTargets;
 	
-	private List<JobDefinition> dependencies = new ArrayList<JobDefinition>();
+	private List<JobDependency> dependencies = new ArrayList<JobDependency>();
 	
 	public JobDefinition(Map<String, String>settings, List<String> outputFilenames, List<String> inputFilenames, String src) {
 		this.settings = Collections.unmodifiableMap(settings);
@@ -100,13 +100,13 @@ public class JobDefinition {
 		return src;
 	}
 
-	public void addDependency(JobDefinition dep) {
+	public void addDependency(JobDependency dep) {
 		if (!dependencies.contains(dep)) {
 			dependencies.add(dep);
 		}
 	}
 
-	public List<JobDefinition> getDependencies() {
+	public List<JobDependency> getDependencies() {
 		return dependencies;
 	}
 }
