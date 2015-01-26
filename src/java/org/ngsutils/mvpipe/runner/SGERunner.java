@@ -38,17 +38,19 @@ public class SGERunner extends JobRunner {
 	@Override
 	public void done() throws RunnerException {
 		super.done();
-		log.info("submitted jobs: "+StringUtils.join(",", jobids));
-		System.out.println(StringUtils.join("\n", jobids));
-		
-		if (globalHoldJob != null) {
-			try {
-				int retcode = Runtime.getRuntime().exec(new String[]{"qrls", globalHoldJob.getJobId()}).waitFor();
-				if (retcode != 0) {
-					throw new RunnerException("Unable to release global hold");
+		if (jobids.size() > 0) {
+			log.info("submitted jobs: "+StringUtils.join(",", jobids));
+			System.out.println(StringUtils.join("\n", jobids));
+			
+			if (globalHoldJob != null) {
+				try {
+					int retcode = Runtime.getRuntime().exec(new String[]{"qrls", globalHoldJob.getJobId()}).waitFor();
+					if (retcode != 0) {
+						throw new RunnerException("Unable to release global hold");
+					}
+				} catch (IOException | InterruptedException e) {
+					throw new RunnerException(e);
 				}
-			} catch (IOException | InterruptedException e) {
-				throw new RunnerException(e);
 			}
 		}
 	}

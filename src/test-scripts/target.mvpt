@@ -5,7 +5,7 @@ one: two three.foo
     touch one
 
 val="test2"
-two: three.foo
+two: three.foo #fake
     #$ echo "bar"
     #$ echo val
     touch two
@@ -20,4 +20,6 @@ val="test3"
 extra:
     # extra job
     touch four
+
+#fake: nothing
 

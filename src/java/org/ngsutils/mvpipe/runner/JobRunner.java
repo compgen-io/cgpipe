@@ -138,8 +138,10 @@ public abstract class JobRunner {
 	}
 	
 	private JobDefinition buildJobTree(String target) throws RunnerException, SyntaxException {
+		log.debug("Building job tree for: "+target);
 		for (JobDefinition jd: pendingJobs) {
 			if (jd.getOutputFilenames().contains(target)) {
+				log.debug("Pending job found for: "+target);
 				return jd;
 			}
 		}
@@ -167,12 +169,15 @@ public abstract class JobRunner {
 		if (!force) {
 			boolean allfound = true;
 			for (String out: jobdef.getOutputFilenames()) {
-				if (!new File(out).exists()) {
+				if (new File(out).exists()) {
+					log.debug("Output file exists: "+out);
+				} else {
 					allfound = false;
 					break;
 				}
 			}
 			if (allfound) {
+				log.debug("All output files found, not building job script");
 				jobdef = null;
 			}
 		}

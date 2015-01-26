@@ -114,9 +114,9 @@ public class BuildTarget {
 				matched = true;
 				if (m.groupCount()>0) {
 					wildcard = m.group(1);
-					log.debug("Target match"+m.group(0)+" ("+m.group(1)+")");
+					log.debug("Target match: "+m.group(0)+" ("+m.group(1)+")");
 				} else {
-					log.debug("Target match"+m.group(0));
+					log.debug("Target match: "+m.group(0));
 				}
 				break;
 			}
