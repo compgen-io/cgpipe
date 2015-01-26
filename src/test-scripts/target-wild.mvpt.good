@@ -1,0 +1,27 @@
+func_1() {
+touch foo
+}
+
+func_2() {
+gzip -c foo > foo.gz
+}
+
+func_3() {
+touch bar
+
+}
+
+func_4() {
+echo "$> = foo.bar"
+echo "$< = foo bar"
+
+echo "$>1 = foo.bar"
+echo "$<1 = foo"
+echo "$<2 = bar"
+}
+
+
+func_1
+func_2
+func_3
+func_4

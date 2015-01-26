@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.parser.context.BuildTarget.Output;
-import org.ngsutils.mvpipe.parser.variable.VarString;
 import org.ngsutils.mvpipe.runner.JobDefinition;
 
 public class RootContext extends ExecContext {
@@ -18,7 +17,6 @@ public class RootContext extends ExecContext {
 	
 	public RootContext() {
 		super();
-		set("mvpipe.runner", new VarString("shell"));
 	}
 
 	public void addTarget(BuildTarget target) {

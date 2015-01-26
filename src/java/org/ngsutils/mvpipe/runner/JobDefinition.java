@@ -9,7 +9,7 @@ import org.ngsutils.mvpipe.support.StringUtils;
 
 public class JobDefinition implements JobDependency {
 	private String jobId = null;
-	private String name = "";
+	private String name = null;
 
 	final private String src;
 	final private Map<String, String> settings;
@@ -50,7 +50,11 @@ public class JobDefinition implements JobDependency {
 	public List<String> getExtraTargets() {
 		return extraTargets;
 	}
-	
+
+	public boolean hasSetting(String k) {
+		return settings.containsKey(k);
+	}
+
 	public String getSetting(String k) {
 		return getSetting(k, null);
 	}
@@ -93,7 +97,18 @@ public class JobDefinition implements JobDependency {
 	}
 	
 	public String getName() {
-		return name;
+		if (name != null) {
+			return name;
+		}
+		
+		String n = src.split("[ \t\n\r]")[0];
+		if (n.length() > 0) {
+			if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".contains(""+n.charAt(0))) {
+				return n;
+			}
+			return "mvp_"+n;
+		}
+		return "mvpjob";
 	}
 	
 	public String getSrc() {

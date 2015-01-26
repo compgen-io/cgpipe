@@ -11,7 +11,7 @@ import org.ngsutils.mvpipe.parser.context.RootContext;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 
 public abstract class JobRunner {
-	abstract public boolean submit(JobDefinition jobdef);
+	abstract public boolean submit(JobDefinition jobdef) throws RunnerException;
 	abstract protected void setConfig(String k, String val);
 	
 	protected boolean verbose;
@@ -35,15 +35,18 @@ public abstract class JobRunner {
 	public static JobRunner load(RootContext cxt, boolean verbose, boolean dryrun) throws RunnerException {
 		String runner = cxt.getString("mvpipe.runner");
 		if (runner == null) {
-			runner = "bash";
+			runner = "shell";
 		}
 		
 		JobRunner obj = null;
-		if (runner.equals("shell")) {
+		switch (runner) {
+		case "shell":
 			obj = new ShellScriptRunner();
-		}
-
-		if (obj == null) {
+			break;
+		case "sge":
+			obj = new SGERunner();
+			break;
+		default:
 			throw new RunnerException("Can't load job runner: "+runner);
 		}
 
@@ -83,7 +86,9 @@ public abstract class JobRunner {
 					continue;
 				}
 				if (jobDepsSubmitted(job)) {
-					if (!submit(job)) {
+					if (job.getSrc().equals("")) {
+						job.setJobId("");
+					} else if (!submit(job)) {
 						abort();
 						throw new RunnerException("Unable to submit job: "+job);
 					}

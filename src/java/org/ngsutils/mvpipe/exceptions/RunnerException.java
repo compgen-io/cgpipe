@@ -1,5 +1,6 @@
 package org.ngsutils.mvpipe.exceptions;
 
+
 public class RunnerException extends Exception {
 
 	/**
@@ -11,7 +12,7 @@ public class RunnerException extends Exception {
 		super(s);
 	}
 
-	public RunnerException(SyntaxException e) {
+	public RunnerException(Exception e) {
 		super(e);
 	}
 }

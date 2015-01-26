@@ -1,0 +1,19 @@
+test = "bar"
+one: foo.gz foo.bar
+
+%.gz: %
+    gzip -c $< > $>
+
+foo:
+    touch foo
+
+bar:
+    touch bar
+
+%.bar: foo ${test}
+    echo "\$> = $>"
+    echo "\$< = $<"
+
+    echo "\$>1 = $>1"
+    echo "\$<1 = $<1"
+    echo "\$<2 = $<2"

@@ -16,7 +16,7 @@ import org.ngsutils.mvpipe.parser.variable.VarValue;
 import org.ngsutils.mvpipe.runner.JobRunner;
 
 public class MVPipe {
-	public static final String RCFILE = (System.getenv("MVPIPE_HOME") != null ? System.getenv("MVPIPE_HOME") : System.getenv("user.home"))  + File.separator + ".mvpiperc";  
+	public static final String RCFILE = (System.getenv("MVPIPE_HOME") != null ? System.getenv("MVPIPE_HOME") : System.getProperty("user.home"))  + File.separator + ".mvpiperc";  
 
 	public static void main(String[] args) throws IOException, RunnerException, SyntaxException {
 		RootContext global = new RootContext();
