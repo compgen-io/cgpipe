@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -106,7 +107,7 @@ public class JobDefinition implements JobDependency {
 		if (n == null && hasSetting("job.name")) {
 			n = getSetting("job.name");
 		}
-		if (n.length() > 0) {
+		if (n != null && n.length() > 0) {
 			if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".contains(""+n.charAt(0))) {
 				return n;
 			}
@@ -127,5 +128,9 @@ public class JobDefinition implements JobDependency {
 
 	public List<JobDependency> getDependencies() {
 		return dependencies;
+	}
+
+	public Set<String> getSettings() {
+		return settings.keySet();
 	}
 }

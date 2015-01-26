@@ -82,7 +82,7 @@ public class MVPipe {
 					confVals.put(k, VarValue.parseString(arg, true));
 				}
 				k = null;
-			} else if (args[0].charAt(0) != '-'){
+			} else if (arg.charAt(0) != '-'){
 				targets.add(arg);
 			}
 		}

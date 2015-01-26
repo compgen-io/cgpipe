@@ -11,6 +11,7 @@ import org.ngsutils.mvpipe.exceptions.RunnerException;
 import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.parser.context.RootContext;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
+import org.ngsutils.mvpipe.support.StringUtils;
 
 public abstract class JobRunner {
 	abstract public boolean submit(JobDefinition jobdef) throws RunnerException;
@@ -95,6 +96,23 @@ public abstract class JobRunner {
 						throw new RunnerException("Unable to submit job: "+job);
 					}
 					submittedAJob = true;
+					if (!job.getJobId().equals("")) {
+						log.info("Submitted job: "+job.getJobId() +" "+ job.getName());
+						for (String k:job.getSettings()) {
+							if (k.startsWith("job.")) {
+								log.debug("setting: "+k+" => "+job.getSetting(k));
+							}
+						}
+						for (String out:job.getOutputFilenames()) {
+							log.debug("output: "+out);
+						}
+						for (String inp:job.getRequiredInputs()) {
+							log.debug("input: "+inp);
+						}
+						for (String s: job.getSrc().split("\n")) {
+							log.info("src: "+StringUtils.strip(s));
+						}
+					}
 				} else {
 					jobsToSubmit ++;
 				}
@@ -173,5 +191,4 @@ public abstract class JobRunner {
 		
 		return jobdef;
 	}
-
 }
