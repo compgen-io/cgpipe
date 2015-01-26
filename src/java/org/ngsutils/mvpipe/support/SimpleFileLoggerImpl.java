@@ -4,6 +4,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.commons.logging.Log;
 
@@ -52,6 +55,7 @@ public class SimpleFileLoggerImpl implements Log, Serializable {
 	}
 	
 	private String name;
+	private DateFormat dateFormater=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	public SimpleFileLoggerImpl(String name) {
 		this.name = name;
@@ -60,7 +64,8 @@ public class SimpleFileLoggerImpl implements Log, Serializable {
 	private void log(Level level, Object arg0, Throwable arg1) {
 		if (SimpleFileLoggerImpl.level.compareTo(level) <= 0) {
 			if (out != null) {
-				out.println(level.name()+" "+name+" "+arg0);
+				String date = dateFormater.format(new Date());
+				out.println(date+" "+level.name()+" "+name+" "+arg0);
 				if (arg1 != null) {
 					arg1.printStackTrace(out);
 				}

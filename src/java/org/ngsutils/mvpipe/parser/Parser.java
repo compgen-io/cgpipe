@@ -61,7 +61,6 @@ public class Parser {
 		if (f.exists()) {
 			return f;
 		}
-		
 
 		IOException e = new IOException("File: "+filename+" was not found!");
 		log.fatal("File: "+filename+" was not found!", e);
@@ -79,7 +78,8 @@ public class Parser {
 		} else {
 			currentContext.setCWD(new File(new File(".").getAbsolutePath()).getParent());
 		}
-		curFilename = file.getAbsolutePath();
+		curFilename = file.getCanonicalPath();
+		log.info("Parsing file: "+curFilename);
 		parseInputStream(new FileInputStream(file));
 	}
 	
@@ -92,6 +92,8 @@ public class Parser {
 		while ((line = reader.readLine()) != null) {
 			line = StringUtils.rstrip(line);
 
+			log.trace(">>> " + line);
+			
 			linenum += 1;
 			
 			if (priorLine != null) {

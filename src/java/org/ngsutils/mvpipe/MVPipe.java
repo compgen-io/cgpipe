@@ -110,15 +110,16 @@ public class MVPipe {
 				break;
 			}
 		}
-
-		
 		
 		Log log = LogFactory.getLog(MVPipe.class);
+		log.info("Starting new run");
 		
 		RootContext global = new RootContext();
 		for (String k1:confVals.keySet()) {
+			log.info("config: "+k1+" => "+confVals.get(k1).toString());
 			global.set(k1, confVals.get(k1));
 		}
+		
 		Parser parser = new Parser(global);
 		try {
 			File rc = new File(RCFILE);
