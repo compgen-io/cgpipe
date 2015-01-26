@@ -3,12 +3,15 @@ package org.ngsutils.mvpipe.parser.context;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.parser.Eval;
 import org.ngsutils.mvpipe.parser.Tokens;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 
 public class ExecContext {
+	protected Log log = LogFactory.getLog(getClass());
 	protected final ExecContext parent;
 	protected String cwd = null;
 			
@@ -43,7 +46,7 @@ public class ExecContext {
 	}
 
 	public void setCWD(String cwd) {
-		System.err.println("#CWD:"+cwd);
+		log.debug("set current working directory:"+cwd);
 		this.cwd = cwd;
 	}
 	

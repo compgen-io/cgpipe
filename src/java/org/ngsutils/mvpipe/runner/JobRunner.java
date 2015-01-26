@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ngsutils.mvpipe.exceptions.RunnerException;
 import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.parser.context.RootContext;
@@ -13,8 +15,9 @@ import org.ngsutils.mvpipe.parser.variable.VarValue;
 public abstract class JobRunner {
 	abstract public boolean submit(JobDefinition jobdef) throws RunnerException;
 	abstract protected void setConfig(String k, String val);
+
+	protected Log log = LogFactory.getLog(getClass());
 	
-	protected boolean verbose;
 	protected boolean dryrun;
 	protected RootContext globalContext;
 	
@@ -32,7 +35,7 @@ public abstract class JobRunner {
 		return true;
 	}
 
-	public static JobRunner load(RootContext cxt, boolean verbose, boolean dryrun) throws RunnerException {
+	public static JobRunner load(RootContext cxt, boolean dryrun) throws RunnerException {
 		String runner = cxt.getString("mvpipe.runner");
 		if (runner == null) {
 			runner = "shell";
@@ -57,7 +60,6 @@ public abstract class JobRunner {
 		}
 		
 		obj.dryrun = dryrun;
-		obj.verbose = verbose;
 		obj.globalContext = cxt;
 		
 		return obj;
@@ -118,11 +120,6 @@ public abstract class JobRunner {
 	}
 	
 	private JobDefinition buildJobTree(String target) throws RunnerException, SyntaxException {
-		// TODO: Check to see if target exists as a file / S3 / existing job / etc...
-		if (new File(target).exists()) {
-			return null;
-		}
-
 		for (JobDefinition jd: pendingJobs) {
 			if (jd.getOutputFilenames().contains(target)) {
 				return jd;
@@ -135,21 +132,42 @@ public abstract class JobRunner {
 			throw new RunnerException("No build target available to build file: "+target);
 		}
 		
+		boolean force = false;
+		
 		for (String input: jobdef.getRequiredInputs()) {
-			System.err.println("#Looking for jobdep: "+input);
+			log.trace("Looking for jobdep: "+input);
 			JobDefinition dep = buildJobTree(input);
 			if (dep != null) {
 				jobdef.addDependency(dep);
+				
+				// we have a job dependency that will run... therefore, we need to as well.
+				force = true;				
 			}
 		}
 
-		pendingJobs.add(jobdef);
+		// TODO: Check to see if target exists as a file / S3 / existing job / etc...
+		if (!force) {
+			boolean allfound = true;
+			for (String out: jobdef.getOutputFilenames()) {
+				if (!new File(out).exists()) {
+					allfound = false;
+					break;
+				}
+			}
+			if (allfound) {
+				jobdef = null;
+			}
+		}
+
+		if (jobdef != null) {
+			pendingJobs.add(jobdef);
 		
-		for (String extra: jobdef.getExtraTargets()) {
-			System.err.println("#Looking for extra: "+extra);
-			JobDefinition dep = buildJobTree(extra);
-			if (dep != null) {
-				dep.addDependency(jobdef);
+			for (String extra: jobdef.getExtraTargets()) {
+				log.trace("Looking for extra job: "+extra);
+				JobDefinition dep = buildJobTree(extra);
+				if (dep != null && jobdef != null) {
+					dep.addDependency(jobdef);
+				}
 			}
 		}
 		

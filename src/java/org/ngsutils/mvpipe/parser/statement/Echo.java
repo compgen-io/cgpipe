@@ -9,11 +9,9 @@ public class Echo implements Statement {
 
 	@Override
 	public ExecContext eval(ExecContext context, Tokens tokens) throws SyntaxException {
-		
 		if (context.isActive()) {
-			System.err.println(Eval.evalTokenExpression(context, tokens));
+			System.out.println(Eval.evalTokenExpression(context, tokens));
 		}
 		return context;
 	}
-
 }

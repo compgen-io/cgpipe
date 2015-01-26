@@ -9,8 +9,8 @@ if [ "$MD" == "" ]; then
     exit 1
 fi
 VERBOSE=""
-if [ "$1" == "-v" ]; then
-    VERBOSE="-v"
+if [[ "$1" == "-v" || "$1" == "-vv" || "$1" == "-vvv" ]]; then
+    VERBOSE="$1"
     shift
 fi
 

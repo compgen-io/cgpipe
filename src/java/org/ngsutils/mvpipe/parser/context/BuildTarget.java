@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.parser.Eval;
 import org.ngsutils.mvpipe.parser.Tokens;
@@ -41,6 +43,8 @@ public class BuildTarget {
 
 	private int indentLevel=-1;
 
+	private Log log = LogFactory.getLog(getClass());
+
 	private final List<Output> outputs;
 	private final List<String> inputs;
 	private final Map<String, VarValue> capturedContext;
@@ -52,7 +56,7 @@ public class BuildTarget {
 		// TODO: Eval.parseString outputs / inputs
 		
 		// this is a target context, capture the parent values
-		if (inputs != null) {
+		if (inputs != null && inputs.size() > 0) {
 			List<String> tmp = new ArrayList<String>();
 			for (String input: inputs) {
 				tmp.add(Eval.evalString(input, cxt));
@@ -70,12 +74,12 @@ public class BuildTarget {
 		}
 		this.outputs = Collections.unmodifiableList(tmp);
 
-		System.err.println("#inputs: " + StringUtils.join(",", this.inputs));
-		System.err.println("#outputs: " + StringUtils.join(",", this.outputs));
+
+		log.debug("inputs: " + StringUtils.join(",", this.inputs));
+		log.debug("outputs: " + StringUtils.join(",", this.outputs));
 		
-		System.err.println("#context:");
 		for (String k: capturedContext.keySet()) {
-			System.err.println("#  "+k+" => "+capturedContext.get(k));
+			log.debug("context: "+k+" => "+capturedContext.get(k));
 		}
 		
 	}
@@ -99,19 +103,20 @@ public class BuildTarget {
 		 * TODO: This needs to be a regex match to replace wildcards in inputs (%.gzfoo)
 		 */
 		
-		System.err.println("# Looking for: "+outputName);
+		log.trace("Trying to match: "+outputName);
 		boolean matched = false;
 		String wildcard = "";
 		
 		for (Output out:outputs) {
-			System.err.println("#   Testing: "+out.regex);
+			log.trace("testing regex: "+out.regex);
 			Matcher m = out.regex.matcher(outputName);
 			if (m.matches()) {
 				matched = true;
-				System.err.println("#   MATCH: "+m.group(0));
 				if (m.groupCount()>0) {
 					wildcard = m.group(1);
-					System.err.println("#   Wildcard: "+m.group(1));
+					log.debug("Target match"+m.group(0)+" ("+m.group(1)+")");
+				} else {
+					log.debug("Target match"+m.group(0));
 				}
 				break;
 			}

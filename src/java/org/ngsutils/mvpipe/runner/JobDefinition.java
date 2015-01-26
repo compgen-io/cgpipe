@@ -5,9 +5,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ngsutils.mvpipe.support.StringUtils;
 
 public class JobDefinition implements JobDependency {
+	private Log log = LogFactory.getLog(getClass());
+	
 	private String jobId = null;
 	private String name = null;
 
@@ -25,13 +29,13 @@ public class JobDefinition implements JobDependency {
 		this.requiredInputs = Collections.unmodifiableList(inputFilenames);
 		
 		for (String k: settings.keySet()) {
-			System.err.println("# setting: "+k +" => " + settings.get(k));
+			log.trace("job setting: "+k +" => " + settings.get(k));
 		}
 		 
 		List<String> tmp = new ArrayList<String>();
 		if (settings.containsKey("job.extras")) {
 			for (String extra: settings.get("job.extras").split(",")) {
-				System.err.println("# extra job: "+extra);
+				log.trace("extra job: "+extra);
 				tmp.add(StringUtils.strip(extra));
 			}
 		}
@@ -97,11 +101,11 @@ public class JobDefinition implements JobDependency {
 	}
 	
 	public String getName() {
-		if (name != null) {
-			return name;
-		}
+		String n = name;
 		
-		String n = src.split("[ \t\n\r]")[0];
+		if (n == null && hasSetting("job.name")) {
+			n = getSetting("job.name");
+		}
 		if (n.length() > 0) {
 			if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".contains(""+n.charAt(0))) {
 				return n;

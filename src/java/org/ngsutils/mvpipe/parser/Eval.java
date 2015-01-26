@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.parser.context.ExecContext;
 import org.ngsutils.mvpipe.parser.op.Add;
@@ -44,6 +46,8 @@ import org.ngsutils.mvpipe.parser.variable.VarValue;
 import org.ngsutils.mvpipe.support.StringUtils;
 
 public class Eval {
+	private static Log log = LogFactory.getLog(Eval.class);
+
 	final public static Map<String, Operator> ops = new HashMap<String, Operator>();
 	final public static List<String> opsOrder = new ArrayList<String>();
 	final public static List<String> opsParseOrder = new ArrayList<String>();
@@ -111,9 +115,9 @@ public class Eval {
 			return context;
 		}
 		
-		System.err.println("#evalTokens: " + StringUtils.join(", ", tokens.getList()));
+		log.trace("#evalTokens: " + StringUtils.join(", ", tokens.getList()));
 		if (statements.containsKey(tokens.get(0))) {
-			System.err.println("#statement: " + tokens.get(0));
+			log.trace("#statement: " + tokens.get(0));
 			List<String> right = new ArrayList<String>();
 			right.addAll(tokens.getList().subList(1, tokens.size()));
 			
@@ -127,7 +131,7 @@ public class Eval {
 		} else if (context.isActive()) {
 			VarValue ret = evalTokenExpression(context, tokens);
 			if (print) {
-				System.err.println(ret.toString());
+				System.out.println(ret.toString());
 			} else if (ret == VarNull.NULL) {
 				// we only throw an error on NULL if we aren't in a print loop
 				throw new SyntaxException("NULL expression: "+ StringUtils.join(" ", tokens.getList()));
@@ -138,7 +142,7 @@ public class Eval {
 	}
 	
 	public static VarValue evalTokenExpression(ExecContext context, Tokens tokens) throws SyntaxException {
-		System.err.println("#evalTokenExpression: " + StringUtils.join(", ", tokens.getList()));
+		log.trace("evalTokenExpression: " + StringUtils.join(", ", tokens.getList()));
 
 		if (tokens.size() == 1) {
 			return VarValue.parseString(tokens.get(0), context);
@@ -241,7 +245,7 @@ public class Eval {
 
 		}
 		
-		System.err.println("#    wild => "+tmp);
+		log.trace("    wild => "+tmp);
 
 		return tmp;
 	}
@@ -251,7 +255,7 @@ public class Eval {
 	}
 
 	public static String evalString(String msg, ExecContext cxt, List<String> outputs, List<String> inputs) {
-		System.err.println("#evalString: "+msg);
+		log.trace("evalString: "+msg);
 		String tmp = "";
 		
 		if (cxt != null) {
@@ -273,7 +277,7 @@ public class Eval {
 				}
 			}
 	
-			System.err.println("#     var => "+tmp);
+			log.trace("var => "+tmp);
 	
 			msg = tmp;
 			tmp = "";
@@ -281,11 +285,11 @@ public class Eval {
 			while (msg.length() > 0) {
 				Matcher m = listPattern.matcher(msg);
 				if (m.matches()) {
-					System.err.println("# Match 1: \""+ m.group(1)+"\"");
-					System.err.println("# Match 2: \""+ m.group(2)+"\"");
-					System.err.println("# Match 3: \""+ m.group(3)+"\"");
-					System.err.println("# Match 4: \""+ m.group(4)+"\"");
-					System.err.println("# Match 5: \""+ m.group(5)+"\"");
+					log.trace("Match 1: \""+ m.group(1)+"\"");
+					log.trace("Match 2: \""+ m.group(2)+"\"");
+					log.trace("Match 3: \""+ m.group(3)+"\"");
+					log.trace("Match 4: \""+ m.group(4)+"\"");
+					log.trace("Match 5: \""+ m.group(5)+"\"");
 					tmp += m.group(1);
 					
 					if (m.group(2).endsWith("\\")) {
@@ -314,7 +318,7 @@ public class Eval {
 					msg = "";
 				}
 			}
-			System.err.println("#    list => "+tmp);
+			log.trace("list => "+tmp);
 	
 			msg = tmp;
 			tmp = "";
@@ -325,7 +329,7 @@ public class Eval {
 				Matcher m = outputPattern.matcher(msg);
 				if (m.matches()) {
 					for (int i=1; i<=m.groupCount(); i++) {
-						System.err.println("# m.group("+i+") => "+m.group(i));
+						log.trace("m.group("+i+") => "+m.group(i));
 					}
 					if (m.group(1).endsWith("\\")) {
 						tmp += m.group(1).substring(0,m.group(1).length()-1);
@@ -346,7 +350,7 @@ public class Eval {
 				}
 			}
 	
-			System.err.println("# outputs => "+tmp);
+			log.trace("outputs => "+tmp);
 
 			msg = tmp;
 			tmp = "";
@@ -375,7 +379,7 @@ public class Eval {
 				}
 			}
 	
-			System.err.println("# inputs => "+tmp);
+			log.trace("inputs => "+tmp);
 
 			msg = tmp;
 			tmp = "";

@@ -31,15 +31,15 @@ public class IteratingContext extends ExecContext {
 			nestedCount ++;
 		} else if (tokens.size() == 1 && tokens.get(0).equals("done")) {
 			if (nestedCount == 0) {
-				System.err.println("# STARTING ITERATION: " + varname + " => " + range);
+				log.trace("# STARTING ITERATION: " + varname + " => " + range);
 				
 				for (Tokens line:lines) {
-					System.err.println("# ITERATING LINE: " + StringUtils.join(" ", line.getList()));
+					log.trace("# ITERATING LINE: " + StringUtils.join(" ", line.getList()));
 				}
 				for (VarValue item: range.iterate()) {
 					ExecContext cxt = new NestedContext(this, true, false);
 					cxt.set(varname, item);
-					System.err.println("# " + varname + " => " + item);
+					log.trace("# " + varname + " => " + item);
 					for (Tokens line: lines) {
 						cxt = cxt.addTokenizedLine(line);
 					}

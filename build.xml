@@ -21,7 +21,10 @@
 
 	<target name="jar" depends="compile, git.revision">
         <copy file="LICENSE" todir="${build.dir}/classes/"/>
-        <copy file="INCLUDES" todir="${build.dir}/classes/"/>
+        <copy file="LICENSE" todir="${build.dir}/classes/"/>
+        <copy todir="${build.dir}/classes/">
+            <fileset dir="${src.dir}/conf"/>
+		</copy>
         <delete file="${build.dir}/classes/VERSION"/>
  		<echo file="${build.dir}/classes/VERSION" message="${ant.project.name}-${version}-${repository.version}"/>
 
@@ -33,6 +36,7 @@
                 <attribute name="Main-Class" value="org.ngsutils.mvpipe.MVPipe"/>
             </manifest>
 	        <fileset dir="${build.dir}/classes"/>
+            <zipfileset src="${lib.dir}/commons-logging-1.2.jar"/>
 	    </jarjar>
         <delete file="${dist.dir}/${project.name}"/>
  		<concat destfile="${dist.dir}/${ant.project.name}" binary="true">

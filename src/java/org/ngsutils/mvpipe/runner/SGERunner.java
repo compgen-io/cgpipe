@@ -12,7 +12,6 @@ import org.ngsutils.mvpipe.exceptions.RunnerException;
 import org.ngsutils.mvpipe.support.StringUtils;
 
 public class SGERunner extends JobRunner {
-
 	private static String[] defaultShellPaths = new String[] {"/bin/bash", "/usr/bin/bash", "/usr/local/bin/bash", "/bin/sh"};
 	
 	private static String findDefaultShell() {
@@ -29,6 +28,8 @@ public class SGERunner extends JobRunner {
 	private String account=null;
 	private String parallelEnv = "shm";
 	private String shell = findDefaultShell();
+	
+	private int dryRunJobCount = 0;
 
 	private List<String> jobids = new ArrayList<String>();
 	
@@ -37,6 +38,7 @@ public class SGERunner extends JobRunner {
 	@Override
 	public void done() throws RunnerException {
 		super.done();
+		log.info("submitted jobs: "+StringUtils.join(",", jobids));
 		System.out.println(StringUtils.join("\n", jobids));
 		
 		if (globalHoldJob != null) {
@@ -47,6 +49,16 @@ public class SGERunner extends JobRunner {
 				}
 			} catch (IOException | InterruptedException e) {
 				throw new RunnerException(e);
+			}
+		}
+	}
+
+	@Override
+	public void abort() {
+		for (String jobid: jobids) {
+			try {
+				Runtime.getRuntime().exec(new String[]{"qdel", jobid}).waitFor();
+			} catch (InterruptedException | IOException e) {
 			}
 		}
 	}
@@ -82,6 +94,7 @@ public class SGERunner extends JobRunner {
 	private String buildGlobalHoldScript() {
         return 	"#!" + shell + "\n" +
         		"#$ -h\n" +
+        		"#$ -terse\n" +
         		"#$ -N holding\n" +
         		"#$ -o /dev/null\n" +
         		"#$ -e /dev/null\n" +
@@ -90,6 +103,11 @@ public class SGERunner extends JobRunner {
 	}
 	
 	private String submitScript(String src) throws RunnerException {
+		if (dryrun) {
+			dryRunJobCount++;
+			return "dryrun." + dryRunJobCount;
+		}
+		
 		try {
 			Process proc = Runtime.getRuntime().exec("qsub");
 			OutputStream os = proc.getOutputStream();
@@ -97,9 +115,18 @@ public class SGERunner extends JobRunner {
 			os.close();
 			
 			InputStream is = proc.getInputStream();
+			InputStream err = proc.getErrorStream();
 			int retcode = proc.waitFor();
 			if (retcode != 0) {
-				throw new RunnerException("Bad return code from qsub: "+retcode);
+
+				String errstr = "";
+				int ch;
+				while ((ch = err.read()) > -1) {
+					errstr += (char) ch;
+				}
+
+				log.info(src);
+				throw new RunnerException("Bad return code from qsub: "+retcode+" - "+errstr);
 			}
 			
 			String jobid = "";
@@ -183,9 +210,10 @@ public class SGERunner extends JobRunner {
             src += "#$ -m "+jobdef.getSetting("job.mail")+"\n";
         }
 
-        if (jobdef.hasSetting("job.wd")) {
-            src += "#$ -wd "+jobdef.getSetting("job.wd")+"\n";
-        }
+        try {
+			src += "#$ -wd "+jobdef.getSetting("job.wd", new File(".").getCanonicalPath())+"\n";
+		} catch (IOException e) {
+		}
 
         if (jobdef.hasSetting("job.account")) {
             src += "#$ -A "+jobdef.getSetting("job.account")+"\n";
@@ -275,7 +303,7 @@ public class SGERunner extends JobRunner {
 	 */
 	@Override
 	protected void setConfig(String k, String val) {
-		System.err.println("#SETCONFIG: " + k + " => " + val);
+		log.debug("Setting config: "+k+" => "+val);
 		switch(k) {
 		case "mvpipe.runner.sge.account":
 			this.account = val;

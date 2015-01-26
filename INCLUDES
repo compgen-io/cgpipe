@@ -1,6 +1,9 @@
-Included software: jarjar (build)
+Included software: jarjar (build, Apache)
 
-jarjar
+Embedded libraries: Apache Commons Logging (Apache)
+
+-----------------------------------------------------------------------------
+Apache License
 -----------------------------------------------------------------------------
                                  Apache License
                            Version 2.0, January 2004

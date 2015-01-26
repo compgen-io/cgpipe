@@ -1,5 +1,7 @@
 package org.ngsutils.mvpipe.parser.statement;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.parser.Eval;
 import org.ngsutils.mvpipe.parser.Tokens;
@@ -7,7 +9,7 @@ import org.ngsutils.mvpipe.parser.context.ExecContext;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 
 public class ElIf implements Statement {
-
+	private Log log = LogFactory.getLog(getClass());
 	@Override
 	public ExecContext eval(ExecContext context, Tokens tokens) throws SyntaxException {
 
@@ -15,12 +17,12 @@ public class ElIf implements Statement {
 		
 		if (!context.wasCurrentLevelEverActive()) {
 			VarValue test = Eval.evalTokenExpression(context, tokens);
-			System.err.println("#ELIF TEST RESULT: " + test);
+			log.trace("ELIF TEST RESULT: " + test);
 			if (test.isTrue()) {
 				context.switchActive();
 			}
 		} else {
-			System.err.println("#ELIF SKIPPED!");
+			log.trace("ELIF SKIPPED!");
 		}
 		return context;
 	}
