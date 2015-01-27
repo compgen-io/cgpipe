@@ -8,3 +8,11 @@ echo $(echo "1") + 1
 
 # act as a string?
 echo $(echo "1") + "1"
+
+foo="hello"
+
+echo $(echo '\\\${foo} world')
+echo $(echo "${foo} world")
+
+# this works too...
+#echo $(echo "${foo} $USER")

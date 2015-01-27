@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ngsutils.mvpipe.exceptions.EvalException;
 import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.parser.Eval;
 import org.ngsutils.mvpipe.parser.Tokens;
@@ -52,9 +53,7 @@ public class BuildTarget {
 
 	private final List<NumberedLine> lines = new ArrayList<NumberedLine>();
 
-	public BuildTarget(List<String> outputs, List<String> inputs, ExecContext cxt, String filename) {
-		// TODO: Eval.parseString outputs / inputs
-		
+	public BuildTarget(List<String> outputs, List<String> inputs, ExecContext cxt, String filename) throws EvalException {
 		// this is a target context, capture the parent values
 		if (inputs != null && inputs.size() > 0) {
 			List<String> tmp = new ArrayList<String>();

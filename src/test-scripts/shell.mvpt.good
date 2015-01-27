@@ -3,3 +3,5 @@ hello foobar
 hello world
 2
 11
+${foo} world
+hello world

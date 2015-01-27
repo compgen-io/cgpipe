@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ngsutils.mvpipe.exceptions.EvalException;
 import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.parser.context.ExecContext;
 import org.ngsutils.mvpipe.parser.op.Add;
@@ -43,7 +44,9 @@ import org.ngsutils.mvpipe.parser.statement.ForLoop;
 import org.ngsutils.mvpipe.parser.statement.If;
 import org.ngsutils.mvpipe.parser.statement.Include;
 import org.ngsutils.mvpipe.parser.statement.Statement;
+import org.ngsutils.mvpipe.parser.statement.Unset;
 import org.ngsutils.mvpipe.parser.variable.VarNull;
+import org.ngsutils.mvpipe.parser.variable.VarRange;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 import org.ngsutils.mvpipe.support.StringUtils;
 
@@ -55,8 +58,9 @@ public class Eval {
 	final public static List<String> opsParseOrder = new ArrayList<String>();
 	final public static Map<String, Statement> statements = new HashMap<String, Statement>();
 
-	final private static Pattern varPattern = Pattern.compile("^(.*?)\\$\\{([A-Za-z_\\.][a-zA-Z0-9_\\.]*?)\\}(.*?)$");
-	final private static Pattern listPattern = Pattern.compile("^(.*?)([^ \t]*)@\\{([A-Za-z_\\.][a-zA-Z0-9_\\.]*?)\\}([^ \t]*)(.*?)$");
+	final private static Pattern varPattern = Pattern.compile("^(.*?)\\$\\{([A-Za-z_\\.][a-zA-Z0-9_\\.]*?\\??)\\}(.*?)$");
+	final private static Pattern listPattern = Pattern.compile("^(.*?)([^ \t]*)@\\{([A-Za-z_\\.][a-zA-Z0-9_\\.]*?\\??)\\}([^ \t]*)(.*?)$");
+	final private static Pattern rangePattern = Pattern.compile("^(.*?)([^ \t]*)@\\{([a-zA-Z0-9_\\.]*?)\\.\\.([a-zA-Z0-9_\\.]*?)\\}([^ \t]*)(.*?)$");
 
 	final private static Pattern outputPattern = Pattern.compile("^(.*?)\\$>([0-9]*)(.*?)$");
 	final private static Pattern inputPattern = Pattern.compile("^(.*?)\\$<([0-9]*)(.*?)$");
@@ -74,6 +78,7 @@ public class Eval {
 	
 	static {
 		statements.put("echo", new Echo());
+		statements.put("unset", new Unset());
 		statements.put("dump", new DumpVars());
 
 		statements.put("if", new If());
@@ -90,14 +95,14 @@ public class Eval {
 		addOp("=", new Assign());
 
 		addOp("!", new Not());
-		addOp("&&", new And());
-		addOp("||", new Or());
 		addOp("==", new Eq());
 		addOp("!=", new NotEq());
 		addOp(">=", new Gte());
 		addOp("<=", new Lte());
 		addOp(">", new Gt());
 		addOp("<", new Lt());
+		addOp("&&", new And());
+		addOp("||", new Or());
 		addOp("**", new Pow());
 		addOp("*", new Mul());
 		addOp("/", new Div());
@@ -129,7 +134,7 @@ public class Eval {
 				right.set(0, "-" + right.get(0));
 			}
 			
-			return statements.get(tokens.get(0)).eval(context, tokens.clone(right));
+			return statements.get(tokens.get(0)).eval(context, new Tokens(right));
 		} else if (context.isActive()) {
 			VarValue ret = evalTokenExpression(context, tokens);
 			if (print) {
@@ -147,16 +152,33 @@ public class Eval {
 		log.trace("evalTokenExpression: " + StringUtils.join(", ", tokens.getList()));
 
 		if (tokens.size() == 1) {
-			return VarValue.parseString(tokens.get(0), context);
+			VarValue ret = VarValue.parseString(tokens.get(0), context);
+			log.trace("parsing: " + tokens.get(0)+" => "+ret);
+			if (ret.equals(VarNull.NULL)) {
+				for (String k: context.keys()) {
+					log.trace("  "+k+" => "+context.getString(k));
+				}
+			}
+			return ret;
 		}
 
+		// look for ranges...
 		if (tokens.size() == 3) {
-			if (tokens.get(0).equals("$(") && tokens.get(2).equals(")")) {
+			if (tokens.get(1).equals("..")) {
+				VarValue lval = evalTokenExpression(context, tokens.subList(0,1));
+				VarValue rval = evalTokenExpression(context, tokens.subList(2,3));
+				return ops.get("..").eval(context, lval, rval);
+			}
+		}
+
+		// look for shells
+		for (int i=0; i<tokens.size(); i++) {
+			if (tokens.get(i).equals("$(") && tokens.get(i+2).equals(")")) {
 				log.trace("shell command: "+tokens.get(1));
 				// shell command
 
 				try {
-					Process proc = Runtime.getRuntime().exec(new String[] { context.contains("mvpipe.shell") ? context.getString("mvpipe.shell"): "/bin/sh", "-c" , tokens.get(1)});
+					Process proc = Runtime.getRuntime().exec(new String[] { context.contains("mvpipe.shell") ? context.getString("mvpipe.shell"): "/bin/sh", "-c" , evalString(tokens.get(1), context)});
 					InputStream is = proc.getInputStream();
 					InputStream es = proc.getErrorStream();
 
@@ -173,14 +195,27 @@ public class Eval {
 					es.close();
 					
 					if (retcode == 0) {
-						return VarValue.parseString(StringUtils.rstrip(out), true);
+						VarValue ret = VarValue.parseString(StringUtils.rstrip(out), true);
+						Tokens rem;
+						if (i > 1) {
+							rem = tokens.subList(0, i-1);
+						} else {
+							rem = new Tokens();
+						}
+
+						log.trace("left: "+StringUtils.join(",", rem.getList()));
+						log.trace("right: "+StringUtils.join(",", tokens.subList(i+3,  tokens.size()).getList()));
+
+						rem.add(ret);
+						rem.add(tokens.subList(i+3, tokens.size()));
+						
+						return evalTokenExpression(context, rem);
 					}
 					throw new SyntaxException("Error processing shell command: "+tokens.get(1) +" - " + err);
 
 				} catch (IOException | InterruptedException e) {
 					throw new SyntaxException(e);
 				}
-				
 			}
 		}
 		
@@ -219,41 +254,64 @@ public class Eval {
 		}
 		
 		if (found) {
-			VarValue innerVal = evalTokenExpression(context, tokens.clone(inner));
+			VarValue innerVal = evalTokenExpression(context, new Tokens(inner));
 			leftTokens.add(innerVal.toString());
 			leftTokens.addAll(rightTokens);
-			return evalTokenExpression(context, tokens.clone(leftTokens));
+			return evalTokenExpression(context, new Tokens(leftTokens));
 		}
 		
+		// otherwise, evaluate operations (in priority order!)
 		for (String op: opsOrder) {
+			log.trace("op test: "+op);
 			for (int i=0; i<tokens.size(); i++) {
 				if (tokens.get(i).equals(op)) {
-					Tokens left;
-					if (i == 0) {
-						left = tokens.clone(new ArrayList<String>());
-					} else {
-						left = tokens.subList(0, i);
-					}
-					Tokens right;
-					if (i < tokens.size() - 1) {
-						right = tokens.subList(i+1, tokens.size());
-					} else {
-						right = tokens.clone(new ArrayList<String>());
-					}
-
-					VarValue rval = evalTokenExpression(context, right);
-					VarValue ret;
-					VarValue lval = null;
+					log.trace("found: "+op+" ("+i+")");
+					
 					if (ops.get(op).evalLeft()) {
-						if (left.size() > 0) {
-							lval = evalTokenExpression(context, left);
+						log.trace("tokens: "+StringUtils.join(",", tokens.getList()));
+						
+						VarValue lval;
+						if (i > 0) {
+							log.trace("left: "+StringUtils.join(",", tokens.subList(i-1, i).getList()));
+							lval = evalTokenExpression(context, tokens.subList(i-1, i));
+						} else {
+							lval = VarNull.NULL;
 						}
-						ret = ops.get(op).eval(context, lval, rval);
-					} else {
-						ret = ops.get(op).eval(context, left, rval);
-					} 
+						log.trace("right: "+StringUtils.join(",", tokens.subList(i+1, i+2).getList()));
+						VarValue rval = evalTokenExpression(context, tokens.subList(i+1, i+2));
 
-					return ret;
+						log.trace("lval: "+lval);
+						log.trace("rval: "+lval);
+
+						VarValue ret = ops.get(op).eval(context,  lval,  rval);
+						log.trace("ret: "+lval);
+						
+						Tokens rem;
+						if (i > 1) {
+							rem = tokens.subList(0, i-1);
+						} else {
+							rem = new Tokens();
+						}
+
+						log.trace("left: "+StringUtils.join(",", rem.getList()));
+						log.trace("right: "+StringUtils.join(",", tokens.subList(i+2,  tokens.size()).getList()));
+
+						rem.add(ret);
+						rem.add(tokens.subList(i+2, tokens.size()));
+						
+						return evalTokenExpression(context, rem);
+					} else {
+						
+						VarValue rval = evalTokenExpression(context, tokens.subList(i+1, tokens.size()));
+						Tokens left;
+						if (i == 0) {
+							left = new Tokens();
+						} else {
+							left = tokens.subList(0, i);
+						}
+						return ops.get(op).eval(context, left, rval);
+
+					}
 				}
 			}
 		}
@@ -286,11 +344,11 @@ public class Eval {
 		return tmp;
 	}
 
-	public static String evalString(String msg, ExecContext cxt) {
+	public static String evalString(String msg, ExecContext cxt) throws EvalException {
 		return evalString(msg, cxt, null, null);
 	}
 
-	public static String evalString(String msg, ExecContext cxt, List<String> outputs, List<String> inputs) {
+	public static String evalString(String msg, ExecContext cxt, List<String> outputs, List<String> inputs) throws EvalException {
 		log.trace("evalString: "+msg);
 		String tmp = "";
 		
@@ -300,11 +358,22 @@ public class Eval {
 				if (m.matches()) {
 					if (m.group(1).endsWith("\\")) {
 						tmp += m.group(1).substring(0,m.group(1).length()-1);
-						tmp += "$" + m.group(2);
+						tmp += "${" + m.group(2)+"}";
 						msg = m.group(3);
 					} else {
 						tmp += m.group(1);
-						tmp += cxt.get(m.group(2));
+						if (m.group(2).endsWith("?")) {
+							String k = m.group(2).substring(0, m.group(2).length()-1);
+							if (cxt.contains(k)) {
+								tmp += cxt.get(k);
+							}
+						} else {
+							if (cxt.contains(m.group(2))) {
+								tmp += cxt.get(m.group(2));
+							} else {
+								throw new EvalException("Missing variable: "+m.group(2));
+							}
+						}
 						msg = m.group(3);
 					}
 				} else {
@@ -314,7 +383,7 @@ public class Eval {
 			}
 	
 			log.trace("var => "+tmp);
-	
+			
 			msg = tmp;
 			tmp = "";
 			
@@ -330,11 +399,25 @@ public class Eval {
 					
 					if (m.group(2).endsWith("\\")) {
 						tmp += m.group(2).substring(0,m.group(2).length()-1);
-						tmp += "@" + m.group(3);
+						tmp += "@{" + m.group(3) + "}";
 						msg = m.group(4) + m.group(5);
 					} else {
 						boolean first = true;
-						for (VarValue v: cxt.get(m.group(3)).iterate()) {
+						VarValue iter = null;
+						if (m.group(3).endsWith("?")) {
+							String k = m.group(3).substring(0, m.group(3).length()-1);
+							if (cxt.contains(k)) {
+								iter = cxt.get(k);
+							}
+						} else {
+							if (!cxt.contains(m.group(3))) {
+								throw new EvalException("Missing variable: "+m.group(3));
+							}
+
+							iter = cxt.get(m.group(3));
+						}
+
+						for (VarValue v: iter.iterate()) {
 							if (first) {
 								first = false;
 							} else {
@@ -344,9 +427,69 @@ public class Eval {
 							tmp += m.group(2);
 							tmp += v;
 							tmp += m.group(4);
-						}
-						
+						}							
+
 						msg = m.group(5);
+					}
+					
+				} else {
+					tmp += msg;
+					msg = "";
+				}
+			}
+			log.trace("list => "+tmp);
+	
+			msg = tmp;
+			tmp = "";
+			
+
+			// range check
+			while (msg.length() > 0) {
+				Matcher m = rangePattern.matcher(msg);
+				if (m.matches()) {
+					log.trace("Match 1: \""+ m.group(1)+"\"");
+					log.trace("Match 2: \""+ m.group(2)+"\"");
+					log.trace("Match 3: \""+ m.group(3)+"\"");
+					log.trace("Match 4: \""+ m.group(4)+"\"");
+					log.trace("Match 5: \""+ m.group(5)+"\"");
+					log.trace("Match 6: \""+ m.group(6)+"\"");
+					tmp += m.group(1);
+					
+					if (m.group(2).endsWith("\\")) {
+						tmp += m.group(2).substring(0,m.group(2).length()-1);
+						tmp += "@{" + m.group(3) +".." + m.group(4) + "}";
+						msg = m.group(5) + m.group(6);
+					} else {
+						boolean first = true;
+						
+						
+						VarValue range;
+						try {
+							List<String> l1 = new ArrayList<String> ();
+							l1.add(m.group(3));
+							VarValue from = evalTokenExpression(cxt, new Tokens(l1));
+							List<String> l2 = new ArrayList<String> ();
+							l2.add(m.group(4));
+							VarValue to = evalTokenExpression(cxt, new Tokens(l2));
+
+							range = VarRange.range(from, to);
+						} catch (SyntaxException e) {
+							throw new EvalException(e);
+						}
+
+						for (VarValue v: range.iterate()) {
+							if (first) {
+								first = false;
+							} else {
+								tmp += " ";
+							}
+							
+							tmp += m.group(2);
+							tmp += v;
+							tmp += m.group(5);
+						}							
+
+						msg = m.group(6);
 					}
 					
 				} else {

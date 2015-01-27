@@ -232,7 +232,7 @@ private static List<String> extractQuotedStrings(String str) {
 			
 			// search for shell command
 			if (i < str.length()-2) {
-				log.trace(str.subSequence(i, i+2));
+//				log.trace(str.subSequence(i, i+2));
 
 				if (str.substring(i, i+2).equals("$(")) {
 					log.trace("SHELL! + "+str.substring(i+2));

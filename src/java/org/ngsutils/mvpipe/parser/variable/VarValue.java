@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.ngsutils.mvpipe.exceptions.EvalException;
 import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.exceptions.VarTypeException;
 import org.ngsutils.mvpipe.parser.Eval;
@@ -67,16 +68,16 @@ public abstract class VarValue {
 		return VarBool.FALSE;
 	}
 	
-	public static VarValue parseString(String val) throws VarTypeException {
+	public static VarValue parseString(String val) throws VarTypeException, EvalException {
 		return parseString(val, null, false);
 	}
-	public static VarValue parseString(String val, boolean allowRaw) throws VarTypeException {
+	public static VarValue parseString(String val, boolean allowRaw) throws VarTypeException, EvalException {
 		return parseString(val, null, allowRaw);
 	}
-	public static VarValue parseString(String val, ExecContext cxt) throws VarTypeException {
+	public static VarValue parseString(String val, ExecContext cxt) throws VarTypeException, EvalException {
 		return parseString(val, cxt, false);
 	}
-	public static VarValue parseString(String val, ExecContext cxt, boolean allowRaw) throws VarTypeException {
+	public static VarValue parseString(String val, ExecContext cxt, boolean allowRaw) throws VarTypeException, EvalException {
 		if (val.equals("true")) {
 			return VarBool.TRUE;
 		}

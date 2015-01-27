@@ -1,0 +1,5 @@
+for i in 1..5
+    echo i
+done
+
+echo "foo@{1..5}bar"

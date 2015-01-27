@@ -1,6 +1,7 @@
 package org.ngsutils.mvpipe.parser.context;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -145,8 +146,22 @@ public class ExecContext {
 			parent.addTarget(target);
 		}
 	}
+
 	public Set<String> keys() {
-		return vars.keySet();
+		Set<String> s = new HashSet<String>();
+		populateKeys(s);
+		return s;	
+	}
+
+	private void populateKeys(Set<String> s) {
+		s.addAll(vars.keySet());
+		if (parent != null) {
+			parent.populateKeys(s);
+		}
+	}
+		
+	public VarValue remove(String key) {
+		return vars.remove(key);
 	}
 
 }
