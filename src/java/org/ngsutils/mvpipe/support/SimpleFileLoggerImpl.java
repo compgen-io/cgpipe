@@ -28,21 +28,28 @@ public class SimpleFileLoggerImpl implements Log, Serializable {
 	
 	private static Level level = Level.INFO;
 	private static PrintStream out = null;
+	private static boolean silent = false;
+	private static boolean written = false;
+	private static DateFormat dateFormater=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	
 	public static void setLevel(Level level) {
 		SimpleFileLoggerImpl.level = level;
 	}
 
 	public static void setFilename(String logFilename) throws FileNotFoundException {
 		if (SimpleFileLoggerImpl.out != null) {
-			SimpleFileLoggerImpl.out.close();
+			close();
 		}
 		SimpleFileLoggerImpl.out  = new PrintStream(new FileOutputStream(logFilename, true));
 	}
 
 	public static void close() {
 		if (SimpleFileLoggerImpl.out != null) {
+			SimpleFileLoggerImpl.out.flush();
 			SimpleFileLoggerImpl.out.close();
 		}
+		SimpleFileLoggerImpl.out = null;
+		written = false;
 	}
 	
 	static {
@@ -55,7 +62,6 @@ public class SimpleFileLoggerImpl implements Log, Serializable {
 	}
 	
 	private String name;
-	private DateFormat dateFormater=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	public SimpleFileLoggerImpl(String name) {
 		this.name = name;
@@ -63,11 +69,20 @@ public class SimpleFileLoggerImpl implements Log, Serializable {
 	
 	private void log(Level level, Object arg0, Throwable arg1) {
 		if (SimpleFileLoggerImpl.level.compareTo(level) <= 0) {
+			String date = dateFormater.format(new Date());
 			if (out != null) {
-				String date = dateFormater.format(new Date());
+				if (!written) {
+					out.println("-----------------------------------------");
+					written = true;
+				}
 				out.println(date+" "+level.name()+" "+name+" "+arg0);
 				if (arg1 != null) {
 					arg1.printStackTrace(out);
+				}
+			} else if (!silent) {
+				System.err.println(date+" "+level.name()+" "+name+" "+arg0);
+				if (arg1 != null) {
+					arg1.printStackTrace(System.err);
 				}
 			}
 		}
@@ -164,6 +179,10 @@ public class SimpleFileLoggerImpl implements Log, Serializable {
 	@Override
 	public void warn(Object arg0, Throwable arg1) {
 		log(Level.WARN, arg0, arg1);
+	}
+
+	public static void setSilent(boolean silent) {
+		SimpleFileLoggerImpl.silent = silent;
 	}
 
 }

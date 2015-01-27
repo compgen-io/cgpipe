@@ -5,8 +5,10 @@ Usage: mvpipe {opts} {args} {target1 target2...}
 Options:
     -f filename   Pipeline script filename (required)
     -l logfile    Log debug messages here
+
     -dr           Dry run (Don't actually build targets)
     -v            Verbose logging
+    -s            Silence logging to console
     
 
     Additional pipeline-specific arguments can be set by using the format:

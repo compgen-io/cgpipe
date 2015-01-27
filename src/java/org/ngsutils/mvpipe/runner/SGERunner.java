@@ -3,7 +3,6 @@ package org.ngsutils.mvpipe.runner;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -112,31 +111,25 @@ public class SGERunner extends JobRunner {
 		
 		try {
 			Process proc = Runtime.getRuntime().exec("qsub");
-			OutputStream os = proc.getOutputStream();
-			os.write(src.getBytes(Charset.forName("UTF8")));
-			os.close();
+			proc.getOutputStream().write(src.getBytes(Charset.forName("UTF8")));
+			proc.getOutputStream().close();
 			
 			InputStream is = proc.getInputStream();
-			InputStream err = proc.getErrorStream();
+			InputStream es = proc.getErrorStream();
+
 			int retcode = proc.waitFor();
-			if (retcode != 0) {
+			String out = StringUtils.slurp(is);
+			String err = StringUtils.slurp(es);
 
-				String errstr = "";
-				int ch;
-				while ((ch = err.read()) > -1) {
-					errstr += (char) ch;
-				}
+			is.close();
+			es.close();
 
-				log.info(src);
-				throw new RunnerException("Bad return code from qsub: "+retcode+" - "+errstr);
+			if (retcode != 0) {	
+				throw new RunnerException("Bad return code from qsub: "+retcode+" - "+err);
 			}
 			
-			String jobid = "";
-			int ch;
-			while ((ch = is.read()) > -1) {
-				jobid += (char) ch;
-			}
-			return StringUtils.strip(jobid);
+			return StringUtils.strip(out);
+
 		} catch (IOException | InterruptedException e) {
 			throw new RunnerException(e);
 		}

@@ -1,5 +1,7 @@
 package org.ngsutils.mvpipe.parser;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -148,6 +150,40 @@ public class Eval {
 			return VarValue.parseString(tokens.get(0), context);
 		}
 
+		if (tokens.size() == 3) {
+			if (tokens.get(0).equals("$(") && tokens.get(2).equals(")")) {
+				log.trace("shell command: "+tokens.get(1));
+				// shell command
+
+				try {
+					Process proc = Runtime.getRuntime().exec(new String[] { context.contains("mvpipe.shell") ? context.getString("mvpipe.shell"): "/bin/sh", "-c" , tokens.get(1)});
+					InputStream is = proc.getInputStream();
+					InputStream es = proc.getErrorStream();
+
+					int retcode = proc.waitFor();
+					
+					String out = StringUtils.slurp(is);
+					String err = StringUtils.slurp(es);
+
+					log.trace("retcode: "+retcode);
+					log.trace("stdout: " + out);
+					log.trace("stderr: " + err);
+					
+					is.close();
+					es.close();
+					
+					if (retcode == 0) {
+						return VarValue.parseString(out, true);
+					}
+					throw new SyntaxException("Error processing shell command: "+tokens.get(1) +" - " + err);
+
+				} catch (IOException | InterruptedException e) {
+					throw new SyntaxException(e);
+				}
+				
+			}
+		}
+		
 		List<String> leftTokens = new ArrayList<String>();
 		List<String> inner = new ArrayList<String>();
 		List<String> rightTokens = new ArrayList<String>();

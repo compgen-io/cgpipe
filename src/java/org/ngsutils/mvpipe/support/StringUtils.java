@@ -1,5 +1,8 @@
 package org.ngsutils.mvpipe.support;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -167,4 +170,21 @@ public class StringUtils {
 		}
 		return acc;
 	}
+
+	public static String slurp(InputStream is) throws IOException {
+		return slurp(is, Charset.defaultCharset());
+	}
+	public static String slurp(InputStream is, Charset cs) throws IOException {
+		String s="";
+
+		int read;
+		byte[] buf = new byte[16*1024];
+		
+		while ((read = is.read(buf)) > -1) {
+			s += new String(buf, 0, read, cs);
+		}
+		
+		return s;
+	}
+
 }

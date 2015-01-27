@@ -1,5 +1,5 @@
 #!/bin/sh
-dist/mvpipe --foo bar --arg one --arg two -f - <<EOF 
+dist/mvpipe -s --foo bar --arg one --arg two -f - <<EOF 
 echo foo
 echo arg
 EOF

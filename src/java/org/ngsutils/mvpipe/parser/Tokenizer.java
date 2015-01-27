@@ -5,7 +5,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class Tokenizer {
+	private static Log log = LogFactory.getLog(Tokenizer.class);
 	public static List<String> tokenize(String str) {
 		List<String> tokens = extractQuotedStrings(str);
 		
@@ -166,9 +170,41 @@ private static List<String> extractQuotedStrings(String str) {
 
 		String buf="";
 		boolean inquote = false;
+		boolean inshell = false;
 		int i=0;
 		
-		while (i < str.length()) {			
+//		log.trace("str=\""+str+"\"");
+		while (i < str.length()) {
+//			log.trace("buf=\""+buf+"\"");
+//			log.trace("i="+i);
+			if (inshell) {
+				if (inquote) {
+					if (str.charAt(i) == '"') {
+						if (buf.endsWith("\\")) {
+							buf = buf.substring(0, buf.length()-1) + "\"";
+						} else {
+							buf += "\"";
+//							tokens.add(buf);
+//							buf = "";
+							inquote = false;
+						}
+					} else {
+						buf += str.charAt(i);
+					}
+					i++;
+					continue;
+				}
+				if (str.charAt(i) == ')') {
+					tokens.add(buf);
+					tokens.add(")");
+					buf = "";
+					inshell = false;
+				} else {
+					buf += str.charAt(i);
+				}
+				i++;
+				continue;
+			}
 			if (inquote) {
 				if (str.charAt(i) == '"') {
 					if (buf.endsWith("\\")) {
@@ -193,7 +229,21 @@ private static List<String> extractQuotedStrings(String str) {
 				continue;
 			}
 
-			boolean found = false;
+			
+			// search for shell command
+			if (i < str.length()-2) {
+				log.trace(str.subSequence(i, i+2));
+
+				if (str.substring(i, i+2).equals("$(")) {
+					log.trace("SHELL! + "+str.substring(i+2));
+					inshell = true;
+					i += 2;
+					tokens.add("$(");
+					buf = "";
+				}
+			}
+			
+			boolean found = false;			
 			
 			for (String op: Eval.opsParseOrder) {
 				if (i+op.length() <= str.length() && str.substring(i, i+op.length()).equals(op)) {

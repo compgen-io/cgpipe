@@ -28,6 +28,7 @@ public class MVPipe {
 		String fname = null;
 		String logFilename = null;
 		int verbosity = 0;
+		boolean silent = false;
 		boolean dryrun = false;
 		
 		List<String> targets = new ArrayList<String>();
@@ -40,6 +41,8 @@ public class MVPipe {
 			if (i == 0) {
 				if (new File(arg).exists()) {
 					fname = arg;
+					// default to silent mode when executing as a script
+					silent = true;
 					continue;
 				}
 			} else if (args[i-1].equals("-f")) {
@@ -54,6 +57,8 @@ public class MVPipe {
 				usage();
 				license();
 				System.exit(1);
+			} else if (arg.equals("-s")) {
+				silent = true;
 			} else if (arg.equals("-v")) {
 				verbosity++;
 			} else if (arg.equals("-vv")) {
@@ -110,6 +115,8 @@ public class MVPipe {
 				break;
 			}
 		}
+		
+		SimpleFileLoggerImpl.setSilent(silent);
 		
 		Log log = LogFactory.getLog(MVPipe.class);
 		log.info("Starting new run");

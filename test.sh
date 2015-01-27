@@ -22,7 +22,7 @@ else
     echo "bar = \"baz\"" > test/run/global.incl
 
     if [ "$(echo $1 | grep ".mvpt$")" != "" ]; then
-        MVPIPE_HOME=test/run dist/mvpipe $VERBOSE -f $1 &> .testout
+        MVPIPE_HOME=test/run dist/mvpipe $VERBOSE -s -f $1 &> .testout
     else
         MVPIPE_HOME=test/run $1 &> .testout
     fi
