@@ -21,9 +21,14 @@ public class ShellScriptRunner extends JobRunner {
 	public void done() throws RunnerException {
 		super.done();
 
-		String out = "#!"+bin+"\n";
+		boolean header = false;
+		String out = "";
 		for (JobDefinition job: jobs) {
 			if (!job.getSrc().equals("")) {
+				if (!header) {
+					out += "#!"+bin+"\n";
+					header = true;
+				}
 				out += job.getJobId()+"() {\n";
 				out += job.getSrc();
 				out += "\n}\n\n";

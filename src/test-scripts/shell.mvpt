@@ -1,3 +1,10 @@
 echo $(echo "hello world")
 echo $(echo "hello world" | sed -e 's/world/foobar/')
 
+echo $(echo "hello") + " world"
+
+# auto convert to int
+echo $(echo "1") + 1
+
+# act as a string?
+echo $(echo "1") + "1"

@@ -173,7 +173,7 @@ public class Eval {
 					es.close();
 					
 					if (retcode == 0) {
-						return VarValue.parseString(out, true);
+						return VarValue.parseString(StringUtils.rstrip(out), true);
 					}
 					throw new SyntaxException("Error processing shell command: "+tokens.get(1) +" - " + err);
 

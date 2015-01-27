@@ -36,10 +36,11 @@ public class VarFloat extends VarValue {
 			return new VarFloat((Double)obj + (Long)val.obj);
 		} else if (val.getClass().equals(VarFloat.class)) {
 			return new VarFloat((Double)obj + (Double)val.obj);
+		} else {
+			return new VarString(toString() + val.toString());
 		}
-		throw new VarTypeException("Invalid operation");
 	}
-
+	
 	public VarValue sub(VarValue val) throws VarTypeException {
 		if (val.getClass().equals(VarInt.class)) {
 			return new VarFloat((Double)obj - (Long)val.obj);

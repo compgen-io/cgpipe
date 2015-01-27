@@ -28,8 +28,9 @@ public class VarInt extends VarValue {
 			return new VarInt((Long)obj + (Long)val.obj);
 		} else if (val.getClass().equals(VarFloat.class)) {
 			return new VarFloat((Long)obj + (Double)val.obj);
+		} else {
+			return new VarString(toString() + val.toString());
 		}
-		throw new VarTypeException("Invalid operation");
 	}
 
 	public VarValue sub(VarValue val) throws VarTypeException {
