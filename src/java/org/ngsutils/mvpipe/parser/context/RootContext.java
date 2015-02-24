@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.ngsutils.mvpipe.exceptions.SyntaxException;
-import org.ngsutils.mvpipe.parser.context.BuildTarget.Output;
 import org.ngsutils.mvpipe.runner.JobDefinition;
 
 public class RootContext extends ExecContext {
@@ -25,21 +24,29 @@ public class RootContext extends ExecContext {
 
 	public List<String> getDefaultOutputs() {
 		List<String> l = new ArrayList<String>();
-		if (targets.size() > 0) {
-			for (Output out: targets.get(0).getOutputs()) {
-				l.add(out.rawName);
+		for (BuildTarget tgt: targets) {
+			if (tgt.getOutputs().get(0).startsWith("__")) {
+				continue;
 			}
+			for (String out: tgt.getOutputs()) {
+				l.add(out);
+			}
+			break;
 		}
 		return l;
 	}
 
-	public JobDefinition findBuildTarget(String outputName) throws SyntaxException {
+	public List<JobDefinition> findCandidateTarget(String outputName) throws SyntaxException {
+		List<JobDefinition> jobdefs = new ArrayList<JobDefinition>();
 		for (BuildTarget tgt: targets) {
-			JobDefinition match = tgt.matches(outputName);
-			if (match != null) {
-				return match;
+			try{
+				JobDefinition match = tgt.matches(outputName, this);
+				if (match != null) {
+					jobdefs.add(match);
+				}
+			} catch(SyntaxException e) {
 			}
 		}
-		return null;
+		return jobdefs;
 	}
 }

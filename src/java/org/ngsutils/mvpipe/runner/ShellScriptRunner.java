@@ -3,11 +3,15 @@ package org.ngsutils.mvpipe.runner;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ngsutils.mvpipe.exceptions.RunnerException;
+import org.ngsutils.mvpipe.exceptions.SyntaxException;
 
 public class ShellScriptRunner extends JobRunner {
 	public String bin = "/bin/bash";
-	
+	protected Log log = LogFactory.getLog(ShellScriptRunner.class);
+
 	private List<JobDefinition> jobs = new ArrayList<JobDefinition>();
 	
 	@Override
@@ -18,7 +22,7 @@ public class ShellScriptRunner extends JobRunner {
 	}
 
 	@Override
-	public void done() throws RunnerException {
+	public void done() throws RunnerException, SyntaxException {
 		super.done();
 
 		boolean header = false;

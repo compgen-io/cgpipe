@@ -174,11 +174,11 @@ public class Eval {
 		// look for shells
 		for (int i=0; i<tokens.size(); i++) {
 			if (tokens.get(i).equals("$(") && tokens.get(i+2).equals(")")) {
-				log.trace("shell command: "+tokens.get(1));
+				log.trace("shell command: "+tokens.get(i+1));
 				// shell command
 
 				try {
-					Process proc = Runtime.getRuntime().exec(new String[] { context.contains("mvpipe.shell") ? context.getString("mvpipe.shell"): "/bin/sh", "-c" , evalString(tokens.get(1), context)});
+					Process proc = Runtime.getRuntime().exec(new String[] { context.contains("mvpipe.shell") ? context.getString("mvpipe.shell"): "/bin/sh", "-c" , evalString(tokens.get(i+1), context)});
 					InputStream is = proc.getInputStream();
 					InputStream es = proc.getErrorStream();
 
@@ -198,7 +198,7 @@ public class Eval {
 						VarValue ret = VarValue.parseString(StringUtils.rstrip(out), true);
 						Tokens rem;
 						if (i > 1) {
-							rem = tokens.subList(0, i-1);
+							rem = tokens.subList(0, i);
 						} else {
 							rem = new Tokens();
 						}
@@ -319,7 +319,7 @@ public class Eval {
 		throw new SyntaxException("Unknown syntax: "+ StringUtils.join(" ", tokens.getList()));
 	}
 
-	public static String evalStringWildcard(String msg, String wildcard) {
+	private static String evalStringWildcard(String msg, String wildcard) {
 		String tmp = "";
 		while (msg.length() > 0) {
 			Matcher m = wildPattern.matcher(msg);
@@ -339,20 +339,19 @@ public class Eval {
 
 		}
 		
-		log.trace("    wild => "+tmp);
+		log.trace("    wild => "+tmp + "("+wildcard+")");
 
 		return tmp;
 	}
 
 	public static String evalString(String msg, ExecContext cxt) throws EvalException {
-		return evalString(msg, cxt, null, null);
+		return evalString(msg, cxt, null);
 	}
-
-	public static String evalString(String msg, ExecContext cxt, List<String> outputs, List<String> inputs) throws EvalException {
-		log.trace("evalString: "+msg);
+	public static String evalString(String msg, ExecContext cxt, String wildcard) throws EvalException {
+		log.trace("evalString: "+msg + " / "+ cxt.isActive());
 		String tmp = "";
 		
-		if (cxt != null) {
+		if (cxt != null && cxt.isActive()) {
 			while (msg.length() > 0) {
 				Matcher m = varPattern.matcher(msg);
 				if (m.matches()) {
@@ -503,7 +502,7 @@ public class Eval {
 			tmp = "";
 		}
 		
-		if (outputs != null) {
+		if (cxt.getMatchedOutputs() != null) {
 			while (msg.length() > 0) {
 				Matcher m = outputPattern.matcher(msg);
 				if (m.matches()) {
@@ -517,9 +516,9 @@ public class Eval {
 					} else {
 						tmp += m.group(1);
 						if (m.group(2).equals("")) {
-							tmp += StringUtils.join(" ", outputs);
+							tmp += StringUtils.join(" ", cxt.getMatchedOutputs());
 						} else {
-							tmp += outputs.get(Integer.parseInt(m.group(2))-1);
+							tmp += cxt.getMatchedOutputs().get(Integer.parseInt(m.group(2))-1);
 						}
 						msg = m.group(3);
 					}
@@ -535,7 +534,7 @@ public class Eval {
 			tmp = "";
 		}
 
-		if (inputs != null) {
+		if (cxt.getMatchedInputs() != null) {
 			while (msg.length() > 0) {
 				Matcher m = inputPattern.matcher(msg);
 				if (m.matches()) {
@@ -546,9 +545,9 @@ public class Eval {
 					} else {
 						tmp += m.group(1);
 						if (m.group(2).equals("")) {
-							tmp += StringUtils.join(" ", inputs);
+							tmp += StringUtils.join(" ", cxt.getMatchedInputs());
 						} else {
-							tmp += inputs.get(Integer.parseInt(m.group(2))-1);
+							tmp += cxt.getMatchedInputs().get(Integer.parseInt(m.group(2))-1);
 						}
 						msg = m.group(3);
 					}
@@ -562,6 +561,12 @@ public class Eval {
 
 			msg = tmp;
 			tmp = "";
+		}
+		
+		if (wildcard!=null) {
+			msg = evalStringWildcard(msg, wildcard);
+		} else if (cxt.getWildcard()!=null) {
+			msg = evalStringWildcard(msg, cxt.getWildcard());
 		}
 		
 		return msg;

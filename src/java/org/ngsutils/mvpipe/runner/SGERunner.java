@@ -7,7 +7,10 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ngsutils.mvpipe.exceptions.RunnerException;
+import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.support.StringUtils;
 
 public class SGERunner extends JobRunner {
@@ -22,6 +25,8 @@ public class SGERunner extends JobRunner {
 		return null;
 	}
 
+	protected Log log = LogFactory.getLog(SGERunner.class);
+
 	private boolean globalHold = false;
 	private boolean hvmemIsTotal = true;
 	private String account=null;
@@ -35,13 +40,13 @@ public class SGERunner extends JobRunner {
 	private JobDependency globalHoldJob = null;
 	
 	@Override
-	public void done() throws RunnerException {
+	public void done() throws RunnerException, SyntaxException {
 		super.done();
 		if (jobids.size() > 0) {
 			log.info("submitted jobs: "+StringUtils.join(",", jobids));
 			System.out.println(StringUtils.join("\n", jobids));
 			
-			if (globalHoldJob != null) {
+			if (!dryrun && globalHoldJob != null) {
 				try {
 					int retcode = Runtime.getRuntime().exec(new String[]{"qrls", globalHoldJob.getJobId()}).waitFor();
 					if (retcode != 0) {
@@ -65,7 +70,7 @@ public class SGERunner extends JobRunner {
 	}
 
 	@Override
-	public boolean submit(JobDefinition jobdef) throws RunnerException {
+	public boolean submit(JobDefinition jobdef) throws RunnerException, SyntaxException {
 		if (jobdef.getSrc().equals("")) {
 			return false;
 		}
@@ -81,7 +86,7 @@ public class SGERunner extends JobRunner {
 		String jobid = submitScript(src);
 		jobdef.setJobId(jobid);
 		jobids.add(jobid);
-			
+
 		return true;
 	}
 
@@ -104,6 +109,9 @@ public class SGERunner extends JobRunner {
 	}
 	
 	private String submitScript(String src) throws RunnerException {
+//		for (String line: src.split("\n")) {
+//			log.debug(line);
+//		}
 		if (dryrun) {
 			dryRunJobCount++;
 			return "dryrun." + dryRunJobCount;
@@ -125,7 +133,7 @@ public class SGERunner extends JobRunner {
 			es.close();
 
 			if (retcode != 0) {	
-				throw new RunnerException("Bad return code from qsub: "+retcode+" - "+err);
+				throw new RunnerException("Bad return code from qsub: "+retcode+" - "+err + "\n\n"+src);
 			}
 			
 			return StringUtils.strip(out);
@@ -135,7 +143,7 @@ public class SGERunner extends JobRunner {
 		}
 	}
 	
-	private String buildScript(JobDefinition jobdef) {
+	private String buildScript(JobDefinition jobdef) throws SyntaxException {
         String src = "#!" + shell + "\n";
         src += "#$ -w e\n";
         src += "#$ -terse\n";
@@ -189,7 +197,7 @@ public class SGERunner extends JobRunner {
         		depids.add(dep.getJobId());
         	}
 
-            src += "#$ -hold_jid "+StringUtils.join(",", depids)+"\n";
+            src += ("#$ -hold_jid "+StringUtils.join(",", depids)+"\n").replaceAll(",,", ",");
         }
         
         if (jobdef.hasSetting("job.qos")) {
@@ -246,7 +254,6 @@ public class SGERunner extends JobRunner {
         src += "set -o pipefail\nfunc () {\n";
         src += jobdef.getSrc();
         src += "\n  return $?\n}\n";
-        	
 
         src += "func\n";
         src += "RETVAL=$?\n";

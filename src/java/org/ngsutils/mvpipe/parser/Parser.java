@@ -24,6 +24,10 @@ public class Parser {
 	private BuildTarget curTarget = null;
 	private String curFilename = null;
 
+	private BuildTarget preTarget = null;
+	private BuildTarget postTarget = null;
+
+	
 	public ExecContext getContext() {
 		return currentContext;
 	}
@@ -97,17 +101,25 @@ public class Parser {
 			linenum += 1;
 			
 			if (priorLine != null) {
-				line = priorLine + line;
-				priorLine = null;
+				if (curTarget != null) {
+					if (StringUtils.strip(line).startsWith("#$")) {
+						line = priorLine + " " + StringUtils.strip(line).substring(2);
+						priorLine = null;
+					}
+				} else {
+					line = priorLine + line;
+					priorLine = null;
+				}
 			}
 
-			if (line.endsWith("\\")) {
+			if (line.endsWith("\\") && (curTarget == null || StringUtils.strip(line).startsWith("#$"))) {
+				// only allow this outside of a target... TODO: consider removing entirely...
 				priorLine = line.substring(0, line.length()-1);
 				continue;
 			}
 
 			// check for a new target (out1 out2 : in1 in2)
-			if (StringUtils.strip(line).length() > 0) {
+			if (StringUtils.strip(line).length() > 0 && (curTarget == null || StringUtils.calcIndentLevel(line) <= curTarget.getIndentLevel())) {
 				List<String> targets = StringUtils.quotedSplit(line, ":", true);
 				log.trace("target test split: "+StringUtils.join(",", targets));
 				if (targets.size() > 1 && targets.get(1).equals(":")) {
@@ -133,9 +145,33 @@ public class Parser {
 								}
 							}
 						}
+					
+						if (curTarget != null){
+							log.trace("END OF TARGET");
+							if (priorLine != null) {
+								curTarget.addLine(priorLine, curFilename, linenum);
+								priorLine = null;
+							}
+						}
 						
-						curTarget = new BuildTarget(outputs, inputs, currentContext, curFilename);
-						currentContext.addTarget(curTarget);
+						log.trace("NEW TARGET - "+line);
+						curTarget = new BuildTarget(outputs, inputs, currentContext, StringUtils.calcIndentLevel(line));
+					
+						if (outputs.get(0).equals("__pre__")) {
+							preTarget = curTarget;
+						} else if (outputs.get(0).equals("__post__")) {
+							postTarget = curTarget;
+						} else { 
+							if (preTarget != null) {
+								curTarget.addPreLines(preTarget.getLines());
+							}
+							if (postTarget != null) {
+								curTarget.addPostLines(postTarget.getLines());
+							}
+						}
+						if (currentContext.isActive()) {
+							currentContext.addTarget(curTarget);
+						}
 						continue;
 					}
 				}
@@ -143,12 +179,20 @@ public class Parser {
 			
 			// Try to add this to an existing target
 			if (curTarget != null) {
-				if (StringUtils.strip(line).length() == 0 || curTarget.getIndentLevel() == -1 || StringUtils.calcIndentLevel(line) >= curTarget.getIndentLevel()) { // not blank
-					curTarget.addLine(line, linenum);
+				if (StringUtils.strip(line).length() == 0 || StringUtils.calcIndentLevel(line) > curTarget.getIndentLevel()) { // not blank
+					curTarget.addLine(line, curFilename, linenum);
 					continue;
 				}
 				// we aren't indented... and have something... must be at the end of the target
+
+				if (priorLine != null) {
+					curTarget.addLine(priorLine, curFilename, linenum);
+					priorLine = null;
+				}
+
 				curTarget = null;
+				log.trace("END OF TARGET");
+				
 			}
 			
 			// Finally tokenize the line and attempt to execute it
@@ -165,7 +209,20 @@ public class Parser {
 				}
 			}
 		}
-		
+		if (priorLine != null) {
+			Tokens tokens = new Tokens(curFilename, linenum, priorLine);
+			log.trace("Parsing tokens: [" +StringUtils.join(", ", tokens.getList())+"]");
+			
+			try {
+				currentContext = currentContext.addTokenizedLine(tokens);
+			} catch (SyntaxException e) {
+				reader.close();
+				e.setErrorLine(curFilename, linenum);
+				throw e;
+			}
+			priorLine = null;
+		}
+
 		reader.close();
 	}
 }

@@ -26,7 +26,7 @@ public class MVPipe {
 
 	public static void main(String[] args) throws IOException, SyntaxException {
 		String fname = null;
-		String logFilename = null;
+		String logFilename = "-";
 		int verbosity = 0;
 		boolean silent = false;
 		boolean dryrun = false;
@@ -97,23 +97,21 @@ public class MVPipe {
 			System.exit(1);
 		}
 
-		if (logFilename != null) {
-			SimpleFileLoggerImpl.setFilename(logFilename);
-			switch (verbosity) {
-			case 0:
-				SimpleFileLoggerImpl.setLevel(Level.INFO);
-				break;
-			case 1:
-				SimpleFileLoggerImpl.setLevel(Level.DEBUG);
-				break;
-			case 2:
-				SimpleFileLoggerImpl.setLevel(Level.TRACE);
-				break;
-			case 3:
-			default:
-				SimpleFileLoggerImpl.setLevel(Level.ALL);
-				break;
-			}
+		SimpleFileLoggerImpl.setFilename(logFilename);
+		switch (verbosity) {
+		case 0:
+			SimpleFileLoggerImpl.setLevel(Level.INFO);
+			break;
+		case 1:
+			SimpleFileLoggerImpl.setLevel(Level.DEBUG);
+			break;
+		case 2:
+			SimpleFileLoggerImpl.setLevel(Level.TRACE);
+			break;
+		case 3:
+		default:
+			SimpleFileLoggerImpl.setLevel(Level.ALL);
+			break;
 		}
 		
 		SimpleFileLoggerImpl.setSilent(silent);
@@ -155,6 +153,9 @@ public class MVPipe {
 			runner.done();
 		} catch (RunnerException e) {
 			log.fatal("MVPIPE SUBMIT ERROR", e);
+			System.err.flush();
+			System.out.flush();
+			System.exit(1);
 		}
 	}
 

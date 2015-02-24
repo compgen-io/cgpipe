@@ -14,11 +14,18 @@ public class If implements Statement {
 
 	@Override
 	public ExecContext eval(ExecContext context, Tokens tokens) throws SyntaxException {
-		VarValue test = Eval.evalTokenExpression(context, tokens);
-		log.trace("IF TEST RESULT: " + test);
-
-		ExecContext nested = new NestedContext(context, test.isTrue(), true);
-		return nested;		
+		if (context.isActive()) {
+			VarValue test = Eval.evalTokenExpression(context, tokens);
+			log.trace("IF TEST RESULT: " + test.isTrue());
+			
+			ExecContext nested = new NestedContext(context, test.isTrue(), true);
+			return nested;		
+		}
+		else {
+			// TODO: check this...
+			ExecContext nested = new NestedContext(context, false, true);
+			return nested;		
+		}
 	}
 
 }

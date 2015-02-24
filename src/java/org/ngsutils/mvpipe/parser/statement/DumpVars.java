@@ -14,10 +14,12 @@ public class DumpVars implements Statement {
 
 	@Override
 	public ExecContext eval(ExecContext context, Tokens tokens) throws SyntaxException {
-		Map<String, VarValue> state = context.cloneValues();
-		for (String k: state.keySet()) {
-			log.debug(k + " => " + state.get(k));
-			System.err.println(k + " => " + state.get(k));
+		if (context.isActive()) {
+			Map<String, VarValue> state = context.cloneValues();
+			for (String k: state.keySet()) {
+				log.debug(k + " => " + state.get(k));
+				System.err.println(k + " => " + state.get(k));
+			}
 		}
 		return context;
 	}

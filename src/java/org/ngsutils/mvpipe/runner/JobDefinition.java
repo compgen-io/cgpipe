@@ -2,48 +2,56 @@ package org.ngsutils.mvpipe.runner;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.ngsutils.mvpipe.exceptions.SyntaxException;
+import org.ngsutils.mvpipe.parser.Eval;
+import org.ngsutils.mvpipe.parser.Tokens;
+import org.ngsutils.mvpipe.parser.context.BuildTarget.NumberedLine;
+import org.ngsutils.mvpipe.parser.context.ExecContext;
+import org.ngsutils.mvpipe.parser.variable.VarValue;
 import org.ngsutils.mvpipe.support.StringUtils;
 
 public class JobDefinition implements JobDependency {
-	private Log log = LogFactory.getLog(getClass());
+//	private Log log = LogFactory.getLog(getClass());
 	
 	private String jobId = null;
 	private String name = null;
 
-	final private String src;
-	final private Map<String, String> settings;
+	final private Map<String, VarValue> capturedContext;
+	final private List<NumberedLine> lines;
+	final private String wildcard;
 	final private List<String> outputFilenames;
 	final private List<String> requiredInputs;
-	final private List<String> extraTargets;
+
+	private String src = null;
+	private Map<String, String> settings = null;
+//	private List<String> extraTargets = null;
 	
 	private List<JobDependency> dependencies = new ArrayList<JobDependency>();
+
+
 	
-	public JobDefinition(Map<String, String>settings, List<String> outputFilenames, List<String> inputFilenames, String src) {
-		this.settings = Collections.unmodifiableMap(settings);
+	public JobDefinition(Map<String, VarValue> capturedContext, List<String> outputFilenames, List<String> inputFilenames,
+			String wildcard, List<NumberedLine> lines) {
+//		this.settings = Collections.unmodifiableMap(settings);
 		this.outputFilenames = Collections.unmodifiableList(outputFilenames);
 		this.requiredInputs = Collections.unmodifiableList(inputFilenames);
 		
-		for (String k: settings.keySet()) {
-			log.trace("job setting: "+k +" => " + settings.get(k));
-		}
-		 
-		List<String> tmp = new ArrayList<String>();
-		if (settings.containsKey("job.extras")) {
-			for (String extra: settings.get("job.extras").split(",")) {
-				log.trace("extra job: "+extra);
-				tmp.add(StringUtils.strip(extra));
-			}
-		}
-		extraTargets = Collections.unmodifiableList(tmp);
-		this.src = src;		
+//		for (String k: settings.keySet()) {
+//			log.trace("job setting: "+k +" => " + settings.get(k));
+//		}
+//		 
+//		this.src = src;
+		
+		this.capturedContext = capturedContext;
+		this.wildcard = wildcard;
+		this.lines = lines;
 	}
-	
+
 	public List<String> getRequiredInputs() {
 		return requiredInputs;
 	}
@@ -51,10 +59,10 @@ public class JobDefinition implements JobDependency {
 	public List<String> getOutputFilenames() {
 		return outputFilenames;
 	}
-
-	public List<String> getExtraTargets() {
-		return extraTargets;
-	}
+//
+//	public List<String> getExtraTargets() {
+//		return extraTargets;
+//	}
 
 	public boolean hasSetting(String k) {
 		return settings.containsKey(k);
@@ -116,10 +124,42 @@ public class JobDefinition implements JobDependency {
 		return "mvpjob";
 	}
 	
-	public String getSrc() {
+	public String getSrc() throws SyntaxException {
+		if (src == null) {
+			eval();
+		}
 		return src;
 	}
 
+	private void eval() throws SyntaxException {
+		if (src == null) {
+			ExecContext jobcxt = new ExecContext(capturedContext, outputFilenames, requiredInputs, wildcard);
+			ExecContext cxt = jobcxt;
+			List<String> srcLines = new ArrayList<String>();
+			for (NumberedLine nl:lines) {
+				String stripped = StringUtils.strip(nl.line);
+				if (stripped.length()>2) {
+					if (stripped.startsWith("#$")) {
+						Tokens tokens = new Tokens(nl.filename, nl.linenum, stripped.substring(2));
+						cxt = cxt.addTokenizedLine(tokens);
+						continue;
+					}
+				}
+				if (cxt.isActive()) {
+					srcLines.add(Eval.evalString(nl.line, cxt));// matchedOutputs, matchedInputs));
+				}
+			}
+
+			this.src = StringUtils.join("\n", srcLines);
+			
+			settings = new HashMap<String, String>();
+			Map<String, VarValue> cxtvals = jobcxt.cloneValues("job.");
+			for (String k: cxtvals.keySet()) {
+				settings.put(k, cxtvals.get(k).toString());
+			}
+		}
+	}	
+	
 	public void addDependency(JobDependency dep) {
 		if (!dependencies.contains(dep)) {
 			dependencies.add(dep);

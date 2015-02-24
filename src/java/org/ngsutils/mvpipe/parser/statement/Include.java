@@ -14,15 +14,17 @@ public class Include implements Statement {
 
 	@Override
 	public ExecContext eval(ExecContext context, Tokens tokens) throws SyntaxException {
-		Parser p = new Parser(context);
-		try {
-			VarValue file = Eval.evalTokenExpression(context, tokens);
-			if (file == VarNull.NULL) {
-				throw new SyntaxException("Unknown include file (missing quotes?)");
+		if (context.isActive()) {
+			Parser p = new Parser(context);
+			try {
+				VarValue file = Eval.evalTokenExpression(context, tokens);
+				if (file == VarNull.NULL) {
+					throw new SyntaxException("Unknown include file (missing quotes?)");
+				}
+				p.parseFile(file.toString());
+			} catch (IOException e) {
+				throw new SyntaxException(e);
 			}
-			p.parseFile(file.toString());
-		} catch (IOException e) {
-			throw new SyntaxException(e);
 		}
 		
 		return context;

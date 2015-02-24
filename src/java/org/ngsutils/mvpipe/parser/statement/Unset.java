@@ -13,9 +13,11 @@ public class Unset implements Statement {
 
 	@Override
 	public ExecContext eval(ExecContext context, Tokens tokens) throws SyntaxException {
-		VarValue test = Eval.evalTokenExpression(context, tokens);
-		log.trace("Removing: " + test);
-		context.remove(test.toString());
+		if (context.isActive()) {
+			VarValue test = Eval.evalTokenExpression(context, tokens);
+			log.trace("Removing: " + test);
+			context.remove(test.toString());
+		}
 		return context;
 	}
 

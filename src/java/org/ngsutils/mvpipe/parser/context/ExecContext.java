@@ -2,6 +2,7 @@ package org.ngsutils.mvpipe.parser.context;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,7 +19,10 @@ public class ExecContext {
 	protected String cwd = null;
 			
 	protected Map<String, VarValue> vars = new HashMap<String, VarValue>();
-
+	protected List<String> matchedOutputs = null;
+	protected List<String> matchedInputs = null;
+	protected String wildcard = null;
+	
 	private boolean active = true;
 	private boolean everActive = true;
 
@@ -45,6 +49,17 @@ public class ExecContext {
 		if (!active) {
 			this.everActive = false;
 		}
+	}
+
+	public ExecContext(Map<String, VarValue> capturedContext,
+			List<String> matchedOutputs, List<String> matchedInputs,
+			String wildcard) {
+		this.parent = null;
+		this.vars.putAll(capturedContext);
+		this.matchedOutputs = matchedOutputs;
+		this.matchedInputs = matchedInputs;
+		this.wildcard = wildcard;
+		
 	}
 
 	public void setCWD(String cwd) {
@@ -162,6 +177,18 @@ public class ExecContext {
 		
 	public VarValue remove(String key) {
 		return vars.remove(key);
+	}
+
+	public List<String> getMatchedOutputs() {
+		return matchedOutputs;
+	}
+
+	public List<String> getMatchedInputs() {
+		return matchedInputs;
+	}
+
+	public String getWildcard() {
+		return wildcard;
 	}
 
 }

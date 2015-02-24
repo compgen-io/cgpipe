@@ -289,7 +289,7 @@ works, you can set any of the variables below at the script or job level.
     job.stderr     | Capture stderr to file        |      |  X  |   X   |  X  |
     job.keepfailed | Keep outputs from failed jobs |  X   |  X  |   X   |  X  |
     job.shell      | Job-specific shell binary     | [3]  |  X  |   X   |  X  |
-    job.exec  (T/F)| Exec job; don't submit job    |      |  X  |   X   |  X  |
+    job.shexec(T/F)| Exec job; don't submit job    |      |  X  |   X   |  X  |
     job.nopre (T/F)| Don't include global pre      | [4]  |  X  |   X   |  X  |
     job.nopost(T/F)| Don't include global post     | [4]  |  X  |   X   |  X  |
 

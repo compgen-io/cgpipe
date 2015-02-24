@@ -37,10 +37,14 @@ public class SimpleFileLoggerImpl implements Log, Serializable {
 	}
 
 	public static void setFilename(String logFilename) throws FileNotFoundException {
-		if (SimpleFileLoggerImpl.out != null) {
+		if (SimpleFileLoggerImpl.out != null && SimpleFileLoggerImpl.out != System.err) {
 			close();
 		}
-		SimpleFileLoggerImpl.out  = new PrintStream(new FileOutputStream(logFilename, true));
+		if (logFilename.equals("-")) {
+			SimpleFileLoggerImpl.out  = System.err;
+		} else {
+			SimpleFileLoggerImpl.out  = new PrintStream(new FileOutputStream(logFilename, true));
+		}
 	}
 
 	public static void close() {
