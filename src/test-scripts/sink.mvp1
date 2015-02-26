@@ -3,17 +3,17 @@
 chunks = 4
 
 for i in 1..chunks
-    echo "i=${i}"
+    print "i=${i}"
 done
 
 foo="bar"
 
 out1: in1 in2.@{1..chunk}
-    echo "${foo}"
+    print "${foo}"
 
 out2:
     #$ foo = "baz"
-    echo "${foo}"
+    print "${foo}"
 
 in1:
 

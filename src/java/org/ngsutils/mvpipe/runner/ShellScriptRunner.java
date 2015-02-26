@@ -22,31 +22,34 @@ public class ShellScriptRunner extends JobRunner {
 	}
 
 	@Override
-	public void done() throws RunnerException, SyntaxException {
+	public void done() throws RunnerException {
 		super.done();
 
-		boolean header = false;
-		String out = "";
-		for (JobDefinition job: jobs) {
-			if (!job.getSrc().equals("")) {
-				if (!header) {
-					out += "#!"+bin+"\n";
-					header = true;
+		try {
+			boolean header = false;
+			String out = "";
+			for (JobDefinition job: jobs) {
+				if (!job.getSrc().equals("")) {
+					if (!header) {
+						out += "#!"+bin+"\n";
+						header = true;
+					}
+					out += job.getJobId()+"() {\n";
+					out += job.getSrc();
+					out += "\n}\n\n";
 				}
-				out += job.getJobId()+"() {\n";
-				out += job.getSrc();
-				out += "\n}\n\n";
 			}
-		}
-
-		out += "\n";
-		
-		for (JobDefinition job: jobs) {
-			if (!job.getSrc().equals("")) {
-				out += job.getJobId()+"\n";
+			out += "\n";
+			
+			for (JobDefinition job: jobs) {
+				if (!job.getSrc().equals("")) {
+					out += job.getJobId()+"\n";
+				}
 			}
+			System.out.println(out);
+		} catch (SyntaxException e) {
+			throw new RunnerException(e);
 		}
-		System.out.println(out);
 	}
 
 	@Override

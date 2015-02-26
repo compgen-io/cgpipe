@@ -1,2 +1,2 @@
-#!dist/mvpipe
-echo "Hello world"
+#!/usr/bin/env dist/mvpipe
+print "Hello world"

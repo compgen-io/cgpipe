@@ -16,6 +16,7 @@ import org.ngsutils.mvpipe.parser.Parser;
 import org.ngsutils.mvpipe.parser.context.RootContext;
 import org.ngsutils.mvpipe.parser.variable.VarBool;
 import org.ngsutils.mvpipe.parser.variable.VarList;
+import org.ngsutils.mvpipe.parser.variable.VarString;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 import org.ngsutils.mvpipe.runner.JobRunner;
 import org.ngsutils.mvpipe.support.SimpleFileLoggerImpl;
@@ -26,7 +27,7 @@ public class MVPipe {
 
 	public static void main(String[] args) throws IOException, SyntaxException {
 		String fname = null;
-		String logFilename = "-";
+		String logFilename = null;
 		int verbosity = 0;
 		boolean silent = false;
 		boolean dryrun = false;
@@ -97,7 +98,6 @@ public class MVPipe {
 			System.exit(1);
 		}
 
-		SimpleFileLoggerImpl.setFilename(logFilename);
 		switch (verbosity) {
 		case 0:
 			SimpleFileLoggerImpl.setLevel(Level.INFO);
@@ -115,7 +115,7 @@ public class MVPipe {
 		}
 		
 		SimpleFileLoggerImpl.setSilent(silent);
-		
+
 		Log log = LogFactory.getLog(MVPipe.class);
 		log.info("Starting new run");
 		
@@ -123,6 +123,9 @@ public class MVPipe {
 		for (String k1:confVals.keySet()) {
 			log.info("config: "+k1+" => "+confVals.get(k1).toString());
 			global.set(k1, confVals.get(k1));
+		}
+		if (logFilename != null) {
+			global.set("mvpipe.log", new VarString(logFilename));
 		}
 		
 		Parser parser = new Parser(global);
@@ -165,8 +168,7 @@ public class MVPipe {
 		while ((c = is.read()) > -1) {
 			System.err.print((char) c);
 		}
-		is.close();
-		
+		is.close();	
 	}
 	
 	private static void usage() throws IOException {

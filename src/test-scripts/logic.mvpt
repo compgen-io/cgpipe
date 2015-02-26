@@ -1,25 +1,25 @@
 if true
-    echo "foo"
+    print "foo"
 else
-    echo "baz"
+    print "baz"
 endif
 
 if true && true
-    echo "foo"
+    print "foo"
 else
-    echo "baz"
+    print "baz"
 endif
 
 if true && false
-    echo "baz"
+    print "baz"
 else
-    echo "foo"
+    print "foo"
 endif
 
 if true || false
-    echo "foo"
+    print "foo"
 else
-    echo "baz"
+    print "baz"
 endif
 
 
@@ -27,13 +27,13 @@ foo = "bar"
 bar = 2
 
 if (foo == "bar") && (bar == 2)
-    echo "hello"
+    print "hello"
 else
-    echo "nope"
+    print "nope"
 endif
 
 if foo == "bar" && bar == 2
-    echo "hello"
+    print "hello"
 else
-    echo "nope"
+    print "nope"
 endif

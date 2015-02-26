@@ -6,7 +6,9 @@ import java.io.PrintStream;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 
@@ -31,6 +33,7 @@ public class SimpleFileLoggerImpl implements Log, Serializable {
 	private static boolean silent = false;
 	private static boolean written = false;
 	private static DateFormat dateFormater=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static List<String> buffer = new ArrayList<String>();
 	
 	public static void setLevel(Level level) {
 		SimpleFileLoggerImpl.level = level;
@@ -45,12 +48,21 @@ public class SimpleFileLoggerImpl implements Log, Serializable {
 		} else {
 			SimpleFileLoggerImpl.out  = new PrintStream(new FileOutputStream(logFilename, true));
 		}
+		for (String line: buffer) {
+			out.println(line);
+		}
+		buffer.clear();
 	}
 
 	public static void close() {
 		if (SimpleFileLoggerImpl.out != null) {
 			SimpleFileLoggerImpl.out.flush();
 			SimpleFileLoggerImpl.out.close();
+		} else {
+			for (String line: buffer) {
+				System.err.println(line);
+			}
+			buffer.clear();
 		}
 		SimpleFileLoggerImpl.out = null;
 		written = false;
@@ -84,7 +96,7 @@ public class SimpleFileLoggerImpl implements Log, Serializable {
 					arg1.printStackTrace(out);
 				}
 			} else if (!silent) {
-				System.err.println(date+" "+level.name()+" "+name+" "+arg0);
+				buffer.add(date+" "+level.name()+" "+name+" "+arg0);
 				if (arg1 != null) {
 					arg1.printStackTrace(System.err);
 				}

@@ -1,20 +1,20 @@
 a = "foo"
 b = "bar"
-echo a+b
+print a+b
 
 c = "${a}${b}"
-echo c
+print c
 
 
 foo = "foo"
 foo ?= "baz"
 
-echo foo
+print foo
 
 bar ?= "bar"
 
-echo bar
+print bar
 
 
 foo.bar = "baz"
-echo foo.bar
+print foo.bar

@@ -4,16 +4,16 @@ foo += "bar"
 foo += "baz"
 
 for i in foo
-    echo i
+    print i
 done
 
-echo foo
-echo "@{foo}"
-echo "pre @{foo} post"
+print foo
+print "@{foo}"
+print "pre @{foo} post"
 
-echo "quux.@{foo}"
-echo "@{foo}_suf"
-echo "pre quux.@{foo}_suf post"
+print "quux.@{foo}"
+print "@{foo}_suf"
+print "pre quux.@{foo}_suf post"
 
 
 bar = []
@@ -23,5 +23,5 @@ bar += "blah2"
 foo += bar
 
 for i in foo
-    echo i
+    print i
 done

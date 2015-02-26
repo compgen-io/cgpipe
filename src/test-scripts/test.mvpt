@@ -1,30 +1,30 @@
-echo 1 == 1
-echo 1==2
+print 1 == 1
+print 1==2
 
 a="foo"
-echo a=="foo"
+print a=="foo"
 
 b="bar"
-echo a==b
+print a==b
 
 # testing !=
-echo 1!=1
-echo a!=b
+print 1!=1
+print a!=b
 
 
 # testing comparisons
-echo 2 > 1
-echo 1 < 2
+print 2 > 1
+print 1 < 2
 
-echo 2 >= 1
-echo 2 >= 2
-echo 1 <= 2
-echo 1 <= 1
+print 2 >= 1
+print 2 >= 2
+print 1 <= 2
+print 1 <= 1
 
-echo 1 > 2
-echo 2 < 1
+print 1 > 2
+print 2 < 1
 
 
-echo "a" < "aa"
-echo "a" < "b"
-echo "foo" > "bar"
+print "a" < "aa"
+print "a" < "b"
+print "foo" > "bar"

@@ -5,6 +5,7 @@ Usage: mvpipe {opts} {args} {target1 target2...}
 Options:
     -f filename   Pipeline script filename (required)
     -l logfile    Log debug messages here
+    -j joblog     Output a summary of submitted jobs (and their outputs)
 
     -dr           Dry run (Don't actually build targets)
     -v            Verbose logging

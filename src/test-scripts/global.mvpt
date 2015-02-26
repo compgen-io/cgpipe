@@ -1,1 +1,1 @@
-echo global_foo
+print global_foo

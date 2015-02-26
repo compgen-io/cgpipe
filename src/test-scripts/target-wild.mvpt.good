@@ -1,23 +1,23 @@
 func_1() {
-touch foo
+    touch foo
 }
 
 func_2() {
-gzip -c foo > foo.gz
+    gzip -c foo > foo.gz
 }
 
 func_3() {
-touch bar
+    touch bar
 
 }
 
 func_4() {
-echo "$> = foo.bar"
-echo "$< = foo bar"
+    echo "$> = foo.bar"
+    echo "$< = foo bar"
 
-echo "$>1 = foo.bar"
-echo "$<1 = foo"
-echo "$<2 = bar"
+    echo "$>1 = foo.bar"
+    echo "$<1 = foo"
+    echo "$<2 = bar"
 }
 
 

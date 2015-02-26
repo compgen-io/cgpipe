@@ -1,10 +1,16 @@
 package org.ngsutils.mvpipe.runner;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,14 +41,23 @@ public abstract class JobRunner {
 	
 	protected String preSrc = null;
 	protected String postSrc = null;
+
+	protected PrintStream joblog = null;
+	protected Map<String, String> submittedJobIds = new HashMap<String,String>();	
 	
-	
-	public void done() throws RunnerException, SyntaxException {
+	public void done() throws RunnerException {
 		try {
 			submitAll(pendingJobs);
-		} catch (RunnerException | SyntaxException e) {
+			if (joblog != null) {
+				joblog.close();
+			}
+
+		} catch (RunnerException e ) {
 			abort();
 			throw e;
+		} catch (SyntaxException e) {
+			abort();
+			throw new RunnerException(e);
 		}
 		done=true;
 	}
@@ -52,7 +67,7 @@ public abstract class JobRunner {
 	}
 
 	public boolean isJobIdValid(String jobId) {
-		return true;
+		return false;
 	}
 
 	public static JobRunner load(RootContext cxt, boolean dryrun) throws RunnerException {
@@ -81,7 +96,30 @@ public abstract class JobRunner {
 		
 		obj.dryrun = dryrun;
 		obj.globalContext = cxt;
-		
+
+		String joblog = cxt.getString("mvpipe.joblog");
+		if (joblog != null) {
+			try {
+				File jobfile = new File(joblog);
+				if (jobfile.exists()) {
+					BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(joblog)));
+					String line;
+					while ((line = reader.readLine()) != null) {
+						String[] cols = line.split("\t");
+						if (cols[1].equals("OUTPUT")) {
+							obj.submittedJobIds.put(cols[2], cols[0]);
+						}
+					}
+					reader.close();
+				}
+				
+				jobfile.getParentFile().mkdirs();
+				obj.joblog = new PrintStream(new FileOutputStream(joblog, true));
+			} catch (IOException e) {
+				throw new RunnerException(e);
+			}
+		}
+
 		return obj;
 	}
 
@@ -136,6 +174,28 @@ public abstract class JobRunner {
 			log.info("src: "+StringUtils.strip(s));
 		}
 
+		if (joblog != null && job.getJobId() != null && !job.getJobId().equals("")) {
+			joblog.println(job.getJobId()+"\t"+"JOB\t"+job.getName());
+			for (JobDependency dep:job.getDependencies()) {
+				if (job.getJobId()!=null && job.getJobId() != "") {
+					joblog.println(job.getJobId()+"\t"+"DEP\t"+dep.getJobId());
+				}
+			}
+			for (String out:job.getOutputFilenames()) {
+				joblog.println(job.getJobId()+"\t"+"OUTPUT\t"+out);
+			}
+			for (String inp:job.getRequiredInputs()) {
+				joblog.println(job.getJobId()+"\t"+"INPUT\t"+inp);
+			}
+			for (String s: job.getSrc().split("\n")) {
+				joblog.println(job.getJobId()+"\t"+"SRC\t"+s);
+			}
+			for (String k:job.getSettings()) {
+				if (k.startsWith("job.")) {
+					joblog.println(job.getJobId()+"\t"+"SETTING\t"+k+"\t"+job.getSetting(k));
+				}
+			}
+		}
 	}
 	
 	public void submitAll(List<JobDefinition> jobs) throws RunnerException, SyntaxException {
@@ -165,7 +225,7 @@ public abstract class JobRunner {
 			
 			if (!submittedAJob && jobsToSubmit > 0) {
 				abort();
-				throw new RunnerException("Unable to build dependency tree! Remaining jobs => " + StringUtils.join(",", IterUtils.<JobDefinition>filter(jobs, new IterUtils.Filter<JobDefinition>() {
+				throw new RunnerException("Unable to build dependency tree! Remaining jobs => " + StringUtils.join(",", IterUtils.<JobDefinition>filter(jobs, new IterUtils.FilterFunc<JobDefinition>() {
 					@Override
 					public boolean filter(JobDefinition jobdef) {
 						return jobdef.getJobId() == null;
@@ -230,13 +290,27 @@ public abstract class JobRunner {
 				force = false;
 				for (String input: jd.getRequiredInputs()) {
 					if (new File(input).exists()) {
+						// file exists, no job needed
 						log.info("Input file exists: "+input);
 					} else {
 						log.trace("Looking for jobdep: "+input);
-						JobDefinition dep = buildJobTree(input);
+						JobDependency dep = null;
+						for (String out: submittedJobIds.keySet()) {
+							if (out.equals(input)) {
+								String depid = submittedJobIds.get(out);
+								if (isJobIdValid(depid)) {
+									dep = new ExistingJob(depid);
+									log.info("Input file being supplied by existing job: "+depid);
+									break;
+								}
+							}
+						}
 						if (dep != null) {
 							jd.addDependency(dep);
+						} else {
 							// we have a job dependency that will run... therefore, we need to as well.
+							dep = buildJobTree(input);
+							jd.addDependency(dep);
 							force = true;				
 						}
 					}

@@ -1,8 +1,8 @@
-echo "foo" # this shouldn't be seen
+print "foo" # this shouldn't be seen
 foo = "bar" # this shouldn't be seen
-echo foo # not seen
+print foo # not seen
 # comment
 
 if foo == "bar" # && baz
-    echo "hello"
+    print "hello"
 endif

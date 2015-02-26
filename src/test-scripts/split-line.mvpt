@@ -1,10 +1,10 @@
 if "foo" == "foo"
-    echo "foo"
+    print "foo"
 endif
 
 if "foo" == "foo" \
     && "bar" == "baz"
-    echo "foo"
+    print "foo"
 else
-    echo "bar"
+    print "bar"
 endif

@@ -35,7 +35,10 @@ else
         echo "$1 OK"
     fi
     if [ "$VERBOSE" != "" ]; then
-        cat .testout
+        cat .testout | grep -v '^#' | grep -v '^$' | sed -e 's/MVPIPE ERROR.*/MVPIPE ERROR/g' > .testout1
+        cat $1.good | grep -v '^#' | grep -v '^$' | sed -e 's/MVPIPE ERROR.*/MVPIPE ERROR/g' > .testout2
+        diff -y .testout1 .testout2
+        rm .testout1 .testout2
     fi
     rm .testout
     rm test/run/*

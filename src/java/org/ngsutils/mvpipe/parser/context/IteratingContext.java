@@ -31,18 +31,22 @@ public class IteratingContext extends ExecContext {
 			nestedCount ++;
 		} else if (tokens.size() == 1 && tokens.get(0).equals("done")) {
 			if (nestedCount == 0) {
-				log.trace("# STARTING ITERATION: " + varname + " => " + range);
-				
-				for (Tokens line:lines) {
-					log.trace("# ITERATING LINE: " + StringUtils.join(" ", line.getList()));
-				}
-				for (VarValue item: range.iterate()) {
-					ExecContext cxt = new NestedContext(this, true, false);
-					cxt.set(varname, item);
-					log.trace("# " + varname + " => " + item);
-					for (Tokens line: lines) {
-						cxt = cxt.addTokenizedLine(line);
+				if (isActive()) {
+					log.trace("# STARTING ITERATION: " + varname + " => " + range);
+					
+					for (Tokens line:lines) {
+						log.trace("# ITERATING LINE: " + StringUtils.join(" ", line.getList()));
 					}
+					for (VarValue item: range.iterate()) {
+						ExecContext cxt = new NestedContext(this, true, false);
+						cxt.set(varname, item);
+						log.trace("# " + varname + " => " + item);
+						for (Tokens line: lines) {
+							cxt = cxt.addTokenizedLine(line);
+						}
+					}
+				} else {
+					log.trace("Not processing for-loop (inactive branch)");
 				}
 				return this.parent;			
 			} else {

@@ -9,6 +9,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class StringUtils {
+	public interface MapFunc<T, V> {
+		public V map(T obj);
+	}
 	public static String strip(String str) {
 		return lstrip(rstrip(str));
 	}
@@ -74,13 +77,27 @@ public class StringUtils {
     }
     
     public static String join(String delim, Iterable<? extends Object> args) {
+    	return join(delim, args, null);
+    }
+    public static <T> String join(String delim, Iterable<T> args, MapFunc<T, String> mapper) {
         String out = "";
         if (args != null) {
-	        for (Object arg: args) {
+	        for (T arg: args) {
+	        	String val = null;
+	        	if (mapper == null) {
+	        		val = arg.toString();
+	        	} else {
+	        		val = mapper.map(arg);
+	        	}
+	        	
+	        	if (val == null) {
+	        		continue;
+	        	}
+	        	
 	            if (out.equals("")) {
-	                out = arg.toString();
+	                out = val;
 	            } else {
-	                out = out + delim + arg.toString();
+	                out = out + delim + val;
 	            }
 	        }
         }

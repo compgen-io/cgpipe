@@ -1,5 +1,5 @@
 for i in 1..5
-    echo i
+    print i
 done
 
-echo "foo@{1..5}bar"
+print "foo@{1..5}bar"

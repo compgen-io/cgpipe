@@ -1,19 +1,19 @@
 val="test1"
 one: two three.foo
-    #$ echo "foo"
-    #$ echo val
+    #$ print "foo"
+    #$ print val
     touch one
 
 val="test2"
 two: three.foo #fake
-    #$ echo "bar"
-    #$ echo val
+    #$ print "bar"
+    #$ print val
     touch two
 
 val="test3"
 %.foo:
-    #$ echo "baz"
-    #$ echo val
+    #$ print "baz"
+    #$ print val
     #$ job.extras = "extra"
     touch three
 

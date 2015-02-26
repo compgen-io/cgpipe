@@ -1,18 +1,18 @@
-echo $(echo "hello world")
-echo $(echo "hello world" | sed -e 's/world/foobar/')
+print $(echo "hello world")
+print $(echo "hello world" | sed -e 's/world/foobar/')
 
-echo $(echo "hello") + " world"
+print $(echo "hello") + " world"
 
 # auto convert to int
-echo $(echo "1") + 1
+print $(echo "1") + 1
 
 # act as a string?
-echo $(echo "1") + "1"
+print $(echo "1") + "1"
 
 foo="hello"
 
-echo $(echo '\\\${foo} world')
-echo $(echo "${foo} world")
+print $(echo '\\\${foo} world')
+print $(echo "${foo} world")
 
 # this works too...
-#echo $(echo "${foo} $USER")
+#print $(echo "${foo} $USER")

@@ -1,8 +1,8 @@
 foo="bar"
 include "test.incl"
-echo foo
+print foo
 
-echo baz
+print baz
 
 include "global.incl"
-echo bar
+print bar

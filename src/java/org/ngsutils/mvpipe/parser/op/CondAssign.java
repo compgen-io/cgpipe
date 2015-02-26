@@ -6,7 +6,7 @@ import org.ngsutils.mvpipe.parser.context.ExecContext;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 
 public class CondAssign implements Operator {
-
+	
 	@Override
 	public VarValue eval(ExecContext context, VarValue lval, VarValue rval) throws SyntaxException {
 		throw new SyntaxException("Unsupported syntax for operator " + this.getClass().getSimpleName());

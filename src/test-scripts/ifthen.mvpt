@@ -4,7 +4,7 @@ else
     foo = "bar"
 endif
 
-echo foo
+print foo
 
 if false
     bar="foo"
@@ -12,60 +12,60 @@ else
     bar = "bar"
 endif
 
-echo bar
+print bar
 
 foo = 3
 
 if foo == 1
-    echo "one"
+    print "one"
 elif foo == 2
-    echo "two"
+    print "two"
 elif foo == 3
-    echo "three"
+    print "three"
 else
-    echo "zero"
+    print "zero"
 endif
 
 
 if (1 + 2) == 3
-    echo "yes"
+    print "yes"
 else
-    echo "no"
+    print "no"
 endif
 
 
 if (1 + 2) == 4
-    echo "yes"
+    print "yes"
 else
-    echo "no"
+    print "no"
 endif
 
 
 foo = "1"
 
 if foo
-    echo "foo is set"
+    print "foo is set"
 else
-    echo "foo is not set"
+    print "foo is not set"
 endif
 
 if baz
-    echo "baz is set"
+    print "baz is set"
 else
-    echo "baz is not set"
+    print "baz is not set"
 endif
 
 
 if !foo
-    echo "foo is not set"
+    print "foo is not set"
 else
-    echo "foo is set"
+    print "foo is set"
 endif
 
 if !baz
-    echo "baz is not set"
+    print "baz is not set"
 else
-    echo "baz is set"
+    print "baz is set"
 endif
  
 
@@ -85,6 +85,6 @@ else
     endif
 endif
 
-echo foo
+print foo
  
  

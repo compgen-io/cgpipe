@@ -1,5 +1,6 @@
 package org.ngsutils.mvpipe.parser.context;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +12,9 @@ import org.apache.commons.logging.LogFactory;
 import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.parser.Eval;
 import org.ngsutils.mvpipe.parser.Tokens;
+import org.ngsutils.mvpipe.parser.variable.VarNull;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
+import org.ngsutils.mvpipe.support.SimpleFileLoggerImpl;
 
 public class ExecContext {
 	protected Log log = LogFactory.getLog(getClass());
@@ -63,7 +66,7 @@ public class ExecContext {
 	}
 
 	public void setCWD(String cwd) {
-		log.debug("set current working directory:"+cwd);
+		log.debug("set current working directory: "+cwd);
 		this.cwd = cwd;
 	}
 	
@@ -98,6 +101,7 @@ public class ExecContext {
 	public void switchActive() {
 		active = !active;
 		if (active) {
+			// else if...
 			everActive = true;
 		}
 	}
@@ -105,9 +109,11 @@ public class ExecContext {
 	public boolean contains(String name) {
 		if (parent != null) {
 			if (parent.contains(name)) {
+				log.trace("contains? " + name + " parent does!");
 				return true;
 			}
 		}	
+		log.trace("contains? " + name + " ? " + vars.containsKey(name));
 		return vars.containsKey(name);
 	}
 	
@@ -128,6 +134,14 @@ public class ExecContext {
 
 	public void set(String name, VarValue val) {
 		vars.put(name, val);
+		// handle special cases...
+		if (name.equals("mvpipe.log")) {
+			try {
+				SimpleFileLoggerImpl.setFilename(val.toString());
+			} catch (FileNotFoundException e) {
+				log.error(e);
+			}
+		}
 	}
 
 	public Map<String, VarValue> cloneValues() {
@@ -176,19 +190,42 @@ public class ExecContext {
 	}
 		
 	public VarValue remove(String key) {
-		return vars.remove(key);
+		if (vars.containsKey(key)) {
+			return vars.remove(key);
+		} else if (parent != null){
+			return parent.remove(key);
+		}
+		return VarNull.NULL;
 	}
 
 	public List<String> getMatchedOutputs() {
-		return matchedOutputs;
+		if (matchedOutputs != null) {
+			return matchedOutputs;
+		}
+		if (parent != null) {
+			return parent.getMatchedOutputs();
+		}
+		return null;
 	}
 
 	public List<String> getMatchedInputs() {
-		return matchedInputs;
+		if (matchedInputs != null) {
+			return matchedInputs;
+		}
+		if (parent != null) {
+			return parent.getMatchedInputs();
+		}
+		return null;
 	}
 
 	public String getWildcard() {
-		return wildcard;
+		if (wildcard != null) {
+			return wildcard;
+		}
+		if (parent != null) {
+			return parent.getWildcard();
+		}
+		return null;
 	}
 
 }

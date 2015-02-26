@@ -36,7 +36,7 @@ import org.ngsutils.mvpipe.parser.op.Range;
 import org.ngsutils.mvpipe.parser.op.Rem;
 import org.ngsutils.mvpipe.parser.op.Sub;
 import org.ngsutils.mvpipe.parser.statement.DumpVars;
-import org.ngsutils.mvpipe.parser.statement.Echo;
+import org.ngsutils.mvpipe.parser.statement.Print;
 import org.ngsutils.mvpipe.parser.statement.ElIf;
 import org.ngsutils.mvpipe.parser.statement.Else;
 import org.ngsutils.mvpipe.parser.statement.EndIf;
@@ -77,7 +77,7 @@ public class Eval {
 	}
 	
 	static {
-		statements.put("echo", new Echo());
+		statements.put("print", new Print());
 		statements.put("unset", new Unset());
 		statements.put("dump", new DumpVars());
 

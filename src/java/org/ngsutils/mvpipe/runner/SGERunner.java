@@ -40,7 +40,7 @@ public class SGERunner extends JobRunner {
 	private JobDependency globalHoldJob = null;
 	
 	@Override
-	public void done() throws RunnerException, SyntaxException {
+	public void done() throws RunnerException {
 		super.done();
 		if (jobids.size() > 0) {
 			log.info("submitted jobs: "+StringUtils.join(",", jobids));
@@ -324,5 +324,18 @@ public class SGERunner extends JobRunner {
 			break;
 		}
 	}
+	
+	public boolean isJobIdValid(String jobId) {
+		try {
+			Process proc = Runtime.getRuntime().exec(new String[] {"qstat", "-j", jobId});
+			int retcode = proc.waitFor();
+			if (retcode == 0) {	
+				return true;
+			}
+		} catch (IOException | InterruptedException e) {
+		}
+		return false;
+	}
+
 
 }

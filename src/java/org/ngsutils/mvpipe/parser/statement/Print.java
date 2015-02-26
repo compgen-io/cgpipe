@@ -5,7 +5,7 @@ import org.ngsutils.mvpipe.parser.Eval;
 import org.ngsutils.mvpipe.parser.Tokens;
 import org.ngsutils.mvpipe.parser.context.ExecContext;
 
-public class Echo implements Statement {
+public class Print implements Statement {
 
 	@Override
 	public ExecContext eval(ExecContext context, Tokens tokens) throws SyntaxException {
