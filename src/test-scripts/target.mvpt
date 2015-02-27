@@ -14,6 +14,7 @@ val="test3"
 %.foo:
     #$ print "baz"
     #$ print val
+    #$ print "$>"
     #$ job.extras = "extra"
     touch three
 

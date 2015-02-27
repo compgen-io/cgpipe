@@ -104,14 +104,24 @@ public class BuildTarget {
 				break;
 			}
 		}
-		
+
 		if (matched) {
 			List<String> matchedOutputs = new ArrayList<String>();
+			for (String out:outputs) {
+				out = Eval.evalString(out,  rootContext);
+				Pattern wildPattern = Pattern.compile("^(.*?)%(.*?)$");
+
+				Matcher m = wildPattern.matcher(out);
+				if (m.matches()) {
+					matchedOutputs.add(m.group(1)+wildcard+m.group(2));
+				} else {
+					matchedOutputs.add(out);
+				}
+			}
+
+
 			List<String> matchedInputs = new ArrayList<String>();
 
-			for (String out:outputs) {
-				matchedOutputs.add(Eval.evalString(out, rootContext, wildcard));
-			}
 			if (inputs!=null) {
 				for (String input:inputs) {
 					matchedInputs.add(Eval.evalString(input, rootContext, wildcard));

@@ -64,7 +64,7 @@ public class Eval {
 
 	final private static Pattern outputPattern = Pattern.compile("^(.*?)\\$>([0-9]*)(.*?)$");
 	final private static Pattern inputPattern = Pattern.compile("^(.*?)\\$<([0-9]*)(.*?)$");
-	final private static Pattern wildPattern = Pattern.compile("^(.*?)%(.*?)$");
+	final private static Pattern wildPattern = Pattern.compile("^(.*?)\\$%(.*?)$");
 
 	private static void addOp(String op, Operator obj) {
 		// Operations are added in priority
@@ -326,7 +326,7 @@ public class Eval {
 			if (m.matches()) {
 				if (m.group(1).endsWith("\\")) {
 					tmp += m.group(1).substring(0,m.group(1).length()-1);
-					tmp += "%";
+					tmp += "$%";
 					msg = m.group(2);
 				} else {
 					tmp += m.group(1) + wildcard;
