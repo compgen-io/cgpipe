@@ -1,0 +1,139 @@
+package org.ngsutils.mvpipe.runner;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.ngsutils.mvpipe.parser.variable.VarInt;
+import org.ngsutils.mvpipe.parser.variable.VarValue;
+
+public class JobDef implements JobDependency {
+	private final String body;
+	private final Map<String, VarValue> settings;
+	private final List<String> outputs;
+	private String jobId = null;
+	private String name;
+	private List<JobDependency> depends = new ArrayList<JobDependency>();
+	
+	public JobDef(String body, Map<String, VarValue> settings, List<String> outputs) {
+		this.body = body;
+		this.settings = settings;
+		this.outputs = Collections.unmodifiableList(new ArrayList<String>(outputs));
+	}
+	
+	public void setJobId(String jobId) {
+		this.jobId = jobId;
+	}
+	
+	public String getJobId() {
+		return jobId;
+	}
+	
+	public String getBody() {
+		return body;
+	}
+	public List<String> getOutputs() {
+		return outputs;
+	}
+
+	public boolean hasSetting(String k) {
+		return settings.containsKey(k);
+	}
+
+	public String getSetting(String k) {
+		return getSetting(k, null);
+	}
+	
+	public String getSetting(String k, String defval) {
+		if (settings.containsKey(k)) {
+			return settings.get(k).toString();
+		}
+		return defval;		
+	}
+	
+	public long getSettingInt(String k) {
+		return getSettingInt(k, null);
+	}
+	
+	public long getSettingInt(String k, Integer defval) {
+		if (settings.containsKey(k)) {
+			VarValue v = settings.get(k);
+			if (v.isNumber()) {
+				if (v.getClass().equals(VarInt.class)) {
+					return (Long) ((VarInt) v).getObject();
+				}
+			}
+		}
+		return defval;		
+	}
+
+	public boolean getSettingBool(String k) {
+		return getSettingBool(k, null);
+	}
+	
+	public boolean getSettingBool(String k, Boolean defval) {
+		if (settings.containsKey(k)) {
+			return settings.get(k).isTrue();
+		}
+		return defval;		
+	}
+
+	public Iterable<String> getSettings(final String name) {
+		return new Iterable<String>() {
+			@Override
+			public Iterator<String> iterator() {
+				return new Iterator<String>() {
+					Iterator<VarValue> it = settings.get(name).iterate().iterator();
+					@Override
+					public boolean hasNext() {
+						return it.hasNext();
+					}
+
+					@Override
+					public String next() {
+						VarValue val = it.next();
+						return val.toString();
+					}
+
+					@Override
+					public void remove() {
+						it.remove();
+					}
+				};
+			}
+		};
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getName() {
+		String n = this.name;
+		
+		if (n == null && hasSetting("job.name")) {
+			n = getSetting("job.name");
+		}
+		if (n != null && n.length() > 0) {
+			if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".contains(""+n.charAt(0))) {
+				return n;
+			}
+			return "mvp_"+n;
+		}
+		return "mvpjob";
+	}
+
+	public void addDependency(JobDependency dep) {
+		this.depends.add(dep);
+	}
+
+	public void addDependencies(List<JobDependency> deps) {
+		this.depends.addAll(deps);
+	}
+
+	public List<JobDependency> getDependencies() {
+		return this.depends;
+	}
+}

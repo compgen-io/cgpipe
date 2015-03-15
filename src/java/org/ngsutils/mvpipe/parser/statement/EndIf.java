@@ -1,17 +1,31 @@
 package org.ngsutils.mvpipe.parser.statement;
 
-import org.ngsutils.mvpipe.exceptions.SyntaxException;
-import org.ngsutils.mvpipe.parser.Tokens;
-import org.ngsutils.mvpipe.parser.context.ExecContext;
+import org.ngsutils.mvpipe.exceptions.ASTParseException;
+import org.ngsutils.mvpipe.parser.node.ConditionalNode;
+import org.ngsutils.mvpipe.parser.node.ASTNode;
+import org.ngsutils.mvpipe.parser.tokens.TokenList;
 
 public class EndIf implements Statement {
 
 	@Override
-	public ExecContext eval(ExecContext context, Tokens tokens) throws SyntaxException {
-		if (tokens.size() > 0) {
-			throw new SyntaxException("Extra fields on endif line!");
+	public ASTNode parse(ASTNode parent, final TokenList tokens) throws ASTParseException {
+		ASTNode p = parent;
+		while (p != null) {
+			if (p instanceof ConditionalNode) {
+				ConditionalNode condNode = (ConditionalNode) p;
+				if (!condNode.isDone()) {
+					condNode.endif();
+					return null;
+				}
+			}
+			p = p.getParent();
 		}
-		return context.getParent();
+		
+		throw new ASTParseException("endif outside of if-then context!", tokens);
 	}
 
+	@Override
+	public String getName() {
+		return "endif";
+	}
 }

@@ -22,7 +22,7 @@ else
     echo "bar = \"baz\"" > test/run/global.incl
 
     if [ "$(echo $1 | grep ".mvpt$")" != "" ]; then
-        MVPIPE_HOME=test/run dist/mvpipe $VERBOSE -s -f $1 &> .testout
+        MVPIPE_HOME=test/run dist/mvpipe $VERBOSE -f $1 &> .testout
     else
         MVPIPE_HOME=test/run $1 &> .testout
     fi
@@ -37,7 +37,11 @@ else
     if [ "$VERBOSE" != "" ]; then
         cat .testout | grep -v '^#' | grep -v '^$' | sed -e 's/MVPIPE ERROR.*/MVPIPE ERROR/g' > .testout1
         cat $1.good | grep -v '^#' | grep -v '^$' | sed -e 's/MVPIPE ERROR.*/MVPIPE ERROR/g' > .testout2
-        diff -y .testout1 .testout2
+        echo "[EXPECTED]"
+        cat .testout2
+        echo ""
+        echo "[GOT]"
+        cat .testout1
         rm .testout1 .testout2
     fi
     rm .testout

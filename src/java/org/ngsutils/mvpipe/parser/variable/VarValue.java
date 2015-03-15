@@ -4,11 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.ngsutils.mvpipe.exceptions.EvalException;
-import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.exceptions.VarTypeException;
-import org.ngsutils.mvpipe.parser.Eval;
-import org.ngsutils.mvpipe.parser.context.ExecContext;
 
 public abstract class VarValue {
 	final protected Object obj;
@@ -20,6 +16,14 @@ public abstract class VarValue {
 		return true;
 	}
 
+	public boolean isNumber() {
+		return false;
+	}
+
+	public Object getObject() {
+		return obj;
+	}
+	
 	public String toString() {
 		return obj.toString();
 	}
@@ -68,16 +72,15 @@ public abstract class VarValue {
 		return VarBool.FALSE;
 	}
 	
-	public static VarValue parseString(String val) throws VarTypeException, EvalException {
-		return parseString(val, null, false);
+	public static VarValue parseStringRaw(String val) {
+		try {
+			return parseString(val);
+		} catch (VarTypeException e) {
+			return new VarString(val);
+		}
 	}
-	public static VarValue parseString(String val, boolean allowRaw) throws VarTypeException, EvalException {
-		return parseString(val, null, allowRaw);
-	}
-	public static VarValue parseString(String val, ExecContext cxt) throws VarTypeException, EvalException {
-		return parseString(val, cxt, false);
-	}
-	public static VarValue parseString(String val, ExecContext cxt, boolean allowRaw) throws VarTypeException, EvalException {
+	
+	public static VarValue parseString(String val) throws VarTypeException {
 		if (val.equals("true")) {
 			return VarBool.TRUE;
 		}
@@ -98,32 +101,14 @@ public abstract class VarValue {
 		} catch (NumberFormatException e) {
 			// ignore
 		}
-		
-		if (val.charAt(0) == '"' && val.charAt(val.length()-1) == '"') {
-			String s = val.substring(1, val.length()-1);
-			if (cxt != null) {
-				s = Eval.evalString(s, cxt);
-			}
-			return new VarString(s);
-		}
-		
+				
 		if (val.equals("[]")) {
 			return new VarList();
 		}
-		
-		if (cxt != null) {
-			if (cxt.contains(val)) {
-				return cxt.get(val);
-			}
-			// If the value is not set, then we'll assume it should be "NULL"
-			return VarNull.NULL;
-		} else if (allowRaw) {
-			return new VarString(val);
-		} else {
-			throw new VarTypeException("Unknown variable: "+val);
-		}
+
+		throw new VarTypeException("Unable to parse value: "+val);
 	}
-	
+
 	protected static VarValue parseBool(boolean val) {
 		if (val) {
 			return VarBool.TRUE;
@@ -146,7 +131,7 @@ public abstract class VarValue {
 		return Collections.unmodifiableList(list);
 	}
 
-	public static VarValue range(VarValue from, VarValue to) throws SyntaxException {
+	public static VarValue range(VarValue from, VarValue to) throws VarTypeException {
 		return new VarRange(from, to);
 	}
 }

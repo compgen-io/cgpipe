@@ -3,7 +3,8 @@ if "foo" == "foo"
 endif
 
 if "foo" == "foo" \
-    && "bar" == "baz"
+    && "bar" == "baz" \
+    && "foo" == "baz"
     print "foo"
 else
     print "bar"

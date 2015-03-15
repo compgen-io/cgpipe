@@ -1,9 +1,32 @@
 package org.ngsutils.mvpipe.parser.statement;
 
-import org.ngsutils.mvpipe.exceptions.SyntaxException;
-import org.ngsutils.mvpipe.parser.Tokens;
-import org.ngsutils.mvpipe.parser.context.ExecContext;
+import org.ngsutils.mvpipe.exceptions.ASTParseException;
+import org.ngsutils.mvpipe.parser.node.ASTNode;
+import org.ngsutils.mvpipe.parser.tokens.TokenList;
 
 public interface Statement {
-	public ExecContext eval(ExecContext context, Tokens tokens) throws SyntaxException;
+	public ASTNode parse(ASTNode parent, TokenList tokens) throws ASTParseException;
+	public String getName();
+	
+	public static final Statement PRINT = new Print();
+	public static final Statement IF    = new If();
+	public static final Statement ELSE  = new Else();
+	public static final Statement ELIF  = new ElseIf();
+	public static final Statement ENDIF = new EndIf();
+	public static final Statement FOR = new For();
+	public static final Statement DONE = new Done();
+	public static final Statement INCLUDE = new Include();
+	public static final Statement IN = new In();
+	
+	public static final Statement[] statements = {
+		PRINT,
+		IF,
+		ELSE,
+		ELIF,
+		ENDIF,
+		FOR,
+		DONE,
+		INCLUDE,
+		IN
+	};
 }

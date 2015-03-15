@@ -1,0 +1,45 @@
+package org.ngsutils.mvpipe.parser.node;
+
+import org.ngsutils.mvpipe.exceptions.ASTExecException;
+import org.ngsutils.mvpipe.exceptions.ASTParseException;
+import org.ngsutils.mvpipe.parser.NumberedLine;
+import org.ngsutils.mvpipe.parser.context.ExecContext;
+import org.ngsutils.mvpipe.parser.tokens.TokenList;
+import org.ngsutils.mvpipe.parser.tokens.Tokenizer;
+
+
+
+public class SplitLineNode extends ASTNode {
+	public SplitLineNode(ASTNode parent, TokenList tokens) {
+		super(parent, tokens);
+	}
+
+	@Override
+	public ASTNode parseLine(NumberedLine line) throws ASTParseException {
+		TokenList newtokens = Tokenizer.tokenize(line);
+		
+		if (newtokens.size()==0) {
+			return this;
+		}
+		
+		if (newtokens.get(newtokens.size()-1).isSplitLine()) {
+			tokens.append(newtokens.subList(0, newtokens.size()-1));
+			return this;
+		} else {
+			tokens.append(newtokens);
+			this.next = super.parseTokens(tokens);
+			return this.next;
+		}
+	}
+
+	@Override
+	public ASTNode exec(ExecContext context) throws ASTExecException {
+		return next.exec(context);
+	}
+
+	@Override
+	protected String dumpString() {
+		return "[split-line]";
+	}
+
+}

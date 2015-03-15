@@ -14,6 +14,10 @@ public class VarFloat extends VarValue {
 		return true;
 	}
 
+	public boolean isNumber() {
+		return true;
+	}
+
 	public String toString() {
 		String s = obj.toString();
 		if (s.endsWith(".0")) {

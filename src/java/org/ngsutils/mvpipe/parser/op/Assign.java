@@ -1,24 +1,37 @@
 package org.ngsutils.mvpipe.parser.op;
 
-import org.ngsutils.mvpipe.exceptions.SyntaxException;
-import org.ngsutils.mvpipe.parser.Tokens;
+import org.ngsutils.mvpipe.exceptions.ASTExecException;
 import org.ngsutils.mvpipe.parser.context.ExecContext;
+import org.ngsutils.mvpipe.parser.tokens.Token;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 
 public class Assign implements Operator {
 
 	@Override
-	public VarValue eval(ExecContext context, VarValue lval, VarValue rval) throws SyntaxException {
-		throw new SyntaxException("Unsupported syntax for operator " + this.getClass().getSimpleName());
+	public VarValue eval(ExecContext context, VarValue lval, VarValue rval) throws ASTExecException {
+		throw new ASTExecException("Unsupported syntax for operator " + this.getClass().getSimpleName());
 	}
 
 	@Override
-	public VarValue eval(ExecContext context, Tokens ltokens, VarValue rval) throws SyntaxException {
-		context.set(ltokens.get(0), rval);
+	public VarValue eval(ExecContext context, Token ltoken, VarValue rval) throws ASTExecException {
+		if (!ltoken.isVariable()) {
+			throw new ASTExecException("Unsupported syntax for operator (missing var) " + this.getClass().getSimpleName());			
+		}
+		context.set(ltoken.getStr(), rval);
 		return rval;
 	}
 	@Override
-	public boolean evalLeft() {
-		return false;
+	public boolean tokenLeft() {
+		return true;
+	}
+
+	@Override
+	public String getSymbol() {
+		return "=";
+	}
+
+	@Override
+	public int getPriority() {
+		return 1000;
 	}
 }

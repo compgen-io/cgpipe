@@ -8,24 +8,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.ngsutils.mvpipe.exceptions.ASTExecException;
+import org.ngsutils.mvpipe.exceptions.ASTParseException;
 import org.ngsutils.mvpipe.exceptions.RunnerException;
-import org.ngsutils.mvpipe.exceptions.SyntaxException;
+import org.ngsutils.mvpipe.exceptions.VarTypeException;
 import org.ngsutils.mvpipe.parser.Parser;
 import org.ngsutils.mvpipe.parser.context.RootContext;
+import org.ngsutils.mvpipe.parser.target.BuildTarget;
 import org.ngsutils.mvpipe.parser.variable.VarBool;
 import org.ngsutils.mvpipe.parser.variable.VarList;
-import org.ngsutils.mvpipe.parser.variable.VarString;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 import org.ngsutils.mvpipe.runner.JobRunner;
-import org.ngsutils.mvpipe.support.SimpleFileLoggerImpl;
-import org.ngsutils.mvpipe.support.SimpleFileLoggerImpl.Level;
 
 public class MVPipe {
-	public static final String RCFILE = (System.getenv("MVPIPE_HOME") != null ? System.getenv("MVPIPE_HOME") : System.getProperty("user.home"))  + File.separator + ".mvpiperc";  
+	public static final String MVPIPE_HOME = (System.getenv("MVPIPE_HOME") != null ? System.getenv("MVPIPE_HOME") : System.getProperty("user.home"));
+	public static final String RCFILE = MVPIPE_HOME  + File.separator + ".mvpiperc";  
 
-	public static void main(String[] args) throws IOException, SyntaxException {
+	public static void main(String[] args) {
 		String fname = null;
 		String logFilename = null;
 		int verbosity = 0;
@@ -42,8 +41,6 @@ public class MVPipe {
 			if (i == 0) {
 				if (new File(arg).exists()) {
 					fname = arg;
-					// default to silent mode when executing as a script
-					silent = true;
 					continue;
 				}
 			} else if (args[i-1].equals("-f")) {
@@ -75,17 +72,22 @@ public class MVPipe {
 				k = arg.substring(2);
 			} else if (k != null) {
 				if (confVals.containsKey(k)) {
-					VarValue val = confVals.get(k);
-					if (val.getClass().equals(VarList.class)) {
-						((VarList) val).add(VarValue.parseString(arg, true));
-					} else {
-						VarList list = new VarList();
-						list.add(val);
-						list.add(VarValue.parseString(arg, true));
-						confVals.put(k, list);
+					try {
+						VarValue val = confVals.get(k);
+						if (val.getClass().equals(VarList.class)) {
+							((VarList) val).add(VarValue.parseStringRaw(arg));
+						} else {
+							VarList list = new VarList();
+							list.add(val);
+							list.add(VarValue.parseStringRaw(arg));
+							confVals.put(k, list);
+						}
+					} catch (VarTypeException e) {
+						System.err.println("Error setting variable: "+k+" => "+arg);
+						System.exit(1);;
 					}
 				} else {
-					confVals.put(k, VarValue.parseString(arg, true));
+					confVals.put(k, VarValue.parseStringRaw(arg));
 				}
 				k = null;
 			} else if (arg.charAt(0) != '-'){
@@ -97,69 +99,113 @@ public class MVPipe {
 			usage();
 			System.exit(1);
 		}
-
-		switch (verbosity) {
-		case 0:
-			SimpleFileLoggerImpl.setLevel(Level.INFO);
-			break;
-		case 1:
-			SimpleFileLoggerImpl.setLevel(Level.DEBUG);
-			break;
-		case 2:
-			SimpleFileLoggerImpl.setLevel(Level.TRACE);
-			break;
-		case 3:
-		default:
-			SimpleFileLoggerImpl.setLevel(Level.ALL);
-			break;
-		}
 		
-		SimpleFileLoggerImpl.setSilent(silent);
-
-		Log log = LogFactory.getLog(MVPipe.class);
-		log.info("Starting new run");
-		
-		RootContext global = new RootContext();
-		for (String k1:confVals.keySet()) {
-			log.info("config: "+k1+" => "+confVals.get(k1).toString());
-			global.set(k1, confVals.get(k1));
-		}
-		if (logFilename != null) {
-			global.set("mvpipe.log", new VarString(logFilename));
-		}
-		
-		Parser parser = new Parser(global);
 		try {
+			// Load config values from global config. 
+			RootContext root = new RootContext();
+			root.pushCWD(MVPIPE_HOME);
 			File rc = new File(RCFILE);
 			if (rc.exists()) {
-				parser.parseFile(rc);
+				// Parse RC file
+				Parser.exec(rc, root);
 			}
-			if (fname.equals("-")) {
-				parser.parseInputStream(System.in);
-			} else {
-				parser.parseFile(fname);
+
+			// Set cmd-line arguments
+			if (silent) {
+				root.setOutputStream(null);
 			}
-		} catch (IOException | SyntaxException e) {
-			log.fatal("MVPIPE ERROR", e);
-			System.exit(1);
-		}
-		
-		try {
-			JobRunner runner = JobRunner.load(global, dryrun);
+			root.update(confVals);
+
+			// Load the job runner *before* we execute the script
+			JobRunner runner = JobRunner.load(root, dryrun);
+			
+			// Parse the AST and run it
+			Parser.exec(fname, root);
+			
 			if (targets.size() > 0) {
-				for (String target:targets) {
-					runner.build(target);
+				for (String target: targets) {
+					List<BuildTarget> targetList = root.build(target);
+					runner.submitAll(targetList, root);
 				}
 			} else {
-				runner.build(null);
+				List<BuildTarget> targetList = root.build();
+				if (targetList != null) {
+					runner.submitAll(targetList, root);
+				}
 			}
 			runner.done();
-		} catch (RunnerException e) {
-			log.fatal("MVPIPE SUBMIT ERROR", e);
-			System.err.flush();
-			System.out.flush();
+
+		} catch (ASTParseException | ASTExecException | RunnerException e) {
+			System.out.println("MVPIPE ERROR " + e.getMessage());
+			if (verbosity > 0) {
+				e.printStackTrace();
+			}
 			System.exit(1);
 		}
+
+		
+//		switch (verbosity) {
+//		case 0:
+//			SimpleFileLoggerImpl.setLevel(Level.INFO);
+//			break;
+//		case 1:
+//			SimpleFileLoggerImpl.setLevel(Level.DEBUG);
+//			break;
+//		case 2:
+//			SimpleFileLoggerImpl.setLevel(Level.TRACE);
+//			break;
+//		case 3:
+//		default:
+//			SimpleFileLoggerImpl.setLevel(Level.ALL);
+//			break;
+//		}
+//		
+//		SimpleFileLoggerImpl.setSilent(silent);
+//
+//		Log log = LogFactory.getLog(MVPipe.class);
+//		log.info("Starting new run");
+//		
+//		RootContext global = new RootContext();
+//		for (String k1:confVals.keySet()) {
+//			log.info("config: "+k1+" => "+confVals.get(k1).toString());
+//			global.set(k1, confVals.get(k1));
+//		}
+//		if (logFilename != null) {
+//			global.set("mvpipe.log", new VarString(logFilename));
+//		}
+		
+//		Parser parser = new Parser(global);
+//		try {
+//			File rc = new File(RCFILE);
+//			if (rc.exists()) {
+//				parser.parseFile(rc);
+//			}
+//			if (fname.equals("-")) {
+//				parser.parseInputStream(System.in);
+//			} else {
+//				parser.parseFile(fname);
+//			}
+//		} catch (IOException | SyntaxException e) {
+//			log.fatal("MVPIPE ERROR", e);
+//			System.exit(1);
+//		}
+//		
+//		try {
+//			JobRunner runner = JobRunner.load(global, dryrun);
+//			if (targets.size() > 0) {
+//				for (String target:targets) {
+//					runner.build(target);
+//				}
+//			} else {
+//				runner.build(null);
+//			}
+//			runner.done();
+//		} catch (RunnerException e) {
+//			log.fatal("MVPIPE SUBMIT ERROR", e);
+//			System.err.flush();
+//			System.out.flush();
+//			System.exit(1);
+//		}
 	}
 
 	private static void showFile(String fname) throws IOException {
@@ -171,13 +217,19 @@ public class MVPipe {
 		is.close();	
 	}
 	
-	private static void usage() throws IOException {
-		showFile("org/ngsutils/mvpipe/USAGE.txt");
+	private static void usage() {
+		try {
+			showFile("org/ngsutils/mvpipe/USAGE.txt");
+		} catch (IOException e) {
+		}
 	}
 
-	private static void license() throws IOException {
-		showFile("LICENSE");
-		showFile("INCLUDES");
+	private static void license() {
+		try {
+			showFile("LICENSE");
+			showFile("INCLUDES");
+		} catch (IOException e) {
+		}
 	}
 
 }

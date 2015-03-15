@@ -1,5 +1,6 @@
 package org.ngsutils.mvpipe.runner;
 
+
 public class ExistingJob implements JobDependency {
 	private String jobid;
 	

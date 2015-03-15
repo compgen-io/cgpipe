@@ -188,9 +188,25 @@ public class StringUtils {
 		return acc;
 	}
 
+	public static String stripIndent(String line, int indent) {
+		int acc = 0;
+		int i=0;
+		for (i=0; i<line.length() && acc < indent; i++) {
+			if (line.charAt(0) == ' ') { 
+				acc +=1;
+			} else if (line.charAt(0) == '\t') { 
+				acc += 4;
+			} else {
+				break;
+			}
+		}
+		return line.substring(i);
+	}
+
 	public static String slurp(InputStream is) throws IOException {
 		return slurp(is, Charset.defaultCharset());
 	}
+
 	public static String slurp(InputStream is, Charset cs) throws IOException {
 		String s="";
 
@@ -201,6 +217,14 @@ public class StringUtils {
 			s += new String(buf, 0, read, cs);
 		}
 		
+		return s;
+	}
+
+	public static String repeat(String str, int indent) {
+		String s = "";
+		for (int i=0; i< indent; i++) {
+			s += str;
+		}
 		return s;
 	}
 

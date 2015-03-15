@@ -1,7 +1,7 @@
 package org.ngsutils.mvpipe.exceptions;
 
 
-public class VarTypeException extends SyntaxException {
+public class VarTypeException extends ASTException {
 
 	public VarTypeException(String msg) {
 		super(msg);

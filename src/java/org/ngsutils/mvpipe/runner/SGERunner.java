@@ -10,28 +10,16 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ngsutils.mvpipe.exceptions.RunnerException;
-import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.support.StringUtils;
 
 public class SGERunner extends JobRunner {
-	private static String[] defaultShellPaths = new String[] {"/bin/bash", "/usr/bin/bash", "/usr/local/bin/bash", "/bin/sh"};
-	
-	private static String findDefaultShell() {
-		for (String path: defaultShellPaths) {
-			if (new File(path).exists()) {
-				return path;
-			}
-		}
-		return null;
-	}
-
 	protected Log log = LogFactory.getLog(SGERunner.class);
 
 	private boolean globalHold = false;
 	private boolean hvmemIsTotal = true;
 	private String account=null;
 	private String parallelEnv = "shm";
-	private String shell = findDefaultShell();
+	private String shell = ShellScriptRunner.findDefaultShell();
 	
 	private int dryRunJobCount = 0;
 
@@ -40,8 +28,7 @@ public class SGERunner extends JobRunner {
 	private JobDependency globalHoldJob = null;
 	
 	@Override
-	public void done() throws RunnerException {
-		super.done();
+	public void innerDone() throws RunnerException {
 		if (jobids.size() > 0) {
 			log.info("submitted jobs: "+StringUtils.join(",", jobids));
 			System.out.println(StringUtils.join("\n", jobids));
@@ -70,8 +57,8 @@ public class SGERunner extends JobRunner {
 	}
 
 	@Override
-	public boolean submit(JobDefinition jobdef) throws RunnerException, SyntaxException {
-		if (jobdef.getSrc().equals("")) {
+	public boolean submit(JobDef jobdef) throws RunnerException {
+		if (jobdef.getBody().equals("")) {
 			return false;
 		}
 		
@@ -143,7 +130,7 @@ public class SGERunner extends JobRunner {
 		}
 	}
 	
-	private String buildScript(JobDefinition jobdef) throws SyntaxException {
+	private String buildScript(JobDef jobdef) {
         String src = "#!" + shell + "\n";
         src += "#$ -w e\n";
         src += "#$ -terse\n";
@@ -232,6 +219,10 @@ public class SGERunner extends JobRunner {
             src += "#$ -e "+jobdef.getSetting("job.stderr")+"\n";
         }
 
+        for (String custom: jobdef.getSettings("job.custom")) {
+            src += "#$ "+custom+"\n";
+        }
+        
         src += "#$ -notify\n";
         src += "FAILED=\"\"\n";
         src += "notify_stop() {\nkill_deps_signal \"SIGSTOP\"\n}\n";
@@ -252,7 +243,7 @@ public class SGERunner extends JobRunner {
         src += "trap notify_kill SIGUSR2\n";
     
         src += "set -o pipefail\nfunc () {\n";
-        src += jobdef.getSrc();
+        src += jobdef.getBody();
         src += "\n  return $?\n}\n";
 
         src += "func\n";
@@ -261,7 +252,7 @@ public class SGERunner extends JobRunner {
         src += "  if [ $RETVAL -ne 0 ]; then\n";
         src += "    kill_deps\n";
         
-        for (String out: jobdef.getOutputFilenames()) {
+        for (String out: jobdef.getOutputs()) {
         	if (!jobdef.getSettingBool("keepfailed", false)) {
         		if (out.charAt(0) != '.') {
         			src += "    if [ -e \""+out+"\" ]; then rm \""+out+"\"; fi\n";

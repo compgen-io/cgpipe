@@ -7,7 +7,7 @@ foo
 test1
 #!/bin/bash
 func_1() {
-    touch three
+touch three
 }
 
 #func_2() {
@@ -17,12 +17,12 @@ func_1() {
 #}
 
 func_2() {
-    touch two
+touch two
 
 }
 
 func_3() {
-    touch one
+touch one
 
 }
 

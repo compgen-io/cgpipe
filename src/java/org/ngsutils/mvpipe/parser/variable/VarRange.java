@@ -2,7 +2,6 @@ package org.ngsutils.mvpipe.parser.variable;
 
 import java.util.Iterator;
 
-import org.ngsutils.mvpipe.exceptions.SyntaxException;
 import org.ngsutils.mvpipe.exceptions.VarTypeException;
 import org.ngsutils.mvpipe.support.StringUtils;
 
@@ -10,7 +9,7 @@ public class VarRange extends VarValue {
 	final private long start;
 	final private long end;
 
-	public VarRange(VarValue from, VarValue to) throws SyntaxException {
+	public VarRange(VarValue from, VarValue to) throws VarTypeException {
 		super(null);
 		
 		if (from.getClass().equals(VarInt.class)) {
@@ -18,7 +17,7 @@ public class VarRange extends VarValue {
 		} else if (from.getClass().equals(VarFloat.class)) {
 			start = ((Double)from.obj).longValue();
 		} else {
-			throw new SyntaxException("Range needs to be on a number!");
+			throw new VarTypeException("Range start is not a number!");
 		}
 		
 
@@ -27,7 +26,7 @@ public class VarRange extends VarValue {
 		} else if (to.getClass().equals(VarFloat.class)) {
 			end = ((Double)to.obj).longValue();
 		} else {
-			throw new SyntaxException("Range needs to be on a number!");
+			throw new VarTypeException("Range end is not a number!");
 		}
 	}
 

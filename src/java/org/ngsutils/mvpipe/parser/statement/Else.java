@@ -1,18 +1,32 @@
 package org.ngsutils.mvpipe.parser.statement;
 
-import org.ngsutils.mvpipe.exceptions.SyntaxException;
-import org.ngsutils.mvpipe.parser.Tokens;
-import org.ngsutils.mvpipe.parser.context.ExecContext;
+import org.ngsutils.mvpipe.exceptions.ASTParseException;
+import org.ngsutils.mvpipe.parser.node.ConditionalNode;
+import org.ngsutils.mvpipe.parser.node.ASTNode;
+import org.ngsutils.mvpipe.parser.tokens.TokenList;
 
 public class Else implements Statement {
 
 	@Override
-	public ExecContext eval(ExecContext context, Tokens tokens) throws SyntaxException {
-		if (tokens.size() > 0) {
-			throw new SyntaxException("Extra fields on else line!");
+	public ASTNode parse(ASTNode parent, final TokenList tokens) throws ASTParseException {
+		ASTNode p = parent;
+		while (p != null) {
+			if (p instanceof ConditionalNode) {
+				ConditionalNode condNode = (ConditionalNode) p;
+				if (!condNode.isDone()) {
+					condNode.elseClause(null);
+					return null;
+//					return new NoOp();
+				}
+			}
+			p = p.getParent();
 		}
-		context.switchActive();
-		return context;
+		
+		throw new ASTParseException("else outside of if-then context! "+parent.getParent(), tokens);
 	}
 
+	@Override
+	public String getName() {
+		return "else";
+	}
 }

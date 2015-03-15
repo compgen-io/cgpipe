@@ -1,123 +1,43 @@
 package org.ngsutils.mvpipe.parser.context;
 
-import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.ngsutils.mvpipe.exceptions.SyntaxException;
-import org.ngsutils.mvpipe.parser.Eval;
-import org.ngsutils.mvpipe.parser.Tokens;
 import org.ngsutils.mvpipe.parser.variable.VarNull;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
-import org.ngsutils.mvpipe.support.SimpleFileLoggerImpl;
+import org.ngsutils.mvpipe.support.StringUtils;
 
 public class ExecContext {
-	protected Log log = LogFactory.getLog(getClass());
 	protected final ExecContext parent;
-	protected String cwd = null;
-			
-	protected Map<String, VarValue> vars = new HashMap<String, VarValue>();
-	protected List<String> matchedOutputs = null;
-	protected List<String> matchedInputs = null;
-	protected String wildcard = null;
-	
-	private boolean active = true;
-	private boolean everActive = true;
+	protected List<String> curPathList = new ArrayList<String>();
 
-	public ExecContext() {
-		// this is the root / global context
+	protected ExecContext() {
 		this.parent = null;
 	}
 	
-	public ExecContext(Map<String, VarValue> vars) {
-		// this is a target context (for-loop)
-		this.parent = null;
-		this.vars.putAll(vars);
-	}
-
 	public ExecContext(ExecContext parent) {
-		// this is a child context (for-loop)
+		if (parent == null) {
+			throw new RuntimeException("Parent context is null");
+		}
 		this.parent = parent;
 	}
 
-	protected ExecContext(ExecContext parent, boolean active) {
-		// this is a child context (for-loop)
-		this.parent = parent;
-		this.active = active;
-		if (!active) {
-			this.everActive = false;
-		}
-	}
+	protected Map<String, VarValue> vars = new HashMap<String, VarValue>();
 
-	public ExecContext(Map<String, VarValue> capturedContext,
-			List<String> matchedOutputs, List<String> matchedInputs,
-			String wildcard) {
-		this.parent = null;
-		this.vars.putAll(capturedContext);
-		this.matchedOutputs = matchedOutputs;
-		this.matchedInputs = matchedInputs;
-		this.wildcard = wildcard;
-		
-	}
-
-	public void setCWD(String cwd) {
-		log.debug("set current working directory: "+cwd);
-		this.cwd = cwd;
-	}
-	
-	public String getCWD() {
-		if (cwd !=null) {
-			return cwd;
-		} else if (parent != null) {
-			return parent.getCWD();
-		}
-		return null;
-	}
-	
-	public ExecContext getParent() {
-		return parent;
-	}
-
-	public boolean isActive() {
-		if (!active) {
-			return false;
-		}
-		if (parent != null) {
-			return parent.isActive();
-		}
-
-		return active;
-	}
-
-	public boolean wasCurrentLevelEverActive() {
-		return everActive;
-	}
-
-	public void switchActive() {
-		active = !active;
-		if (active) {
-			// else if...
-			everActive = true;
-		}
-	}
-	
 	public boolean contains(String name) {
-		if (parent != null) {
-			if (parent.contains(name)) {
-				log.trace("contains? " + name + " parent does!");
-				return true;
-			}
+		if (parent != null && parent.contains(name)) {
+			return true;
 		}	
-		log.trace("contains? " + name + " ? " + vars.containsKey(name));
 		return vars.containsKey(name);
 	}
 	
 	public VarValue get(String name) {
+		if (!contains(name)) {
+			return VarNull.NULL;
+		}
+		
  		if (parent != null && parent.contains(name)) {
 			return parent.get(name);
 		}
@@ -133,14 +53,22 @@ public class ExecContext {
 	}
 
 	public void set(String name, VarValue val) {
+		// we pass all of the values back to the root context
+		// there are only two variable scopes: global or target
+		
+		if (parent != null) {
+			parent.set(name,  val);
+			return;
+		}
+
 		vars.put(name, val);
 		// handle special cases...
 		if (name.equals("mvpipe.log")) {
-			try {
-				SimpleFileLoggerImpl.setFilename(val.toString());
-			} catch (FileNotFoundException e) {
-				log.error(e);
-			}
+//			try {
+//				SimpleFileLoggerImpl.setFilename(val.toString());
+//			} catch (FileNotFoundException e) {
+//				log.error(e);
+//			}
 		}
 	}
 
@@ -164,68 +92,28 @@ public class ExecContext {
 
 		return vars;
 	}
-
-	public ExecContext addTokenizedLine(Tokens tokens) throws SyntaxException {
-		return Eval.evalTokenLine(this,  tokens);
-	}
-
-	public void addTarget(BuildTarget target) {
-		// this should get funneled to a RootContext
-		if (this.parent!=null) {
-			parent.addTarget(target);
+	
+	public void update(Map<String, VarValue> vals) {
+		for (String k: vals.keySet()) {
+			set(k, vals.get(k));
 		}
 	}
-
-	public Set<String> keys() {
-		Set<String> s = new HashSet<String>();
-		populateKeys(s);
-		return s;	
+	
+	public RootContext getRoot() {
+		return parent.getRoot();
 	}
 
-	private void populateKeys(Set<String> s) {
-		s.addAll(vars.keySet());
-		if (parent != null) {
-			parent.populateKeys(s);
+	public void dump() {
+		System.err.println("[CONTEXT VALS] - " + this);
+		for (String k: vars.keySet()) {
+			System.err.println("  " + k + " => " + vars.get(k));
 		}
-	}
 		
-	public VarValue remove(String key) {
-		if (vars.containsKey(key)) {
-			return vars.remove(key);
-		} else if (parent != null){
-			return parent.remove(key);
-		}
-		return VarNull.NULL;
-	}
-
-	public List<String> getMatchedOutputs() {
-		if (matchedOutputs != null) {
-			return matchedOutputs;
-		}
+		System.err.println("  paths:" + StringUtils.join(", ", curPathList));
+		
 		if (parent != null) {
-			return parent.getMatchedOutputs();
+			parent.dump();
 		}
-		return null;
-	}
-
-	public List<String> getMatchedInputs() {
-		if (matchedInputs != null) {
-			return matchedInputs;
-		}
-		if (parent != null) {
-			return parent.getMatchedInputs();
-		}
-		return null;
-	}
-
-	public String getWildcard() {
-		if (wildcard != null) {
-			return wildcard;
-		}
-		if (parent != null) {
-			return parent.getWildcard();
-		}
-		return null;
 	}
 
 }

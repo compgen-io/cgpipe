@@ -13,7 +13,11 @@ public class VarInt extends VarValue {
 		}
 		return true;
 	}
-	
+
+	public boolean isNumber() {
+		return true;
+	}
+
 	public VarValue lt(VarValue val) throws VarTypeException {
 		if (val.getClass().equals(VarInt.class)) {
 			return ((Long)obj < (Long)val.obj) ? VarBool.TRUE: VarBool.FALSE;

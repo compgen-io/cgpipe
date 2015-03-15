@@ -1,7 +1,7 @@
 test = "bar"
 one: foo.gz foo.bar
 
-%.gz: $%
+%.gz: %
     gzip -c $< > $>
 
 foo:
