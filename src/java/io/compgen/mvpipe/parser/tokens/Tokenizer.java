@@ -1,17 +1,17 @@
-package org.ngsutils.mvpipe.parser.tokens;
+package io.compgen.mvpipe.parser.tokens;
+
+import io.compgen.mvpipe.exceptions.ASTParseException;
+import io.compgen.mvpipe.exceptions.VarTypeException;
+import io.compgen.mvpipe.parser.NumberedLine;
+import io.compgen.mvpipe.parser.op.Operator;
+import io.compgen.mvpipe.parser.statement.Statement;
+import io.compgen.mvpipe.parser.variable.VarFloat;
+import io.compgen.mvpipe.parser.variable.VarInt;
+import io.compgen.mvpipe.parser.variable.VarValue;
+import io.compgen.mvpipe.support.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.ngsutils.mvpipe.exceptions.ASTParseException;
-import org.ngsutils.mvpipe.exceptions.VarTypeException;
-import org.ngsutils.mvpipe.parser.NumberedLine;
-import org.ngsutils.mvpipe.parser.op.Operator;
-import org.ngsutils.mvpipe.parser.statement.Statement;
-import org.ngsutils.mvpipe.parser.variable.VarFloat;
-import org.ngsutils.mvpipe.parser.variable.VarInt;
-import org.ngsutils.mvpipe.parser.variable.VarValue;
-import org.ngsutils.mvpipe.support.StringUtils;
 
 public class Tokenizer {
 

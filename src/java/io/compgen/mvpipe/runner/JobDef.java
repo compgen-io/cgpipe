@@ -1,14 +1,14 @@
-package org.ngsutils.mvpipe.runner;
+package io.compgen.mvpipe.runner;
+
+import io.compgen.mvpipe.parser.variable.VarInt;
+import io.compgen.mvpipe.parser.variable.VarValue;
+import io.compgen.mvpipe.support.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import org.ngsutils.mvpipe.parser.variable.VarInt;
-import org.ngsutils.mvpipe.parser.variable.VarValue;
-import org.ngsutils.mvpipe.support.StringUtils;
 
 public class JobDef implements JobDependency {
 	private final String body;

@@ -1,6 +1,6 @@
-package org.ngsutils.mvpipe.parser.node;
+package io.compgen.mvpipe.parser.node;
 
-import org.ngsutils.mvpipe.parser.context.ExecContext;
+import io.compgen.mvpipe.parser.context.ExecContext;
 
 
 

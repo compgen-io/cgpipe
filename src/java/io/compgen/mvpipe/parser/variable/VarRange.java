@@ -1,9 +1,9 @@
-package org.ngsutils.mvpipe.parser.variable;
+package io.compgen.mvpipe.parser.variable;
+
+import io.compgen.mvpipe.exceptions.VarTypeException;
+import io.compgen.mvpipe.support.StringUtils;
 
 import java.util.Iterator;
-
-import org.ngsutils.mvpipe.exceptions.VarTypeException;
-import org.ngsutils.mvpipe.support.StringUtils;
 
 public class VarRange extends VarValue {
 	final private long start;

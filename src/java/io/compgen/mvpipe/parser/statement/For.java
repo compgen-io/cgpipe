@@ -1,9 +1,9 @@
-package org.ngsutils.mvpipe.parser.statement;
+package io.compgen.mvpipe.parser.statement;
 
-import org.ngsutils.mvpipe.exceptions.ASTParseException;
-import org.ngsutils.mvpipe.parser.node.IteratingNode;
-import org.ngsutils.mvpipe.parser.node.ASTNode;
-import org.ngsutils.mvpipe.parser.tokens.TokenList;
+import io.compgen.mvpipe.exceptions.ASTParseException;
+import io.compgen.mvpipe.parser.node.ASTNode;
+import io.compgen.mvpipe.parser.node.IteratingNode;
+import io.compgen.mvpipe.parser.tokens.TokenList;
 
 public class For implements Statement {
 	

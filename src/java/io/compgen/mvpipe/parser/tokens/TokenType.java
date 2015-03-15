@@ -1,4 +1,4 @@
-package org.ngsutils.mvpipe.parser.tokens;
+package io.compgen.mvpipe.parser.tokens;
 
 public enum TokenType {
 	RAW,

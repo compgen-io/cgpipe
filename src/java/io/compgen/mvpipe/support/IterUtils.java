@@ -1,4 +1,4 @@
-package org.ngsutils.mvpipe.support;
+package io.compgen.mvpipe.support;
 
 import java.util.ArrayList;
 import java.util.List;

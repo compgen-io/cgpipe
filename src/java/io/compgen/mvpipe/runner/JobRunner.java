@@ -1,4 +1,13 @@
-package org.ngsutils.mvpipe.runner;
+package io.compgen.mvpipe.runner;
+
+import io.compgen.mvpipe.exceptions.ASTExecException;
+import io.compgen.mvpipe.exceptions.ASTParseException;
+import io.compgen.mvpipe.exceptions.RunnerException;
+import io.compgen.mvpipe.parser.NumberedLine;
+import io.compgen.mvpipe.parser.context.RootContext;
+import io.compgen.mvpipe.parser.target.BuildTarget;
+import io.compgen.mvpipe.parser.variable.VarValue;
+import io.compgen.mvpipe.support.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,14 +25,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ngsutils.mvpipe.exceptions.ASTExecException;
-import org.ngsutils.mvpipe.exceptions.ASTParseException;
-import org.ngsutils.mvpipe.exceptions.RunnerException;
-import org.ngsutils.mvpipe.parser.NumberedLine;
-import org.ngsutils.mvpipe.parser.context.RootContext;
-import org.ngsutils.mvpipe.parser.target.BuildTarget;
-import org.ngsutils.mvpipe.parser.variable.VarValue;
-import org.ngsutils.mvpipe.support.StringUtils;
 
 public abstract class JobRunner {
 	abstract public boolean submit(JobDef jobdef) throws RunnerException;

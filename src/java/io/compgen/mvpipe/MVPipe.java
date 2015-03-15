@@ -1,4 +1,19 @@
-package org.ngsutils.mvpipe;
+package io.compgen.mvpipe;
+
+import io.compgen.mvpipe.exceptions.ASTExecException;
+import io.compgen.mvpipe.exceptions.ASTParseException;
+import io.compgen.mvpipe.exceptions.RunnerException;
+import io.compgen.mvpipe.exceptions.VarTypeException;
+import io.compgen.mvpipe.parser.Parser;
+import io.compgen.mvpipe.parser.context.RootContext;
+import io.compgen.mvpipe.parser.target.BuildTarget;
+import io.compgen.mvpipe.parser.variable.VarBool;
+import io.compgen.mvpipe.parser.variable.VarList;
+import io.compgen.mvpipe.parser.variable.VarString;
+import io.compgen.mvpipe.parser.variable.VarValue;
+import io.compgen.mvpipe.runner.JobRunner;
+import io.compgen.mvpipe.support.SimpleFileLoggerImpl;
+import io.compgen.mvpipe.support.SimpleFileLoggerImpl.Level;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,20 +25,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ngsutils.mvpipe.exceptions.ASTExecException;
-import org.ngsutils.mvpipe.exceptions.ASTParseException;
-import org.ngsutils.mvpipe.exceptions.RunnerException;
-import org.ngsutils.mvpipe.exceptions.VarTypeException;
-import org.ngsutils.mvpipe.parser.Parser;
-import org.ngsutils.mvpipe.parser.context.RootContext;
-import org.ngsutils.mvpipe.parser.target.BuildTarget;
-import org.ngsutils.mvpipe.parser.variable.VarBool;
-import org.ngsutils.mvpipe.parser.variable.VarList;
-import org.ngsutils.mvpipe.parser.variable.VarString;
-import org.ngsutils.mvpipe.parser.variable.VarValue;
-import org.ngsutils.mvpipe.runner.JobRunner;
-import org.ngsutils.mvpipe.support.SimpleFileLoggerImpl;
-import org.ngsutils.mvpipe.support.SimpleFileLoggerImpl.Level;
 
 public class MVPipe {
 	public static final String MVPIPE_HOME = (System.getenv("MVPIPE_HOME") != null ? System.getenv("MVPIPE_HOME") : System.getProperty("user.home"));
@@ -201,7 +202,7 @@ public class MVPipe {
 	
 	private static void usage() {
 		try {
-			showFile("org/ngsutils/mvpipe/USAGE.txt");
+			showFile("io/compgen/mvpipe/USAGE.txt");
 			showFile("VERSION");
 			System.out.println();
 		} catch (IOException e) {

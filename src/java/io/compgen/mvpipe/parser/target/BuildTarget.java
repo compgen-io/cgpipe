@@ -1,22 +1,22 @@
-package org.ngsutils.mvpipe.parser.target;
+package io.compgen.mvpipe.parser.target;
+
+import io.compgen.mvpipe.exceptions.ASTExecException;
+import io.compgen.mvpipe.exceptions.ASTParseException;
+import io.compgen.mvpipe.parser.NumberedLine;
+import io.compgen.mvpipe.parser.context.RootContext;
+import io.compgen.mvpipe.parser.node.ASTNode;
+import io.compgen.mvpipe.parser.node.JobNoOpNode;
+import io.compgen.mvpipe.parser.variable.VarList;
+import io.compgen.mvpipe.parser.variable.VarValue;
+import io.compgen.mvpipe.runner.JobDef;
+import io.compgen.mvpipe.runner.JobDependency;
+import io.compgen.mvpipe.support.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.ngsutils.mvpipe.exceptions.ASTExecException;
-import org.ngsutils.mvpipe.exceptions.ASTParseException;
-import org.ngsutils.mvpipe.parser.NumberedLine;
-import org.ngsutils.mvpipe.parser.context.RootContext;
-import org.ngsutils.mvpipe.parser.node.ASTNode;
-import org.ngsutils.mvpipe.parser.node.JobNoOpNode;
-import org.ngsutils.mvpipe.parser.variable.VarList;
-import org.ngsutils.mvpipe.parser.variable.VarValue;
-import org.ngsutils.mvpipe.runner.JobDef;
-import org.ngsutils.mvpipe.runner.JobDependency;
-import org.ngsutils.mvpipe.support.StringUtils;
 
 public class BuildTarget {
 

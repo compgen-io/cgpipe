@@ -1,10 +1,10 @@
-package org.ngsutils.mvpipe.parser.variable;
+package io.compgen.mvpipe.parser.variable;
+
+import io.compgen.mvpipe.exceptions.VarTypeException;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.ngsutils.mvpipe.exceptions.VarTypeException;
 
 public abstract class VarValue {
 	final protected Object obj;

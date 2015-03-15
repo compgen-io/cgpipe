@@ -1,4 +1,9 @@
-package org.ngsutils.mvpipe.parser.context;
+package io.compgen.mvpipe.parser.context;
+
+import io.compgen.mvpipe.parser.target.BuildTarget;
+import io.compgen.mvpipe.parser.target.BuildTargetTemplate;
+import io.compgen.mvpipe.parser.target.FileExistsBuildTarget;
+import io.compgen.mvpipe.parser.variable.VarValue;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -10,10 +15,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ngsutils.mvpipe.parser.target.BuildTarget;
-import org.ngsutils.mvpipe.parser.target.BuildTargetTemplate;
-import org.ngsutils.mvpipe.parser.target.FileExistsBuildTarget;
-import org.ngsutils.mvpipe.parser.variable.VarValue;
 
 
 public class RootContext extends ExecContext{

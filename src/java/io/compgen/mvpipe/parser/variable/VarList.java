@@ -1,11 +1,11 @@
-package org.ngsutils.mvpipe.parser.variable;
+package io.compgen.mvpipe.parser.variable;
+
+import io.compgen.mvpipe.exceptions.VarTypeException;
+import io.compgen.mvpipe.support.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.ngsutils.mvpipe.exceptions.VarTypeException;
-import org.ngsutils.mvpipe.support.StringUtils;
 
 public class VarList extends VarValue {
 	List<VarValue> vals = new ArrayList<VarValue>();

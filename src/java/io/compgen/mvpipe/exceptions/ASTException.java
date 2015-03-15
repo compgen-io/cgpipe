@@ -1,6 +1,6 @@
-package org.ngsutils.mvpipe.exceptions;
+package io.compgen.mvpipe.exceptions;
 
-import org.ngsutils.mvpipe.parser.NumberedLine;
+import io.compgen.mvpipe.parser.NumberedLine;
 
 
 public class ASTException extends Exception {

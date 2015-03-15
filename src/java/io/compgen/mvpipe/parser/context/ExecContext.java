@@ -1,4 +1,9 @@
-package org.ngsutils.mvpipe.parser.context;
+package io.compgen.mvpipe.parser.context;
+
+import io.compgen.mvpipe.parser.variable.VarNull;
+import io.compgen.mvpipe.parser.variable.VarValue;
+import io.compgen.mvpipe.support.SimpleFileLoggerImpl;
+import io.compgen.mvpipe.support.StringUtils;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -8,10 +13,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ngsutils.mvpipe.parser.variable.VarNull;
-import org.ngsutils.mvpipe.parser.variable.VarValue;
-import org.ngsutils.mvpipe.support.SimpleFileLoggerImpl;
-import org.ngsutils.mvpipe.support.StringUtils;
 
 public class ExecContext {
 	protected final ExecContext parent;

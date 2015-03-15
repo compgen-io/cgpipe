@@ -1,10 +1,10 @@
-package org.ngsutils.mvpipe.parser.tokens;
+package io.compgen.mvpipe.parser.tokens;
+
+import io.compgen.mvpipe.parser.NumberedLine;
+import io.compgen.mvpipe.support.StringUtils;
 
 import java.util.Iterator;
 import java.util.List;
-
-import org.ngsutils.mvpipe.parser.NumberedLine;
-import org.ngsutils.mvpipe.support.StringUtils;
 
 public class TokenList implements Iterable<Token> {
 	final private List<Token> tokens;

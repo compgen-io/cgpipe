@@ -27,8 +27,8 @@
         <copy todir="${build.dir}/classes/">
             <fileset dir="${src.dir}/conf"/>
 		</copy>
-        <copy todir="${build.dir}/classes/org/ngsutils/mvpipe">
-            <fileset file="${src.dir}/java/org/ngsutils/mvpipe/USAGE.txt"/>
+        <copy todir="${build.dir}/classes/io/compgen/mvpipe">
+            <fileset file="${src.dir}/java/io/compgen/mvpipe/USAGE.txt"/>
         </copy>
         <delete file="${build.dir}/classes/VERSION"/>
  		<echo file="${build.dir}/classes/VERSION" message="${ant.project.name}-${version}-${repository.version}"/>
@@ -38,7 +38,7 @@
         <jar destfile="${dist.dir}/${ant.project.name}-${version}-${repository.version}.jar" basedir="${build.dir}/classes"/>
 	    <jarjar jarfile="${dist.dir}/${ant.project.name}.jar.tmp">
             <manifest>
-                <attribute name="Main-Class" value="org.ngsutils.mvpipe.MVPipe"/>
+                <attribute name="Main-Class" value="io.compgen.mvpipe.MVPipe"/>
             </manifest>
 	        <fileset dir="${build.dir}/classes"/>
             <zipfileset src="${lib.dir}/commons-logging-1.2.jar"/>

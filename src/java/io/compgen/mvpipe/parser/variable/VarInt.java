@@ -1,6 +1,6 @@
-package org.ngsutils.mvpipe.parser.variable;
+package io.compgen.mvpipe.parser.variable;
 
-import org.ngsutils.mvpipe.exceptions.VarTypeException;
+import io.compgen.mvpipe.exceptions.VarTypeException;
 
 public class VarInt extends VarValue {
 	public VarInt(long val) {

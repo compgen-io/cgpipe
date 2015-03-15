@@ -1,4 +1,4 @@
-package org.ngsutils.mvpipe.parser.variable;
+package io.compgen.mvpipe.parser.variable;
 
 public class VarBool extends VarValue {
 	

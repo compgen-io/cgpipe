@@ -1,4 +1,12 @@
-package org.ngsutils.mvpipe.parser.target;
+package io.compgen.mvpipe.parser.target;
+
+import io.compgen.mvpipe.exceptions.ASTExecException;
+import io.compgen.mvpipe.parser.Eval;
+import io.compgen.mvpipe.parser.NumberedLine;
+import io.compgen.mvpipe.parser.context.ExecContext;
+import io.compgen.mvpipe.parser.tokens.TokenList;
+import io.compgen.mvpipe.parser.variable.VarValue;
+import io.compgen.mvpipe.support.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,14 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.ngsutils.mvpipe.exceptions.ASTExecException;
-import org.ngsutils.mvpipe.parser.Eval;
-import org.ngsutils.mvpipe.parser.NumberedLine;
-import org.ngsutils.mvpipe.parser.context.ExecContext;
-import org.ngsutils.mvpipe.parser.tokens.TokenList;
-import org.ngsutils.mvpipe.parser.variable.VarValue;
-import org.ngsutils.mvpipe.support.StringUtils;
 
 public class BuildTargetTemplate {
 	final private List<String> outputs = new ArrayList<String>();

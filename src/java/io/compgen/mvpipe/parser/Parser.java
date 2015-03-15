@@ -1,4 +1,11 @@
-package org.ngsutils.mvpipe.parser;
+package io.compgen.mvpipe.parser;
+
+import io.compgen.mvpipe.exceptions.ASTExecException;
+import io.compgen.mvpipe.exceptions.ASTParseException;
+import io.compgen.mvpipe.parser.context.ExecContext;
+import io.compgen.mvpipe.parser.node.ASTNode;
+import io.compgen.mvpipe.parser.node.NoOpNode;
+import io.compgen.mvpipe.support.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -6,13 +13,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
-import org.ngsutils.mvpipe.exceptions.ASTExecException;
-import org.ngsutils.mvpipe.exceptions.ASTParseException;
-import org.ngsutils.mvpipe.parser.context.ExecContext;
-import org.ngsutils.mvpipe.parser.node.ASTNode;
-import org.ngsutils.mvpipe.parser.node.NoOpNode;
-import org.ngsutils.mvpipe.support.StringUtils;
 
 public class Parser {
 	private boolean readOnly = false;

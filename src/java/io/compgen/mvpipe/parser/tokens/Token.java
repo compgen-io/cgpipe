@@ -1,9 +1,9 @@
-package org.ngsutils.mvpipe.parser.tokens;
+package io.compgen.mvpipe.parser.tokens;
 
-import org.ngsutils.mvpipe.parser.op.Operator;
-import org.ngsutils.mvpipe.parser.statement.Statement;
-import org.ngsutils.mvpipe.parser.variable.VarString;
-import org.ngsutils.mvpipe.parser.variable.VarValue;
+import io.compgen.mvpipe.parser.op.Operator;
+import io.compgen.mvpipe.parser.statement.Statement;
+import io.compgen.mvpipe.parser.variable.VarString;
+import io.compgen.mvpipe.parser.variable.VarValue;
 
 public class Token {
 	final private TokenType type;

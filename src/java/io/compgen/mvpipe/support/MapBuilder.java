@@ -1,4 +1,4 @@
-package org.ngsutils.mvpipe.support;
+package io.compgen.mvpipe.support;
 
 import java.util.HashMap;
 import java.util.Map;

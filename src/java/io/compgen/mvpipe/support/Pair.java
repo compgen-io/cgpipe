@@ -1,4 +1,4 @@
-package org.ngsutils.mvpipe.support;
+package io.compgen.mvpipe.support;
 
 public class Pair<X, Y>{
 	public final X one;

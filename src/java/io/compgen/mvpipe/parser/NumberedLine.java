@@ -1,4 +1,4 @@
-package org.ngsutils.mvpipe.parser;
+package io.compgen.mvpipe.parser;
 
 
 public class NumberedLine {

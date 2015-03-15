@@ -1,9 +1,9 @@
-package org.ngsutils.mvpipe.parser.op;
+package io.compgen.mvpipe.parser.op;
 
-import org.ngsutils.mvpipe.exceptions.ASTExecException;
-import org.ngsutils.mvpipe.parser.context.ExecContext;
-import org.ngsutils.mvpipe.parser.tokens.Token;
-import org.ngsutils.mvpipe.parser.variable.VarValue;
+import io.compgen.mvpipe.exceptions.ASTExecException;
+import io.compgen.mvpipe.parser.context.ExecContext;
+import io.compgen.mvpipe.parser.tokens.Token;
+import io.compgen.mvpipe.parser.variable.VarValue;
 
 public abstract class BasicOp implements Operator {
 

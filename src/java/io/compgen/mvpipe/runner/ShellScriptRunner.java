@@ -1,4 +1,6 @@
-package org.ngsutils.mvpipe.runner;
+package io.compgen.mvpipe.runner;
+
+import io.compgen.mvpipe.exceptions.RunnerException;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -6,7 +8,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ngsutils.mvpipe.exceptions.RunnerException;
 
 public class ShellScriptRunner extends JobRunner {
 	private static String[] defaultShellPaths = new String[] {"/bin/bash", "/usr/bin/bash", "/usr/local/bin/bash", "/bin/sh"};

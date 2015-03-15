@@ -1,4 +1,7 @@
-package org.ngsutils.mvpipe.runner;
+package io.compgen.mvpipe.runner;
+
+import io.compgen.mvpipe.exceptions.RunnerException;
+import io.compgen.mvpipe.support.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,8 +12,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ngsutils.mvpipe.exceptions.RunnerException;
-import org.ngsutils.mvpipe.support.StringUtils;
 
 public class SGERunner extends JobRunner {
 	protected Log log = LogFactory.getLog(SGERunner.class);

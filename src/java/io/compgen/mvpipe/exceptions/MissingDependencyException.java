@@ -1,4 +1,4 @@
-package org.ngsutils.mvpipe.exceptions;
+package io.compgen.mvpipe.exceptions;
 
 
 public class MissingDependencyException extends RunnerException {

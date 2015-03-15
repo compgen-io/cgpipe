@@ -1,4 +1,17 @@
-package org.ngsutils.mvpipe.parser;
+package io.compgen.mvpipe.parser;
+
+import io.compgen.mvpipe.exceptions.ASTExecException;
+import io.compgen.mvpipe.exceptions.ASTParseException;
+import io.compgen.mvpipe.exceptions.VarTypeException;
+import io.compgen.mvpipe.parser.context.ExecContext;
+import io.compgen.mvpipe.parser.op.Operator;
+import io.compgen.mvpipe.parser.tokens.Token;
+import io.compgen.mvpipe.parser.tokens.TokenList;
+import io.compgen.mvpipe.parser.tokens.Tokenizer;
+import io.compgen.mvpipe.parser.variable.VarRange;
+import io.compgen.mvpipe.parser.variable.VarString;
+import io.compgen.mvpipe.parser.variable.VarValue;
+import io.compgen.mvpipe.support.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,18 +22,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ngsutils.mvpipe.exceptions.ASTExecException;
-import org.ngsutils.mvpipe.exceptions.ASTParseException;
-import org.ngsutils.mvpipe.exceptions.VarTypeException;
-import org.ngsutils.mvpipe.parser.context.ExecContext;
-import org.ngsutils.mvpipe.parser.op.Operator;
-import org.ngsutils.mvpipe.parser.tokens.Token;
-import org.ngsutils.mvpipe.parser.tokens.TokenList;
-import org.ngsutils.mvpipe.parser.tokens.Tokenizer;
-import org.ngsutils.mvpipe.parser.variable.VarRange;
-import org.ngsutils.mvpipe.parser.variable.VarString;
-import org.ngsutils.mvpipe.parser.variable.VarValue;
-import org.ngsutils.mvpipe.support.StringUtils;
 
 public class Eval {
 	final private static Pattern varPattern = Pattern.compile("^(.*?)\\$\\{([A-Za-z_\\.][a-zA-Z0-9_\\.]*?\\??)\\}(.*?)$");

@@ -1,4 +1,4 @@
-package org.ngsutils.mvpipe.runner;
+package io.compgen.mvpipe.runner;
 
 public interface JobDependency {
 	public String getJobId();

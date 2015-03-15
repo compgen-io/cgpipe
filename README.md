@@ -234,28 +234,27 @@ lines by escaping them with a '\' character before them, such as `\$`.
 
 # Pipeline runners (backends)
 Right now there are 4 available backends for running pipelines: a combined bash
-script (default), SGE/Open Grid Engine, SLURM, and a custom job-runner SJQ
-(simple job queue).
+script (default), SGE/Open Grid Engine, SLURM, and a embedded job-runner SJQ
+(see below).
 
 Job runners are chosen by setting the configuration value `mvpipe.runner` in
 `$HOME/.mvpiperc` to either: 'sge', 'slurm', 'sjq', or 'bash' (default).
+
+Note: Slurm support is still in development 
 
 ## Single server backends
 The bash backend simply takes the computed pipeline and builds a bash script
 that can be executed. This script will maintain the proper dependency order of
 jobs, but will only execute jobs serially. If you want to execute jobs in
-parallel on a single workstation, you can use the SJQ runner. This is a
-single-workstation job queue runner that is included with MVpipe. SJQ will
-run jobs in a FIFO queue based upon their CPU and memory requirements. It is
-designed primarily for running pipelines for a single-user. The benefit of
-using SJQ over a specially constructed bash script to perform parallel jobs is
-that with SJQ, multiple pipelines can be scheduled at once. So, for example,
+parallel on a single workstation, you can use the included Simple Job Queue
+(SJQ). SJQ will run jobs in a FIFO queue based upon their CPU and memory 
+requirements. It is designed for running simple pipelines for a single-user 
+from an MVpipe pipeline. The benefit of using SJQ over a specially constructed
+bash script to perform parallel jobs is that with SJQ, multiple pipelines can be scheduled at once. So, for example,
 if you want to run an analysis pipeline on two samples, SJQ will schedule each
 pipeline together, allowing for more efficient processing. However, SJQ does
 not take into account walltime estimates, so it can be less efficient than
 a traditional scheduler that allows back-filling. 
-
-For more information on SJQ, see: https://github.com/mbreese/sjq.
 
 ## HPC server backends
 The more common use-case for MVpipe, however, is running jobs within an HPC
