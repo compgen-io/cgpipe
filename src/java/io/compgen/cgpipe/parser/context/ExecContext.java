@@ -122,4 +122,15 @@ public class ExecContext {
 		}
 	}
 
+	public VarValue remove(String varName) {
+		if (parent != null && parent.contains(varName)) {
+			return parent.remove(varName);
+		}
+		
+		if (vars.containsKey(varName)) {
+			return vars.remove(varName);
+		}
+		return null;
+	}
+
 }

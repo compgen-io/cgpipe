@@ -17,6 +17,7 @@ public interface Statement {
 	public static final Statement DONE = new Done();
 	public static final Statement INCLUDE = new Include();
 	public static final Statement IN = new In();
+	public static final Statement UNSET = new Unset();
 	
 	public static final Statement[] statements = {
 		PRINT,
@@ -27,6 +28,7 @@ public interface Statement {
 		FOR,
 		DONE,
 		INCLUDE,
-		IN
+		IN,
+		UNSET
 	};
 }
