@@ -194,7 +194,7 @@ public class MVPipe {
 		}
 		int c;
 		while ((c = is.read()) > -1) {
-			System.err.print((char) c);
+			System.out.print((char) c);
 		}
 		is.close();	
 	}
@@ -203,6 +203,7 @@ public class MVPipe {
 		try {
 			showFile("org/ngsutils/mvpipe/USAGE.txt");
 		} catch (IOException e) {
+//			e.printStackTrace();
 		}
 	}
 
@@ -211,6 +212,7 @@ public class MVPipe {
 			showFile("LICENSE");
 			showFile("INCLUDES");
 		} catch (IOException e) {
+//			e.printStackTrace();
 		}
 	}
 

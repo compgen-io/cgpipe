@@ -21,10 +21,13 @@
 
 	<target name="jar" depends="compile, git.revision">
         <copy file="LICENSE" todir="${build.dir}/classes/"/>
-        <copy file="LICENSE" todir="${build.dir}/classes/"/>
+        <copy file="INCLUDES" todir="${build.dir}/classes/"/>
         <copy todir="${build.dir}/classes/">
             <fileset dir="${src.dir}/conf"/>
 		</copy>
+        <copy todir="${build.dir}/classes/org/ngsutils/mvpipe">
+            <fileset file="${src.dir}/java/org/ngsutils/mvpipe/USAGE.txt"/>
+        </copy>
         <delete file="${build.dir}/classes/VERSION"/>
  		<echo file="${build.dir}/classes/VERSION" message="${ant.project.name}-${version}-${repository.version}"/>
 
