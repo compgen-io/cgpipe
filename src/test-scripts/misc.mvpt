@@ -1,0 +1,78 @@
+print  "Hello world!"
+foo="bar"
+bar="bar"
+print "Hello " + foo
+print "foo=${foo}, bar=${bar}"
+include "tmp1.incl"
+print "foo=${foo}, bar=${bar}"
+print "(1 + 2) * 4 = " + ((1 + 2) * 4)
+print "1 + (2 * 4) = " + (1 + (2 * 4))
+print "Hello " + 1 + 1 + " there"
+print true
+
+if foo=="bar" 
+    print "foo==bar!"
+    print "another line?"
+endif
+
+if foo=="baz" 
+    print "foo==baz!"
+else
+    print "foo != baz"
+endif
+
+i = 10
+
+if i < 20 
+    if i > 5 
+        print "5 < i < 20!"
+    else
+        print "i < 5!"
+    endif
+else
+    print "i > 20"
+endif
+
+if foo == "foo"
+    print "foo is foo"
+elif foo == "bar"
+    print "foo is bar"
+else
+    print "foo neither foo, nor bar"
+endif
+
+i = -10
+print i
+
+for j in 1..5
+    print j
+    if j == 4
+        print "Hey!"
+        for k in 22..24
+            print j+","+k
+        done
+    endif
+done
+
+output3: output2
+    touch output3
+
+output1 "output2":
+    #$ if foo == "bar"
+    touch output1.bar
+    #$ else
+    touch output1.notbar
+    #$ endif
+
+    #$ for i in 1..5
+        #$ if i == 4
+            echo "FOUR!"
+        #$ else
+        echo "hi - ${i}"
+        #$ endif
+    #$ done
+
+    touch output@{1..2}
+
+
+print "done"

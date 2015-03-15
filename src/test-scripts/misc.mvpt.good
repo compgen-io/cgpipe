@@ -1,0 +1,40 @@
+Hello world!
+Hello bar
+foo=bar, bar=bar
+foo=bar, bar=baz
+foo=bar, bar=baz
+(1 + 2) * 4 = 12
+1 + (2 * 4) = 9
+Hello 11 there
+true
+foo==bar!
+another line?
+foo != baz
+5 < i < 20!
+foo is bar
+-10
+1
+2
+3
+4
+Hey!
+4,22
+4,23
+4,24
+5
+done
+func_1() {
+touch output1.bar
+    echo "hi - 1"
+    echo "hi - 2"
+    echo "hi - 3"
+        echo "FOUR!"
+    echo "hi - 5"
+touch output1 output2
+}
+func_2() {
+touch output3
+}
+func_1
+func_2
+
