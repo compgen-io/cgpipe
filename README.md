@@ -54,7 +54,7 @@ Any text that is indented in the target is assumed to be part of the script
 that will be used to build the target file(s). When the indent is lost, then
 the target context is closed.
 
-Notes: In both global and target contexts, a for-loops will dynamically add and
+Notes: In both global and target contexts, for-loops will dynamically add and
 remove the iterating variable from the context.
 
 
