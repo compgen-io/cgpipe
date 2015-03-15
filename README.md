@@ -33,30 +33,96 @@ with them.
 
 # Pipeline file syntax
 
-## Evaluated lines
-Any line that starts with `#$` will be evaluated as a CGPipe expression. All
-other lines will be processed for variable substitutions and either
-written to the log file, or included in the target script.
+## Contexts
+There are two contexts in an CGPipe file: global and target. In the global
+context, all uncommented lines are evaluated. Within the target context, 
+any line prefixed with `#$` is evaluated as an CGPipe expression. 
+
+When a target is defined, it captures the existing global context *at
+definition*.
+
+A target is defined using the format:
+
+    output_file1 {output_file2 ... } : {input_file1 input_file2 ...}
+        script snippet
+        #$ cgpipe-expression
+        ...
+        continues
+    # ends with outdent.
+
+Any text that is indented in the target is assumed to be part of the script
+that will be used to build the target file(s). When the indent is lost, then
+the target context is closed.
+
+Notes: In both global and target contexts, a for-loops will dynamically add and
+remove the iterating variable from the context.
+
+
+## Data types
+
+There are 6 primary data types in CGPipe: boolean, float, integer, list, range
+and string. Booleans are either "true" or "false". Strings must be enclosed in
+double quotes. Lists are initialized using the syntax "[]". Ranges can be used
+to iterate over a list of numbers using the syntax "from..to".
+
+Here are some examples:
+
+    foo = "Hello world"
+    foo = 1
+    foo = 1.0
+
+    isvalid = true
+
+    list = []
+    list += "one"
+    list += "two"
+
+    range = 1..10
 
 ## Variables
-`#$ foo = bar` Set a variable
 
-`#$ foo ?= bar` Set a variable if it hasn't already been set
+`foo = bar` Set a variable
 
-`#$ foo += bar` Append a value to a list (if the variable has already been set,
+`foo ?= bar` Set a variable if it hasn't already been set
+
+`foo += bar` Append a value to a list (if the variable has already been set,
 then this will convert that variable to a list)
 
-`#$ unset foo` Unsets a variable. Note: if the variable was used by a target,
+`unset foo` Unsets a variable. Note: if the variable was used by a target,
 it will still be set within the context of the target.
 
 Variables may also be set at the command-line like this: `cgpipe -foo bar -baz 1 -baz 2`.
 This is the same as saying:
 
-    #$ foo = bar
-    #$ baz = 1
-    #$ baz += 2
+    foo = "bar"
+    baz = []
+    baz += 1
+    baz += 2
+
+
+## Math
+
+You can perform basic math on integer and float variables. Available
+operations are:
+* + add
+* - subtract
+* * multiplication
+* / divide (integer division if on an integer)
+* % remainder
+* ** power (2**3 = 8)
+
+Operations are performed in standard order; however, you can also add also parentheses
+around clauses to process things in a different order. For example:
+
+    8 + 2 * 10 = 28
+    (8 + 2) * 10 = 100
+    8 + (2 * 10) = 28
+
 
 ## Variable substitution
+Inside of strings, variables can be substituted. Each string (including build script snippets)
+will be evaluated for variable substitutions.
+
     ${var}          - Variable named "var". If "var" is a list, ${var} will
                       be replaced with a space-separated string with all
                       members of the list. **If "var" hasn't been set, then this
@@ -76,6 +142,18 @@ This is the same as saying:
 
                       {n} and {m} may be variables or integers
 
+### Printing
+
+You can output arbitrary messages to stderr using the "echo" command.
+
+Example:
+
+    echo "Hello world"
+
+    foo = "bar"
+    echo "foo${bar}"
+
+
 ### Shell escaping
 You may also include the results from shell commands as well using the syntax
 `$(command)`. Anything surrounded by `$()` will be executed in the current shell.
@@ -83,48 +161,50 @@ Anything written to stdout can be captured as a variable.
 
 Example:
 
-    #$ submit_host = $(hostname)
-    #$ submit_date = $(date)
+    submit_host = $(hostname)
+    submit_date = $(date)
+
 
 ## If/Else/Endif
 Basic syntax:
 
-    #$ if [condition]
+    if [condition]
        do something...
-    #$ else
+    elif [condition]
+       do something...
+    else
        do something else...
-    #$ endif
+    endif
 
-If clauses can be nested as needed, but you can only specify one clause at a
-time (there is no concept of foo==1 and bar==2)
 
 ### Conditions
-`#$ if ${foo}` - if the variable ${foo} was set
-`#$ if !${foo}` - if the variable ${foo} was not set
+`if foo` - if the variable ${foo} was set
+`if !foo` - if the variable ${foo} was not set or is false
 
-`#$ if ${foo} == bar` - if the variable ${foo} equals the string "bar"
-`#$ if ${foo} != bar` - if the variable ${foo} doesn't equal the string "bar"
+`if foo == "bar"` - if the variable `foo` equals the string "bar"
+`if foo != "bar"` - if the variable `foo` doesn't equal the string "bar"
 
-`#$ if ${foo} < 1`    
-`#$ if ${foo} <= 1`    
-`#$ if ${foo} > 1`    
-`#$ if ${foo} >= 1`    
+`if foo < 1`    
+`if foo <= 1`    
+`if foo > 1`    
+`if foo >= 1`    
 
 
 ## For loops
 Basic syntax:
 
-    #$ for i in {start}..{end}
+    for i in {start}..{end}
        do something...
-    #$ done
+    done
 
-    #$ for i in 1..10
+    for i in 1..10
         do something...
-    #$ done
+    done
 
-    #$ for i in ${list}
+    for i in list
        do something...
-    #$ done
+    done
+
 
 ## Build target definitions
 Targets are the files that you want to create. They are defined on a single
@@ -135,14 +215,14 @@ Any text (indented) after the target definition will be included in the
 script used to build the outputs. The indentation for the first line will be
 removed from all subsequent lines, in case there is a need for indentation to
 be maintained. The indentation can be any number of tabs or spaces. The first
-(non-blank) line will end the target definition. CGPipe expressions can also
-be included in target definitions, but they need to be indented as well.
+(non-blank) line that is at the *same* indentation level as the target
+definition line marks the end of the target definition.
 
-CGPipe expressions can also be evaluated in the target definition. These
+CGPipe expressions can also be evaluated within the target definition. These
 will only be evaluated if the target needs to be built and can be used to 
 dynamically alter the build script. Any variables that are defined within the
 target can only be used within the target. Any global variables are captured
-at the point where the target is defined. Global variables may not altered
+at the point *when the target is defined*. Global variables may not altered
 within a target, but they can be reset within the context of the target
 itself.
 
@@ -164,8 +244,11 @@ thrown.
 ### Wildcards in targets
 Using wildcards, the above could also be rewritten like this:
 
-    %.gz: $1
+    %.gz: %
         gzip -c $< > $>
+
+Note: The '%' is only valid as a wildcard placeholder for inputs / outputs
+of build targets. 
 
 ### Target substitutions
 In addition to global variable substitutions, within a target these
@@ -181,9 +264,6 @@ defined.
     $<              - The list of all inputs
     $<num           - The {num}'th input (starts at 1)
 
-    $num            - If a wildcard was matched for the target-name (%.txt,
-                      for example), the wildcard for output {num}. (Each
-                      output filename can have at most one wildcard).
 
 ### Special targets
 There are four special target names that can be added for any pipeline: 
@@ -199,14 +279,14 @@ the variable `job.nopre` and `job.nopost`.
 
 ## Including other files
 Other Pileline files can be imported into the currently running Pipeline by
-using the `#$ include filename` directive. In this case, the directory of the
+using the `include filename` statement. In this case, the directory of the
 current Pileline file will be searched for 'filename'. If it isn't found, 
 then the current working directory will be searched. If it still isn't found,
 then an ParseError will be thrown.
 
 ## Logging
 You can define a log file to use within the Pileline file. You can do this
-with the `#$ log filename` directive. If an existing log file is active, then
+with the `log filename` directive. If an existing log file is active, then
 it will be closed and the new log file used. By default all output from the
 Pipeline will be written to the last log file specified.
 
@@ -215,7 +295,7 @@ command-line argument.
 
 ## Output logs
 You can keep track of which files are scheduled to be created using an output log.
-Do use this, you can use the `#$ outfile filename` directive. If you set an outfile,
+Do use this, you'll need to set the `cgpipe.outlog` variable. If you set an outfile,
 then in addition to checking the local filesystem to see if a target already exists,
 this file will also be consulted. This file keeps track of outputs that will be made
 by a job. It will then check with the job runner to see if the job is still active.
@@ -224,12 +304,9 @@ This way you can avoid re-submitting the same jobs over and over again if you re
 the Pipeline.
 
 ## Comments
-Comments are started with two `##` characters. If a line starts with only one
-`#`, then it will be evaluated and outputed to the log file (if one exists) or
-the script body for the target.
-
-You may also include the '$' and '@' characters in expressions or evaluated
-lines by escaping them with a '\' character before them, such as `\$`.
+Comments are started with a `#` character. You may also include the '$' and '@'
+characters in strings or evaluated lines by escaping them with a '\' character before 
+them, such as `\$`.
 
 
 # Pipeline runners (backends)
@@ -240,21 +317,8 @@ script (default), SGE/Open Grid Engine, SLURM, and a embedded job-runner SJQ
 Job runners are chosen by setting the configuration value `cgpipe.runner` in
 `$HOME/.cgpiperc` to either: 'sge', 'slurm', 'sjq', or 'bash' (default).
 
-Note: Slurm support is still in development 
+Note: Slurm and SJQ support is still in development 
 
-## Single server backends
-The bash backend simply takes the computed pipeline and builds a bash script
-that can be executed. This script will maintain the proper dependency order of
-jobs, but will only execute jobs serially. If you want to execute jobs in
-parallel on a single workstation, you can use the included Simple Job Queue
-(SJQ). SJQ will run jobs in a FIFO queue based upon their CPU and memory 
-requirements. It is designed for running simple pipelines for a single-user 
-from an CGPipe pipeline. The benefit of using SJQ over a specially constructed
-bash script to perform parallel jobs is that with SJQ, multiple pipelines can be scheduled at once. So, for example,
-if you want to run an analysis pipeline on two samples, SJQ will schedule each
-pipeline together, allowing for more efficient processing. However, SJQ does
-not take into account walltime estimates, so it can be less efficient than
-a traditional scheduler that allows back-filling. 
 
 ## HPC server backends
 The more common use-case for CGPipe, however, is running jobs within an HPC
@@ -346,13 +410,13 @@ Jobs can also be directly executed as part of the pipeline building process.
 Instead of submitting the jobs to a scheduler, the jobs can be put into a
 temporary shell script and executed directly. The global shell will be used
 to run the script. If you would like a job to just run directly without being
-scheduled, set the variable `job.exec=T`. `__setup__` and `__teardown__` can
+scheduled, set the variable `job.shexec=true`. `__setup__` and `__teardown__` can
 also be directly executed instead of scheduled.
 
 One use for this is to setup any output folders that may be required. For example:
 
     __setup__:
-        #$ job.exec = T
+        #$ job.shexec = true
         mkdir -p output
 
 
@@ -360,6 +424,6 @@ Another common use-case for this is having a `clean` target to remove all
 output files to perform a fresh set of calculations. For example:
 
     clean:
-        #$ job.exec = T
+        #$ job.shexec = true
         rm *.bam
 
