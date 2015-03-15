@@ -202,6 +202,8 @@ public class MVPipe {
 	private static void usage() {
 		try {
 			showFile("org/ngsutils/mvpipe/USAGE.txt");
+			showFile("VERSION");
+			System.out.println();
 		} catch (IOException e) {
 //			e.printStackTrace();
 		}
