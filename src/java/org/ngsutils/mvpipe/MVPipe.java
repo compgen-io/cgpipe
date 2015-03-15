@@ -60,6 +60,8 @@ public class MVPipe {
 			
 			if (arg.equals("-h")) {
 				usage();
+				System.exit(1);
+			} else if (arg.equals("-license")) {
 				license();
 				System.exit(1);
 			} else if (arg.equals("-s")) {
@@ -183,54 +185,13 @@ public class MVPipe {
 			}
 			System.exit(1);
 		}
-
-		
-//		
-//		RootContext global = new RootContext();
-//		for (String k1:confVals.keySet()) {
-//			log.info("config: "+k1+" => "+confVals.get(k1).toString());
-//			global.set(k1, confVals.get(k1));
-//		}
-//		if (logFilename != null) {
-//			global.set("mvpipe.log", new VarString(logFilename));
-//		}
-		
-//		Parser parser = new Parser(global);
-//		try {
-//			File rc = new File(RCFILE);
-//			if (rc.exists()) {
-//				parser.parseFile(rc);
-//			}
-//			if (fname.equals("-")) {
-//				parser.parseInputStream(System.in);
-//			} else {
-//				parser.parseFile(fname);
-//			}
-//		} catch (IOException | SyntaxException e) {
-//			log.fatal("MVPIPE ERROR", e);
-//			System.exit(1);
-//		}
-//		
-//		try {
-//			JobRunner runner = JobRunner.load(global, dryrun);
-//			if (targets.size() > 0) {
-//				for (String target:targets) {
-//					runner.build(target);
-//				}
-//			} else {
-//				runner.build(null);
-//			}
-//			runner.done();
-//		} catch (RunnerException e) {
-//			log.fatal("MVPIPE SUBMIT ERROR", e);
-//			System.err.flush();
-//			System.out.flush();
-//			System.exit(1);
-//		}
 	}
 
 	private static void showFile(String fname) throws IOException {
 		InputStream is = MVPipe.class.getClassLoader().getResourceAsStream(fname);
+		if (is == null) {
+			throw new IOException("Can't load file: "+fname);
+		}
 		int c;
 		while ((c = is.read()) > -1) {
 			System.err.print((char) c);

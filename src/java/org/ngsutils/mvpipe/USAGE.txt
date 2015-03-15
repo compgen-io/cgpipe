@@ -13,6 +13,8 @@ Options:
     -v            Verbose logging
     -s            Silence logging to console
     
+    -license      Show the license information
+    
 
     Additional pipeline-specific arguments can be set by using the format:
         --foo bar --arg one --arg two
