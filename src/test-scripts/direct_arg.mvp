@@ -1,5 +1,5 @@
 #!/bin/sh
-dist/mvpipe -nolog --foo bar --arg one --arg two -f - <<EOF 
+dist/cgpipe -nolog --foo bar --arg one --arg two -f - <<EOF 
 print foo
 print arg
 EOF

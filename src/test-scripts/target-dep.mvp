@@ -6,7 +6,7 @@
 touch test/run/output2
 touch test/run/output1
 
-dist/mvpipe -nolog -f - <<EOF
+dist/cgpipe -nolog -f - <<EOF
 
 test/run/output3: test/run/output2
     touch test/run/output3

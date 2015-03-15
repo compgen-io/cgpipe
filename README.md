@@ -1,16 +1,16 @@
-MVpipe - minimum viable pipeline
+CGPipe - minimum viable pipeline
 ====
 
 Make for HPC analysis pipelines
 ----
 
-MVpipe is a replacement for the venerable "make" that aims to automate
+CGPipe is a replacement for the venerable "make" that aims to automate
 the process of running complex analysis pipelines on high-throughput clusters.
 Make is a standard build tool for compiling software. The power of make is
 that it takes a set of instructions for building various files, and given a
 target output, make will determine what commands need to be run in order to
 build those outputs. It basically answers the questions: what inputs are
-needed? and how do I build those inputs? MVpipe aims to perform a similar
+needed? and how do I build those inputs? CGPipe aims to perform a similar
 function for pipelines that run on high-throughput/performance clusters.
 These pipelines can be quite elaborate, but by focusing on specific
 transformations, you can make the pipeline easier to create and run.
@@ -24,7 +24,7 @@ include a grid-aware make replacement. However, it is primarily aimed at
 directly building Makefiles, and that is somewhat limiting for more
 complicated pipelines.
 
-MVpipe is designed to run jobs that don't span multiple nodes. Most
+CGPipe is designed to run jobs that don't span multiple nodes. Most
 bioinformatics pipelines require simple programs that execute on one node with
 one or more threads. More complicated, multi-node jobs (MPI), are likely better
 suited with custom execution scripts. We are willing to accept patches to
@@ -34,7 +34,7 @@ with them.
 # Pipeline file syntax
 
 ## Evaluated lines
-Any line that starts with `#$` will be evaluated as a MVpipe expression. All
+Any line that starts with `#$` will be evaluated as a CGPipe expression. All
 other lines will be processed for variable substitutions and either
 written to the log file, or included in the target script.
 
@@ -49,7 +49,7 @@ then this will convert that variable to a list)
 `#$ unset foo` Unsets a variable. Note: if the variable was used by a target,
 it will still be set within the context of the target.
 
-Variables may also be set at the command-line like this: `mvpipe -foo bar -baz 1 -baz 2`.
+Variables may also be set at the command-line like this: `cgpipe -foo bar -baz 1 -baz 2`.
 This is the same as saying:
 
     #$ foo = bar
@@ -135,10 +135,10 @@ Any text (indented) after the target definition will be included in the
 script used to build the outputs. The indentation for the first line will be
 removed from all subsequent lines, in case there is a need for indentation to
 be maintained. The indentation can be any number of tabs or spaces. The first
-(non-blank) line will end the target definition. MVpipe expressions can also
+(non-blank) line will end the target definition. CGPipe expressions can also
 be included in target definitions, but they need to be indented as well.
 
-MVpipe expressions can also be evaluated in the target definition. These
+CGPipe expressions can also be evaluated in the target definition. These
 will only be evaluated if the target needs to be built and can be used to 
 dynamically alter the build script. Any variables that are defined within the
 target can only be used within the target. Any global variables are captured
@@ -237,8 +237,8 @@ Right now there are 4 available backends for running pipelines: a combined bash
 script (default), SGE/Open Grid Engine, SLURM, and a embedded job-runner SJQ
 (see below).
 
-Job runners are chosen by setting the configuration value `mvpipe.runner` in
-`$HOME/.mvpiperc` to either: 'sge', 'slurm', 'sjq', or 'bash' (default).
+Job runners are chosen by setting the configuration value `cgpipe.runner` in
+`$HOME/.cgpiperc` to either: 'sge', 'slurm', 'sjq', or 'bash' (default).
 
 Note: Slurm support is still in development 
 
@@ -249,7 +249,7 @@ jobs, but will only execute jobs serially. If you want to execute jobs in
 parallel on a single workstation, you can use the included Simple Job Queue
 (SJQ). SJQ will run jobs in a FIFO queue based upon their CPU and memory 
 requirements. It is designed for running simple pipelines for a single-user 
-from an MVpipe pipeline. The benefit of using SJQ over a specially constructed
+from an CGPipe pipeline. The benefit of using SJQ over a specially constructed
 bash script to perform parallel jobs is that with SJQ, multiple pipelines can be scheduled at once. So, for example,
 if you want to run an analysis pipeline on two samples, SJQ will schedule each
 pipeline together, allowing for more efficient processing. However, SJQ does
@@ -257,15 +257,15 @@ not take into account walltime estimates, so it can be less efficient than
 a traditional scheduler that allows back-filling. 
 
 ## HPC server backends
-The more common use-case for MVpipe, however, is running jobs within an HPC
+The more common use-case for CGPipe, however, is running jobs within an HPC
 context. Currently, the only HPC job schedulers that are supported are SGE/Open
-Grid Engine and SLURM. MVpipe integrates with these schedulers by dynamically
+Grid Engine and SLURM. CGPipe integrates with these schedulers by dynamically
 generating job scripts and submitting them to the scheduler by running
 scheduler-specific programs (qsub/sbatch).
 
 ## Specifying requirements
 Resource requirements for each job (output-target) can be set on a per-job
-basis by setting MVpipe variables. Because of the way that variable scoping
+basis by setting CGPipe variables. Because of the way that variable scoping
 works, you can set any of the variables below at the script or job level.
 
 
@@ -293,7 +293,7 @@ works, you can set any of the variables below at the script or job level.
     job.nopost(T/F)| Don't include global post     | [4]  |  X  |   X   |  X  |
 
     * - Memory should be specified as the total amount required for the job, if
-        required, MVpipe will re-calculate the per-processor required memory.
+        required, CGPipe will re-calculate the per-processor required memory.
     
     1, 2 - job.mail has slightly different meanings for SGE and SLURM. For
            each, it corresponds to the `-m` setting.
@@ -305,8 +305,8 @@ works, you can set any of the variables below at the script or job level.
 
 ### Runner specific settings
 You can set runner specific settings by setting config values in
-`$HOME/.mvpiperc`. These settings should be in the form:
-`mvpipe.runner.{runner_name}.{option}`.
+`$HOME/.cgpiperc`. These settings should be in the form:
+`cgpipe.runner.{runner_name}.{option}`.
 
 For SGE, SLURM, and SJQ, you have the option: `global_hold`. If 
 `global_hold` is set to 'T', then a preliminary job will be submitted with a
@@ -332,10 +332,10 @@ is set, then instead of writing the assembled bash script to stdout, the
 script will also be executed.
 
 ### Specifying the shell to use
-MVpipe will attempt to find the correct shell interpreter to use for executing
+CGPipe will attempt to find the correct shell interpreter to use for executing
 scripts. By default it will look for `/bin/bash`, `/usr/bin/bash`, 
 `/usr/local/bin/bash`, or `/bin/sh` (in order of preference). Alternatively,
-you may set the config value `mvpipe.shell` in the `$HOME/.mvpiperc` file to
+you may set the config value `cgpipe.shell` in the `$HOME/.cgpiperc` file to
 set a specific shell binary.
 
 The shell may also be chosen on a per-job basis by setting the `job.shell`

@@ -4,11 +4,11 @@ if [ "$?" -gt 0 ]; then
 	MYSELF="./$0"
 fi
 
-#if [ -e $(dirname $0)/.mvpiperc ]; then
-#    . $(dirname $0)/.mvpiperc
+#if [ -e $(dirname $0)/.cgpiperc ]; then
+#    . $(dirname $0)/.cgpiperc
 #fi
-#if [ -e $HOME/.mvpiperc ]; then
-#    . $HOME/.mvpiperc
+#if [ -e $HOME/.cgpiperc ]; then
+#    . $HOME/.cgpiperc
 #fi
 
 #if [ ! -t 0 ]; then 

@@ -1,4 +1,4 @@
-<project name="mvpipe" default="jar">
+<project name="cgpipe" default="jar">
     <property name="version" value="0.3"/>
     <property name="lib.dir" value="lib"/>
     <property name="build.dir" value="build"/>
@@ -23,22 +23,20 @@
         <copy file="LICENSE" todir="${build.dir}/classes/"/>
         <copy file="INCLUDES" todir="${build.dir}/classes/"/>
         <delete file="${build.dir}/classes/VERSION"/>
-        <echo file="${build.dir}/classes/VERSION" message="mvpipe-${version}-${repository.version}"/>
+        <echo file="${build.dir}/classes/VERSION" message="${ant.project.name}-${version}-${repository.version}"/>
         <copy todir="${build.dir}/classes/">
             <fileset dir="${src.dir}/conf"/>
 		</copy>
-        <copy todir="${build.dir}/classes/io/compgen/mvpipe">
-            <fileset file="${src.dir}/java/io/compgen/mvpipe/USAGE.txt"/>
+        <copy todir="${build.dir}/classes/io/compgen/cgpipe">
+            <fileset file="${src.dir}/java/io/compgen/cgpipe/USAGE.txt"/>
         </copy>
-        <delete file="${build.dir}/classes/VERSION"/>
- 		<echo file="${build.dir}/classes/VERSION" message="${ant.project.name}-${version}-${repository.version}"/>
 
 		<mkdir dir="${dist.dir}"/>
 	    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="${lib.dir}/jarjar-1.4.jar"/>
         <jar destfile="${dist.dir}/${ant.project.name}-${version}-${repository.version}.jar" basedir="${build.dir}/classes"/>
 	    <jarjar jarfile="${dist.dir}/${ant.project.name}.jar.tmp">
             <manifest>
-                <attribute name="Main-Class" value="io.compgen.mvpipe.MVPipe"/>
+                <attribute name="Main-Class" value="io.compgen.cgpipe.CGPipe"/>
             </manifest>
 	        <fileset dir="${build.dir}/classes"/>
             <zipfileset src="${lib.dir}/commons-logging-1.2.jar"/>
