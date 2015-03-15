@@ -1,0 +1,10 @@
+func_1() {
+touch test/run/output2
+}
+
+func_2() {
+touch test/run/output3
+}
+
+func_1
+func_2

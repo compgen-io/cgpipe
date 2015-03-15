@@ -7,10 +7,6 @@ touch bar
 }
 
 func_3() {
-gzip -c foo > foo.gz
-}
-
-func_4() {
 echo "$> = foo.bar"
 echo "$< = foo bar"
 
@@ -19,6 +15,9 @@ echo "$<1 = foo"
 echo "$<2 = bar"
 }
 
+func_4() {
+gzip -c foo > foo.gz
+}
 
 func_1
 func_2

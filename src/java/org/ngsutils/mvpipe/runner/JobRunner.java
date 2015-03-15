@@ -215,6 +215,8 @@ public abstract class JobRunner {
 		}
 		
 		if (lastModified > -1) {
+			// Check to see if the outputName file exists on disk.
+			// Note: this could also be used to look for remote resources.
 			File outputFile = new File(outputName);
 			if (outputFile.exists()) {
 				if (outputFile.lastModified() > lastModified) {

@@ -8,6 +8,8 @@ Options:
     -j joblog     Output a summary of submitted jobs (and their outputs)
 
     -dr           Dry run (Don't actually build targets)
+    
+    -nolog        Suppress logging to stderr
     -v            Verbose logging
     -s            Silence logging to console
     

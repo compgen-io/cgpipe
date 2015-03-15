@@ -35,6 +35,7 @@ public class MVPipe {
 		int verbosity = 0;
 		boolean silent = false;
 		boolean dryrun = false;
+		boolean silenceStdErr = false;
 		
 		List<String> targets = new ArrayList<String>();
 		Map<String, VarValue> confVals = new HashMap<String, VarValue>();
@@ -46,6 +47,7 @@ public class MVPipe {
 			if (i == 0) {
 				if (new File(arg).exists()) {
 					fname = arg;
+					silenceStdErr = true;
 					continue;
 				}
 			} else if (args[i-1].equals("-f")) {
@@ -62,6 +64,8 @@ public class MVPipe {
 				System.exit(1);
 			} else if (arg.equals("-s")) {
 				silent = true;
+			} else if (arg.equals("-nolog")) {
+				silenceStdErr = true;
 			} else if (arg.equals("-v")) {
 				verbosity++;
 			} else if (arg.equals("-vv")) {
@@ -121,7 +125,7 @@ public class MVPipe {
 			break;
 		}
 		
-		SimpleFileLoggerImpl.setSilent(silent);
+		SimpleFileLoggerImpl.setSilent(silenceStdErr);
 
 		Log log = LogFactory.getLog(MVPipe.class);
 		log.info("Starting new run: "+fname);
@@ -161,13 +165,13 @@ public class MVPipe {
 				for (String target: targets) {
 					log.debug("building: "+target);
 
-					BuildTarget targetList = root.build(target);
-					runner.submitAll(targetList, root);
+					BuildTarget initTarget = root.build(target);
+					runner.submitAll(initTarget, root);
 				}
 			} else {
-				BuildTarget targetList = root.build();
-				if (targetList != null) {
-					runner.submitAll(targetList, root);
+				BuildTarget initTarget = root.build();
+				if (initTarget != null) {
+					runner.submitAll(initTarget, root);
 				}
 			}
 			runner.done();
