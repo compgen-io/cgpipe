@@ -27,8 +27,12 @@ public class ShellScriptRunner extends JobRunner {
 	
 	@Override
 	public boolean submit(JobDef jobdef) {
-		jobs.add(jobdef);
-		jobdef.setJobId("func_"+jobs.size());
+		if (!jobdef.getBody().equals("")) {
+			jobs.add(jobdef);
+			jobdef.setJobId("func_"+jobs.size());
+		} else {
+			jobdef.setJobId("");
+		}
 		return true;
 	}
 

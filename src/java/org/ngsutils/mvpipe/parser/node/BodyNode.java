@@ -15,7 +15,7 @@ public class BodyNode extends ASTNode {
 
 	@Override
 	public ASTNode exec(ExecContext context) throws ASTExecException {
-		String evalBody = Eval.evalString(src, context, tokens);
+		String evalBody = Eval.evalString(src, context, parent.tokens);
 		context.getRoot().addBodyLine(evalBody);
 		return next;
 	}

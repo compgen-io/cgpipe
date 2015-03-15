@@ -59,6 +59,7 @@ public class SGERunner extends JobRunner {
 	@Override
 	public boolean submit(JobDef jobdef) throws RunnerException {
 		if (jobdef.getBody().equals("")) {
+			jobdef.setJobId("");
 			return false;
 		}
 		
@@ -74,6 +75,12 @@ public class SGERunner extends JobRunner {
 		jobdef.setJobId(jobid);
 		jobids.add(jobid);
 
+		log.info("SUBMIT JOB: "+jobid);
+		for (String line: src.split("\n")) {
+			log.debug(jobid + " " + line);
+		}
+
+		
 		return true;
 	}
 
@@ -82,6 +89,11 @@ public class SGERunner extends JobRunner {
 		String jobid = submitScript(src);
 		globalHoldJob = new ExistingJob(jobid);
 		jobids.add(jobid);
+
+		log.info("GLOBAL HOLD: "+jobid);
+		for (String line: src.split("\n")) {
+			log.debug(jobid + " " + line);
+		}
 	}
 
 	private String buildGlobalHoldScript() {
@@ -96,9 +108,6 @@ public class SGERunner extends JobRunner {
 	}
 	
 	private String submitScript(String src) throws RunnerException {
-//		for (String line: src.split("\n")) {
-//			log.debug(line);
-//		}
 		if (dryrun) {
 			dryRunJobCount++;
 			return "dryrun." + dryRunJobCount;
@@ -181,7 +190,9 @@ public class SGERunner extends JobRunner {
         if (jobdef.getDependencies().size() > 0) {
         	List<String> depids = new ArrayList<String>();
         	for (JobDependency dep: jobdef.getDependencies()) {
-        		depids.add(dep.getJobId());
+        		if (!dep.getJobId().equals("")) {
+        			depids.add(dep.getJobId());
+        		}
         	}
 
             src += ("#$ -hold_jid "+StringUtils.join(",", depids)+"\n").replaceAll(",,", ",");

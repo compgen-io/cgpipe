@@ -1,6 +1,7 @@
 package org.ngsutils.mvpipe.parser.target;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -20,6 +21,8 @@ public class BuildTargetTemplate {
 	final private List<NumberedLine> lines;
 	final private Map<String, VarValue> capturedContext;
 	
+	private Map<String, BuildTarget> cache = new HashMap<String, BuildTarget>();
+	
 	public BuildTargetTemplate(List<String> outputs, List<String> inputs, ExecContext context, List<NumberedLine> lines, TokenList tokens) throws ASTExecException {
 		// these are copied verbatim.
 		this.capturedContext = context.cloneValues();
@@ -27,11 +30,15 @@ public class BuildTargetTemplate {
 		this.lines = lines; 
 
 		for (String out: outputs) {
-			this.outputs.add(Eval.evalString(out, context, tokens));
+			if (out != null && !out.equals("")) {
+				this.outputs.add(Eval.evalString(out, context, tokens));
+			}
 		}
 
 		for (String in: inputs) {
-			this.inputs.add(Eval.evalString(in, context, tokens));
+			if (in != null && !in.equals("")) {
+				this.inputs.add(Eval.evalString(in, context, tokens));
+			}
 		}
 		
 		if (this.outputs.size() == 0) {
@@ -67,6 +74,11 @@ public class BuildTargetTemplate {
 			return null;
 		}
 		
+		// we want singletons for each wildcard
+		if (cache.containsKey(wildcard)) {
+			return cache.get(wildcard);
+		}
+		
 		List<String> matchedOutputs = new ArrayList<String>();
 		List<String> matchedInputs = new ArrayList<String>();
 
@@ -81,17 +93,21 @@ public class BuildTargetTemplate {
 				matchedOutputs.add(output);
 			}
 		}
-		// replace inputs w/ wildcard
-		for (String input:inputs) {
-			Matcher m = wildPattern.matcher(input);
-			if (m.matches()) {
-				matchedInputs.add(m.group(1)+wildcard+m.group(2));
-			} else {
-				matchedInputs.add(input);
+		if (inputs != null) {
+			// replace inputs w/ wildcard
+			for (String input:inputs) {
+				Matcher m = wildPattern.matcher(input);
+				if (m.matches()) {
+					matchedInputs.add(m.group(1)+wildcard+m.group(2));
+				} else {
+					matchedInputs.add(input);
+				}
 			}
 		}
 
-		return new BuildTarget(matchedOutputs, matchedInputs, capturedContext, lines);
+		BuildTarget tgt = new BuildTarget(matchedOutputs, matchedInputs, capturedContext, lines);
+		cache.put(wildcard, tgt);
+		return tgt;
 	}
 
 	public String getFirstOutput() {

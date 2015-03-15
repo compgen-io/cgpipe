@@ -1,0 +1,17 @@
+__pre__:
+    echo "pre"
+    
+__post__:
+    echo "post"
+
+__setup__:
+    echo "setup"
+
+__teardown__:
+    echo "teardown"
+
+    
+all: foo
+
+foo:
+    echo "foo"

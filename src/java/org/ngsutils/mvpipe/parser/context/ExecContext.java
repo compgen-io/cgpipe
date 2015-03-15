@@ -1,12 +1,16 @@
 package org.ngsutils.mvpipe.parser.context;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ngsutils.mvpipe.parser.variable.VarNull;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
+import org.ngsutils.mvpipe.support.SimpleFileLoggerImpl;
 import org.ngsutils.mvpipe.support.StringUtils;
 
 public class ExecContext {
@@ -25,6 +29,7 @@ public class ExecContext {
 	}
 
 	protected Map<String, VarValue> vars = new HashMap<String, VarValue>();
+	private Log log = LogFactory.getLog(getClass());
 
 	public boolean contains(String name) {
 		if (parent != null && parent.contains(name)) {
@@ -64,11 +69,11 @@ public class ExecContext {
 		vars.put(name, val);
 		// handle special cases...
 		if (name.equals("mvpipe.log")) {
-//			try {
-//				SimpleFileLoggerImpl.setFilename(val.toString());
-//			} catch (FileNotFoundException e) {
-//				log.error(e);
-//			}
+			try {
+				SimpleFileLoggerImpl.setFilename(val.toString());
+			} catch (FileNotFoundException e) {
+				log .error(e);
+			}
 		}
 	}
 

@@ -2,6 +2,7 @@ package org.ngsutils.mvpipe.parser.target;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import org.ngsutils.mvpipe.parser.node.JobNoOpNode;
 import org.ngsutils.mvpipe.parser.variable.VarList;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 import org.ngsutils.mvpipe.runner.JobDef;
+import org.ngsutils.mvpipe.runner.JobDependency;
 import org.ngsutils.mvpipe.support.StringUtils;
 
 public class BuildTarget {
@@ -22,7 +24,11 @@ public class BuildTarget {
 	private List<String> outputs;
 	private Map<String, VarValue> capturedContext;
 	private List<NumberedLine> lines;
+	private boolean skipTarget = false;
+	private JobDependency submittedJobDep=null;
 
+	private Map<String, BuildTarget> deps = new HashMap<String, BuildTarget>();
+	
 	public BuildTarget(List<String> outputs, List<String> inputs, Map<String, VarValue> capturedContext, List<NumberedLine> lines) {
 		this.outputs = outputs;
 		this.inputs = inputs;
@@ -46,10 +52,22 @@ public class BuildTarget {
 		return Collections.unmodifiableList(lines);
 	}
 
+	public Map<String, BuildTarget> getDepends() {
+		return Collections.unmodifiableMap(deps);
+	}
+
+	public void addDep(String file, BuildTarget dep) {
+		this.deps.put(file, dep);
+	}
+
+	public void addDeps(Map<String, BuildTarget> deps) {
+		this.deps.putAll(deps);
+	}
+
 	public JobDef eval(List<NumberedLine> pre, List<NumberedLine> post) throws ASTParseException, ASTExecException {
 		ASTNode headNode = new JobNoOpNode(null);
 		ASTNode curNode = headNode;
-
+	
 		if (lines.size() > 0) {
 			int indent = StringUtils.calcIndentLevel(lines.get(0).line);
 			List<NumberedLine> running = new ArrayList<NumberedLine>();
@@ -84,6 +102,22 @@ public class BuildTarget {
 		}
 
 		return new JobDef(jobRoot.getBody(), jobRoot.cloneValues("job."), outputs);
+	}
+
+	public boolean isSkipTarget() {
+		return skipTarget;
+	}
+
+	public void setSkipTarget(boolean skipTarget) {
+		this.skipTarget = skipTarget;
+	}
+
+	public void setSubmittedJobDep(JobDependency jobDep) {
+		this.submittedJobDep = jobDep;
+	}
+
+	public JobDependency getJobDep() {
+		return this.submittedJobDep;
 	}
 
 }

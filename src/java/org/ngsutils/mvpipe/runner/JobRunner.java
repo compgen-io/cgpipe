@@ -33,13 +33,19 @@ public abstract class JobRunner {
 
 	protected String defaultShell = "/bin/sh";
 	
-	protected Log log = LogFactory.getLog(JobRunner.class);
+	static protected Log log = LogFactory.getLog(JobRunner.class);
 	
 	protected boolean dryrun = false;
 	protected boolean done = false;
 	
 	protected PrintStream joblog = null;
 	protected Map<String, JobDependency> submittedJobs = new HashMap<String, JobDependency>();	 // key = output-file, value = job-id
+
+	private JobDef teardown = null;
+	protected boolean setupRun = false;
+
+	private List<NumberedLine> prelines=null;
+	private List<NumberedLine> postlines=null;
 
 	
 	public static JobRunner load(RootContext cxt, boolean dryrun) throws RunnerException {
@@ -48,7 +54,9 @@ public abstract class JobRunner {
 			runner = "shell";
 		}
 		
+		JobRunner.log.info("job-runner: " +runner);
 		JobRunner obj = null;
+
 		switch (runner) {
 		case "shell":
 			obj = new ShellScriptRunner();
@@ -74,6 +82,7 @@ public abstract class JobRunner {
 
 		// Attempt to load a list of existing jobs
 		String joblog = cxt.getString("mvpipe.joblog");
+		JobRunner.log.info("job-log: " +joblog);
 		if (joblog != null) {
 			try {
 				File jobfile = new File(joblog);
@@ -146,88 +155,152 @@ public abstract class JobRunner {
 	}
 
 	private List<NumberedLine> getLinesForTarget(String name, RootContext context) {
-		List<BuildTarget> list = context.build("__post__");
+		BuildTarget tgt = context.build(name);
 		List<NumberedLine> lines = null;
 		
-		if (list != null && list.size()==1) {
-			lines = list.get(0).getLines();
+		if (tgt != null) {
+			lines = tgt.getLines();
 		}
 		return lines;
 	}
 	
-	public void submitAll(List<BuildTarget> targetList, RootContext context) throws RunnerException {
-		List<NumberedLine> prelines = getLinesForTarget("__pre__", context);
-		List<NumberedLine> postlines = getLinesForTarget("__pre__", context);
-		
-		List<BuildTarget> working = new ArrayList<BuildTarget>(targetList);
-		
-		while (working.size() > 0) {
-			int removeIdx = -1;
-			for (int i=0; i<working.size(); i++) {
-				BuildTarget tgt = working.get(i);
-				
-				boolean needToRun = false;
-				for (String out: tgt.getOutputs()) {
-					if (findJobProviding(out) == null) {
-						needToRun = true;
-						break;
-					}
-				}
-				
-				if (!needToRun) {
-					removeIdx = i;
-					break;
-				}
-				
-				boolean good = true;
-				List<JobDependency> deps = new ArrayList<JobDependency>();
-				for (String input: tgt.getInputs()) {
-					JobDependency depJob = findJobProviding(input);
-					if (depJob == null) {
-						good = false;
-						break;
-					}
-					deps.add(depJob);
-				}
-				
-				if (good) {
-					try {
-						JobDef job = tgt.eval(prelines, postlines);
-						job.addDependencies(deps);
-						submit(job);
-						for (String out: tgt.getOutputs()) {
-							submittedJobs.put(out, job);
+	private void setup(RootContext context) throws RunnerException {
+		if (!setupRun) {
+			setupRun = true;
+			BuildTarget setupTgt = context.build("__setup__");
+			if (setupTgt != null) {
+				try {
+					JobDef setup = setupTgt.eval(null,  null);
+					if (setup.getSettingBool("job.shexec", false)) {
+						if (!dryrun) {
+							shexec(setup);
 						}
-						removeIdx = i;
-						break;
-					} catch (ASTParseException | ASTExecException e) {
-						throw new RunnerException(e);
+					} else {
+						submit(setup);
 					}
+				} catch (ASTParseException | ASTExecException e) {
+					throw new RunnerException(e);
 				}
 			}
-			if (removeIdx == -1) {
-				throw new RunnerException("Could find find a valid dependency graph!");
-			} else {
-				working.remove(removeIdx);
+
+			BuildTarget tdTgt = context.build("__teardown__");
+			if (tdTgt!=null) {
+				try {
+					teardown = tdTgt.eval(null,  null);
+				} catch (ASTParseException | ASTExecException e) {
+					throw new RunnerException(e);
+				}
 			}
+
+			prelines = getLinesForTarget("__pre__", context);
+			postlines = getLinesForTarget("__post__", context);
 		}
 	}
 	
-	private JobDependency findJobProviding(String input) {
-		if (submittedJobs.containsKey(input)) {
-			return submittedJobs.get(input);
+	public void submitAll(BuildTarget initialTarget, RootContext context) throws RunnerException {
+		setup(context);
+		markSkippable(initialTarget, context, initialTarget.getOutputs().get(0));
+		submitTargets(initialTarget, context, initialTarget.getOutputs().get(0));
+	}
+
+	private long markSkippable(BuildTarget target, RootContext context, String outputName) throws RunnerException {
+		long lastModified = 0;
+		for (String dep: target.getDepends().keySet()) {
+			long depLastMod = markSkippable(target.getDepends().get(dep), context, dep);
+			if (depLastMod == -1) {
+				lastModified = -1;
+			} else if (depLastMod > lastModified) {
+				lastModified = depLastMod;
+			}
 		}
 		
-		File f = new File(input);
-		if (f.exists()) {
-			JobDependency existing = new ExistingFile(f);
-			submittedJobs.put(input, existing);
-			return existing;
+		if (lastModified > -1) {
+			File outputFile = new File(outputName);
+			if (outputFile.exists()) {
+				if (outputFile.lastModified() > lastModified) {
+					log.debug("Marking output-target as skippable: "+outputName);
+					target.setSkipTarget(true);
+					return outputFile.lastModified();
+				}
+			}
+		}
+
+		log.debug("Marking output-target as not skippable: "+outputName + ((lastModified > -1) ? " older than dep" : " dep doesn't exist or will be submitted"));
+		target.setSkipTarget(false);
+		return -1;
+	}
+
+	private JobDependency submitTargets(BuildTarget target, RootContext context, String outputName) throws RunnerException {
+		// Can we skip this target (file exists)
+		if (target.isSkipTarget()) {
+			return null;
+		}
+		
+		// Has it already been submitted in another part of the tree?
+		if (target.getJobDep() != null) {
+			return target.getJobDep();
+		}
+
+		// Have we already submitted this job in a prior run?
+		JobDependency depJob = findJobProviding(outputName);
+		if (depJob != null) {
+			return depJob;
+		}
+		
+		// Okay... we are submitting this job, start with submitting it's dependencies...
+		
+		List<JobDependency> deps = new ArrayList<JobDependency>();
+		
+		try {
+			for (String out: target.getDepends().keySet()) {
+				JobDependency dep = submitTargets(target.getDepends().get(out), context, out);
+				if (dep != null) {
+					deps.add(dep);
+				}
+			}
+		
+			JobDef job = target.eval(prelines, postlines);
+			job.addDependencies(deps);
+			submit(job);
+			
+			if (job.getJobId() == null) {
+				abort();
+				log.error("Error submitting job: "+ target);
+				throw new RunnerException("Error submitting job: "+job);
+			}
+			log.debug("submitted: "+ job.getJobId()+" ("+job.getName()+")");
+			
+			target.setSubmittedJobDep(job);
+			for (String out: target.getOutputs()) {
+				submittedJobs.put(out, job);
+			}
+			return job;
+		} catch (ASTParseException | ASTExecException e) {
+			abort();
+			throw new RunnerException(e);
+		}
+	}	
+
+	private JobDependency findJobProviding(String input) {
+		log.trace("Looking for output: "+ input);
+
+		if (submittedJobs.containsKey(input)) {
+			log.debug("Found job providing: "+ input + " ("+submittedJobs.get(input).getJobId()+")");
+			return submittedJobs.get(input);
 		}
 		
 		return null;
 	}
 	public void done() throws RunnerException {
+		if (teardown != null) {
+			if (teardown.getSettingBool("job.shexec", false)) {
+				if (!dryrun) {
+					shexec(teardown);
+				}
+			} else {
+				submit(teardown);
+			}
+		}
 		innerDone();
 	}
 }

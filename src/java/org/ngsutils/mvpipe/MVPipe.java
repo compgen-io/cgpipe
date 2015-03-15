@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ngsutils.mvpipe.exceptions.ASTExecException;
 import org.ngsutils.mvpipe.exceptions.ASTParseException;
 import org.ngsutils.mvpipe.exceptions.RunnerException;
@@ -17,8 +19,11 @@ import org.ngsutils.mvpipe.parser.context.RootContext;
 import org.ngsutils.mvpipe.parser.target.BuildTarget;
 import org.ngsutils.mvpipe.parser.variable.VarBool;
 import org.ngsutils.mvpipe.parser.variable.VarList;
+import org.ngsutils.mvpipe.parser.variable.VarString;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 import org.ngsutils.mvpipe.runner.JobRunner;
+import org.ngsutils.mvpipe.support.SimpleFileLoggerImpl;
+import org.ngsutils.mvpipe.support.SimpleFileLoggerImpl.Level;
 
 public class MVPipe {
 	public static final String MVPIPE_HOME = (System.getenv("MVPIPE_HOME") != null ? System.getenv("MVPIPE_HOME") : System.getProperty("user.home"));
@@ -100,6 +105,31 @@ public class MVPipe {
 			System.exit(1);
 		}
 		
+		switch (verbosity) {
+		case 0:
+			SimpleFileLoggerImpl.setLevel(Level.INFO);
+			break;
+		case 1:
+			SimpleFileLoggerImpl.setLevel(Level.DEBUG);
+			break;
+		case 2:
+			SimpleFileLoggerImpl.setLevel(Level.TRACE);
+			break;
+		case 3:
+		default:
+			SimpleFileLoggerImpl.setLevel(Level.ALL);
+			break;
+		}
+		
+		SimpleFileLoggerImpl.setSilent(silent);
+
+		Log log = LogFactory.getLog(MVPipe.class);
+		log.info("Starting new run: "+fname);
+
+		if (logFilename != null) {
+			confVals.put("mvpipe.log", new VarString(logFilename));
+		}
+
 		try {
 			// Load config values from global config. 
 			RootContext root = new RootContext();
@@ -114,21 +144,28 @@ public class MVPipe {
 			if (silent) {
 				root.setOutputStream(null);
 			}
+
+			for (String k1:confVals.keySet()) {
+				log.info("config: "+k1+" => "+confVals.get(k1).toString());
+			}
+
 			root.update(confVals);
 
-			// Load the job runner *before* we execute the script
-			JobRunner runner = JobRunner.load(root, dryrun);
-			
 			// Parse the AST and run it
 			Parser.exec(fname, root);
-			
+
+			// Load the job runner *after* we execute the script to capture any config changes
+			JobRunner runner = JobRunner.load(root, dryrun);
+
 			if (targets.size() > 0) {
 				for (String target: targets) {
-					List<BuildTarget> targetList = root.build(target);
+					log.debug("building: "+target);
+
+					BuildTarget targetList = root.build(target);
 					runner.submitAll(targetList, root);
 				}
 			} else {
-				List<BuildTarget> targetList = root.build();
+				BuildTarget targetList = root.build();
 				if (targetList != null) {
 					runner.submitAll(targetList, root);
 				}
@@ -144,26 +181,6 @@ public class MVPipe {
 		}
 
 		
-//		switch (verbosity) {
-//		case 0:
-//			SimpleFileLoggerImpl.setLevel(Level.INFO);
-//			break;
-//		case 1:
-//			SimpleFileLoggerImpl.setLevel(Level.DEBUG);
-//			break;
-//		case 2:
-//			SimpleFileLoggerImpl.setLevel(Level.TRACE);
-//			break;
-//		case 3:
-//		default:
-//			SimpleFileLoggerImpl.setLevel(Level.ALL);
-//			break;
-//		}
-//		
-//		SimpleFileLoggerImpl.setSilent(silent);
-//
-//		Log log = LogFactory.getLog(MVPipe.class);
-//		log.info("Starting new run");
 //		
 //		RootContext global = new RootContext();
 //		for (String k1:confVals.keySet()) {

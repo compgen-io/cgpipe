@@ -4,11 +4,15 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ngsutils.mvpipe.parser.target.BuildTarget;
 import org.ngsutils.mvpipe.parser.target.BuildTargetTemplate;
+import org.ngsutils.mvpipe.parser.target.FileExistsBuildTarget;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
 
 
@@ -20,7 +24,8 @@ public class RootContext extends ExecContext{
 	private String body = "";
 
 	private PrintStream outputStream = System.out;
-	
+	private Log log = LogFactory.getLog(getClass());
+
 	public RootContext() {
 		super();
 		this.outputs = null;
@@ -41,6 +46,7 @@ public class RootContext extends ExecContext{
 	}
 
 	public void addTarget(BuildTargetTemplate targetDef) {
+		log.trace("Adding build-target: " + targetDef);
 		this.targets.add(targetDef);
 	}
 	
@@ -48,19 +54,13 @@ public class RootContext extends ExecContext{
 		return this;
 	}
 
-	public List<BuildTarget> build() {
+	public BuildTarget build() {
 		return build(null);
 	}
 	
-	public List<BuildTarget> build(String output) { 
-		List<BuildTarget> targetsToRun = new ArrayList<BuildTarget>();
-		if (build(output, targetsToRun)) {
-			return targetsToRun;
-		}
-		return null;
-	}
+	public BuildTarget build(String output) {
+		log.trace("Looking for build-target: " + output);
 
-	private boolean build(String output, List<BuildTarget> targetsToRun) {
 		BuildTarget tgt = null;
 		
 		for (BuildTargetTemplate tgtdef: targets) {
@@ -69,28 +69,33 @@ public class RootContext extends ExecContext{
 				continue;
 			}
 
-//			System.err.println("output: "+output+ " => "+tgt);
-			
-			List<BuildTarget> deps = new ArrayList<BuildTarget>();
-			for (String input: tgt.getInputs()) {
-				 if (!build(input, deps)) {
-					 System.err.println("Couldn't find target to build: "+ input);
-					 return false;
-				 }
+			if (output == null) {
+				output = tgt.getOutputs().get(0);
 			}
-			targetsToRun.addAll(0, deps);
-			targetsToRun.add(tgt);
-			return true;
+			
+			Map<String, BuildTarget> deps = new HashMap<String, BuildTarget>();
+			
+			for (String input: tgt.getInputs()) {
+				BuildTarget dep = build(input);
+				if (dep == null) {
+					log.error("Couldn't find target to build: "+ input);
+					return null;
+				}
+				deps.put(input, dep);
+			}
+			tgt.addDeps(deps);
+			log.debug("output: "+output+" provider: "+tgt);
+			return tgt;
 		}
 		
 		if (output!=null && new File(output).exists()) {
 			// If we have the build-target for an input, we'll find it above
 			// otherwise, if the file exists on disk, we don't necessarily 
 			// need to rebuild it. 
-			return true;
+			return new FileExistsBuildTarget(output);
 		}
 		
-		return false;
+		return null;
 	}
 	
 	public void addBodyLine(String body) {

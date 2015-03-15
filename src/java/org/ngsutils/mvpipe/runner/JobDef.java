@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.ngsutils.mvpipe.parser.variable.VarInt;
 import org.ngsutils.mvpipe.parser.variable.VarValue;
+import org.ngsutils.mvpipe.support.StringUtils;
 
 public class JobDef implements JobDependency {
 	private final String body;
@@ -26,7 +27,11 @@ public class JobDef implements JobDependency {
 	public void setJobId(String jobId) {
 		this.jobId = jobId;
 	}
-	
+
+	public String toString() {
+		return "<jobdef> " + StringUtils.join(" ", outputs);
+	}
+
 	public String getJobId() {
 		return jobId;
 	}

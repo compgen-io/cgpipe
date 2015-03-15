@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ngsutils.mvpipe.exceptions.ASTExecException;
 import org.ngsutils.mvpipe.exceptions.ASTParseException;
 import org.ngsutils.mvpipe.exceptions.VarTypeException;
@@ -22,11 +24,13 @@ import org.ngsutils.mvpipe.support.StringUtils;
 
 public class Eval {
 	final private static Pattern varPattern = Pattern.compile("^(.*?)\\$\\{([A-Za-z_\\.][a-zA-Z0-9_\\.]*?\\??)\\}(.*?)$");
+	final private static Pattern shellPattern = Pattern.compile("^(.*?)\\$\\(([A-Za-z_\\.][a-zA-Z0-9_\\.]*?\\??)\\)(.*?)$");
 	final private static Pattern listPattern = Pattern.compile("^(.*?)([^ \t]*)@\\{([A-Za-z_\\.][a-zA-Z0-9_\\.]*?\\??)\\}([^ \t]*)(.*?)$");
 	final private static Pattern rangePattern = Pattern.compile("^(.*?)([^ \t]*)@\\{([a-zA-Z0-9_\\.]*?)\\.\\.([a-zA-Z0-9_\\.]*?)\\}([^ \t]*)(.*?)$");
 
 	final private static Pattern outputPattern = Pattern.compile("^(.*?)\\$>([0-9]*)(.*?)$");
 	final private static Pattern inputPattern = Pattern.compile("^(.*?)\\$<([0-9]*)(.*?)$");
+	private static Log log = LogFactory.getLog(Eval.class);
 
 	public static VarValue evalTokenExpression(TokenList tokens, ExecContext context) throws ASTExecException {
 //		System.err.println("TOKENS: " + tokens);
@@ -136,10 +140,12 @@ public class Eval {
 	public static String evalString(String str, ExecContext context, TokenList tokens) throws ASTExecException {
 		String tmp = "";
 		tmp = evalStringVar(str, context, tokens);
+		tmp = evalStringShell(tmp, context, tokens);
 		tmp = evalStringList(tmp, context, tokens);
 		tmp = evalStringRange(tmp, context, tokens);
 		tmp = evalStringInputs(tmp, context, tokens);
 		tmp = evalStringOutputs(tmp, context, tokens);
+		log .trace("eval string: "+str+" => "+tmp);
 		return tmp;
 	}
 
@@ -176,6 +182,29 @@ public class Eval {
 		return tmp;
 	}
 	
+	private static String evalStringShell(String str, ExecContext context, TokenList tokens) throws ASTExecException {
+		String tmp = "";
+		while (str.length() > 0) {
+			Matcher m = shellPattern.matcher(str);
+			if (m.matches()) {
+				if (m.group(1).endsWith("\\")) {
+					tmp += m.group(1).substring(0,m.group(1).length()-1);
+					tmp += "$(" + m.group(2)+")";
+					str = m.group(3);
+				} else {
+					tmp += m.group(1);
+					tmp += Eval.execScript(m.group(2));
+					str = m.group(3);
+				}
+			} else {
+				tmp += str;
+				break;
+			}
+		}
+		return tmp;
+	}
+	
+
 	
 	private static String evalStringList(String str, ExecContext context, TokenList tokens) throws ASTExecException {
 		String tmp = "";
@@ -351,10 +380,6 @@ public class Eval {
 			String out = StringUtils.slurp(is);
 			String err = StringUtils.slurp(es);
 
-//			log.trace("retcode: "+retcode);
-//			log.trace("stdout: " + out);
-//			log.trace("stderr: " + err);
-			
 			is.close();
 			es.close();
 			

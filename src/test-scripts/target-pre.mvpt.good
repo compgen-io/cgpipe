@@ -1,0 +1,17 @@
+func_1() {
+echo "setup"
+}
+
+func_2() {
+echo "pre"
+echo "foo"
+echo "post"
+}
+
+func_3() {
+echo "teardown"
+}
+
+func_1
+func_2
+func_3
