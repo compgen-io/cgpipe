@@ -295,13 +295,14 @@ command-line argument.
 
 ## Output logs
 You can keep track of which files are scheduled to be created using an output log.
-Do use this, you'll need to set the `cgpipe.outlog` variable. If you set an outfile,
+Do use this, you'll need to set the `cgpipe.joblog` variable. If you set a joblog,
 then in addition to checking the local filesystem to see if a target already exists,
-this file will also be consulted. This file keeps track of outputs that will be made
-by a job. It will then check with the job runner to see if the job is still active.
+the joblog will also be consulted. This file keeps track of outputs that have already
+been submitted to the job scheduler. CGPipe will also check with the job runner,
+to verify that the job is still valid (running or queued).
 
 This way you can avoid re-submitting the same jobs over and over again if you re-run
-the Pipeline.
+the pipeline.
 
 ## Comments
 Comments are started with a `#` character. You may also include the '$' and '@'
