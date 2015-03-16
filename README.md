@@ -105,12 +105,12 @@ This is the same as saying:
 You can perform basic arithmetic on integer and float variables. Available
 operations are:
 
-* + add
-* - subtract
-* * multiplication
-* / divide (integer division if on an integer)
-* % remainder
-* ** power (2**3 = 8)
+* `+` add
+* `-` subtract
+* `*` multiplication
+* `/` divide (integer division if on an integer)
+* `%` remainder
+* `**` power (2**3 = 8)
 
 Operations are performed in standard order; however, you can also add also parentheses
 around clauses to process things in a different order. For example:
@@ -124,11 +124,15 @@ around clauses to process things in a different order. For example:
 
 You can perform basic logic operations as well:
 
-* && and
-* || or
-* ! not (or is unset)
-* == equals
-* != not equals
+* `&&` and
+* `||` or
+* `!` not (or is unset)
+* `==` equals
+* `!=` not equals
+* `<` less than
+* `<=` less than or equals
+* `>` greater than
+* `>=` greater than or equals
 
 You can chain these together to form more complex conditions. For example:
 
