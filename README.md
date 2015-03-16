@@ -102,8 +102,9 @@ This is the same as saying:
 
 ## Math
 
-You can perform basic math on integer and float variables. Available
+You can perform basic arithmetic on integer and float variables. Available
 operations are:
+
 * + add
 * - subtract
 * * multiplication
@@ -117,6 +118,26 @@ around clauses to process things in a different order. For example:
     8 + 2 * 10 = 28
     (8 + 2) * 10 = 100
     8 + (2 * 10) = 28
+
+
+## Logic
+
+You can perform basic logic operations as well:
+
+* && and
+* || or
+* ! not (or is unset)
+* == equals
+* != not equals
+
+You can chain these together to form more complex conditions. For example:
+
+    foo = "bar"
+    baz = 12
+
+    if foo == "bar" && baz < 20
+        print "test"
+    endif
 
 
 ## Variable substitution
