@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class IterUtils {
+	public interface MapFunc<T, V> {
+		public V map(T obj);
+	}
+
 	public interface FilterFunc<T> {
 		public boolean filter(T val);
 	}
@@ -17,5 +21,16 @@ public class IterUtils {
 		}
 		return ret;
 	}
-	
+
+	public static <T, V> Iterable<V> map(Iterable<T> l, MapFunc<T,V> func) {
+		List<V> ret = new ArrayList<V>();
+		for (T val: l) {
+			V retval = func.map(val);
+			if (retval != null) {
+				ret.add(retval);
+			}
+		}
+		return ret;
+	}
+
 }	

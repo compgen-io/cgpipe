@@ -27,8 +27,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class CGPipe {
-	public static final String CGPIPE_HOME = (System.getenv("CGPIPE_HOME") != null ? System.getenv("CGPIPE_HOME") : System.getProperty("user.home"));
-	public static final String RCFILE = CGPIPE_HOME  + File.separator + ".cgpiperc";  
+	public static final File CGPIPE_HOME = new File(System.getenv("CGPIPE_HOME") != null ? System.getenv("CGPIPE_HOME") : System.getProperty("user.home"));
+	public static final File RCFILE = new File(CGPIPE_HOME,".cgpiperc");  
 
 	public static void main(String[] args) {
 		String fname = null;
@@ -140,11 +140,11 @@ public class CGPipe {
 		try {
 			// Load config values from global config. 
 			RootContext root = new RootContext();
-			root.pushCWD(CGPIPE_HOME);
-			File rc = new File(RCFILE);
-			if (rc.exists()) {
-				// Parse RC file
-				Parser.exec(rc, root);
+			root.pushCWD(CGPIPE_HOME.getAbsolutePath());
+
+			// Parse RC file
+			if (RCFILE.exists()) {
+				Parser.exec(RCFILE, root);
 			}
 
 			// Set cmd-line arguments
@@ -164,6 +164,7 @@ public class CGPipe {
 			// Load the job runner *after* we execute the script to capture any config changes
 			JobRunner runner = JobRunner.load(root, dryrun);
 
+			// find a build-target, and submit the job(s) to a runner
 			if (targets.size() > 0) {
 				for (String target: targets) {
 					log.debug("building: "+target);

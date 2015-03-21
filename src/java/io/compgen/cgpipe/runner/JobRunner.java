@@ -65,6 +65,9 @@ public abstract class JobRunner {
 		case "sge":
 			obj = new SGERunner();
 			break;
+		case "sjq":
+			obj = new SJQRunner();
+			break;
 		default:
 			throw new RunnerException("Can't load job runner: "+runner);
 		}

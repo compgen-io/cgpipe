@@ -1,5 +1,9 @@
 package io.compgen.cgpipe.support;
 
+import io.compgen.cgpipe.support.IterUtils.MapFunc;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -9,9 +13,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class StringUtils {
-	public interface MapFunc<T, V> {
-		public V map(T obj);
-	}
 	public static String strip(String str) {
 		return lstrip(rstrip(str));
 	}
@@ -227,5 +228,42 @@ public class StringUtils {
 		}
 		return s;
 	}
+	
+	public static String readFile(String filename) throws IOException {
+		InputStream is;
+		if (filename.equals("-")) {
+			is = System.in;
+		} else {
+			is = new FileInputStream(filename);
+		}
+		String s = readStream(is);
+		if (is != System.in) {
+			is.close();
+		}
+		
+		return s;
+	}
+
+	public static String readFile(File file) throws IOException {
+		InputStream is = new FileInputStream(file);
+		String s = readStream(is);
+		is.close();
+		return s;
+	}
+
+	private static String readStream(InputStream is) throws IOException {
+		String s = null;
+		byte[] buf = new byte[4096];
+		int read = 0;
+		while ((read = is.read(buf, 0, buf.length)) > -1) {
+			if (s == null) {
+				s = "";
+			}
+			s += new String(buf,0,read);
+		}
+		return s;
+		
+	}
+	
 
 }
