@@ -304,6 +304,10 @@ public abstract class JobRunner {
 		}
 		
 		innerDone();
+
+		if (joblog!=null) {
+			joblog.close();
+		}
 	}
 	
 	protected void logJob(JobDef job) {
