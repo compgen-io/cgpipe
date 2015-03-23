@@ -66,6 +66,7 @@ public class SJQRunner extends JobRunner {
 				throw new RunnerException(e);
 			}
 		}
+		
 		try {
 			String jobId = client.submitJob(jobdef.getName(), jobdef.getBody(), 
 					((int)jobdef.getSettingInt("job.procs", 1)), jobdef.getSetting("job.mem"), 
@@ -78,6 +79,10 @@ public class SJQRunner extends JobRunner {
 						}}));
 			jobdef.setJobId(jobId);
 			submittedJobs.add(jobId);
+			log.info("SUBMIT JOB: "+jobId);
+			for (String line: jobdef.getBody().split("\n")) {
+				log.debug(jobId + " " + line);
+			}
 			return jobId != null;
 		} catch (ClientException e) {
 			e.printStackTrace();
@@ -97,6 +102,7 @@ public class SJQRunner extends JobRunner {
 
 	@Override
 	public void innerDone() throws RunnerException {
+		log.info("submitted jobs: "+StringUtils.join(",", submittedJobs));
 		try {
 			client.close();
 		} catch (ClientException e) {
