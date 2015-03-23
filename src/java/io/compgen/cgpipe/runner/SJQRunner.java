@@ -28,6 +28,7 @@ public class SJQRunner extends JobRunner {
 	private File socketFile = new File(CGPipe.CGPIPE_HOME, ".sjqserv");
 	private int maxProcs = Runtime.getRuntime().availableProcessors();
 	private String maxMem = null;
+	private String tempDir = null;
 	private int port = 0;
 	
 	private List<String> submittedJobs = new ArrayList<String>();
@@ -38,6 +39,7 @@ public class SJQRunner extends JobRunner {
 			server.setMaxMemory(maxMem);
 			server.setMaxProcs(maxProcs);
 			server.setPortFilename(socketFile.getAbsolutePath());
+			server.setTempDir(tempDir);
 			server.setSilent(false);
 			server.setPort(port);
 			server.setTimeout(10);
@@ -116,6 +118,8 @@ public class SJQRunner extends JobRunner {
 	protected void setConfig(String k, String val) {
 		if (k.equals("cgpipe.runner.sjq.maxmem")) {
 			this.maxMem = val;
+		} else if (k.equals("cgpipe.runner.sjq.tempdir")) {
+			this.tempDir = val;
 		} else if (k.equals("cgpipe.runner.sjq.sockfile")) {
 			this.socketFile = new File(val);
 		} else if (k.equals("cgpipe.runner.sjq.maxprocs")) {
