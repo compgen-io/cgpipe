@@ -329,6 +329,9 @@ public abstract class JobRunner {
 
 		if (joblog != null && job.getJobId() != null && !job.getJobId().equals("")) {
 			joblog.println(job.getJobId()+"\t"+"JOB\t"+job.getName());
+			joblog.println(job.getJobId()+"\t"+"TIMESTAMP\t"+System.currentTimeMillis());
+			joblog.println(job.getJobId()+"\t"+"USER\t"+System.getProperty("user.name"));
+			
 			for (JobDependency dep:job.getDependencies()) {
 				if (job.getJobId()!=null && job.getJobId() != "") {
 					joblog.println(job.getJobId()+"\t"+"DEP\t"+dep.getJobId());
