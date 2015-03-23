@@ -11,7 +11,13 @@ __teardown__:
     echo "teardown"
 
     
-all: foo
+all: foo bar
 
 foo:
     echo "foo"
+
+bar:
+    #$ job.nopre = true
+    #$ job.nopost = true
+    echo "bar"
+

@@ -70,23 +70,46 @@ public class BuildTarget {
 	
 		if (lines.size() > 0) {
 			int indent = StringUtils.calcIndentLevel(lines.get(0).line);
-			List<NumberedLine> running = new ArrayList<NumberedLine>();
-			if (pre != null) {
-				running.addAll(pre);
-			}
-			running.addAll(lines);
-			if (post != null) {
-				running.addAll(post);
-			}
+			boolean preRun = false;
 			
 			// Parse AST
-			for (NumberedLine line: running) {
+			for (NumberedLine line: lines) {
 				String l = StringUtils.stripIndent(line.line, indent);
 				if (StringUtils.lstrip(l).startsWith("#$")) {
 					curNode = curNode.parseLine(line.stripPrefix());
 				} else {
+					// Handle the pre- and post- blocks as conditionals, so that they can be selectively disabled.
+					// Only handle the pre right before any body lines so that can disable it if needed.
+					// pre only runs if there is a target body.
+					if (pre != null && !preRun) {
+						preRun = true;
+						curNode = curNode.parseLine(new NumberedLine("<none>", -1, "if !job.nopre"));
+						for (NumberedLine preLine: pre) {
+							String l2 = StringUtils.stripIndent(preLine.line, indent);
+							if (StringUtils.lstrip(l).startsWith("#$")) {
+								curNode = curNode.parseLine(preLine.stripPrefix());
+							} else {
+								curNode = curNode.parseBody(l2);
+							}
+						}
+						curNode = curNode.parseLine(new NumberedLine("<none>", -1, "endif"));
+					}
 					curNode = curNode.parseBody(l);
 				}
+			}
+
+			// post only runs if there is a target body.
+			if (post != null && lines.size() > 0) {
+				curNode = curNode.parseLine(new NumberedLine("<none>", -1, "if !job.nopost"));
+				for (NumberedLine postLine: post) {
+					String l2 = StringUtils.stripIndent(postLine.line, indent);
+					if (StringUtils.lstrip(l2).startsWith("#$")) {
+						curNode = curNode.parseLine(postLine.stripPrefix());
+					} else {
+						curNode = curNode.parseBody(l2);
+					}
+				}
+				curNode = curNode.parseLine(new NumberedLine("<none>", -1, "endif"));
 			}
 		}
 		

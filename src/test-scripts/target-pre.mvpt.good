@@ -9,9 +9,14 @@ echo "post"
 }
 
 func_3() {
+echo "bar"
+}
+
+func_4() {
 echo "teardown"
 }
 
 func_1
 func_2
 func_3
+func_4

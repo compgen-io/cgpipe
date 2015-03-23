@@ -368,17 +368,21 @@ works, you can set any of the variables below at the script or job level.
     job.tasks      | Number of tasks               |      |     |   X   |     |
     job.mem        | Req'd RAM (ex: 2M, 4G) [*]    |      |  X  |   X   |  X  |
     job.stack      | Req'd stack space (ex: 10M)   |      |  X  |       |     |
-    job.hold       | Place a user-hold on the job  |      |  X  |   X   |  X  |
-    job.env   (T/F)| Capture the current ENV vars  |      |  X  |   X   |  X  |
+    job.hold       | Place a user-hold on the job  |      |  X  |   X   |     |
+    job.env   (T/F)| Capture the current ENV vars  |      |  X  |   X   |     |
     job.qos        | QoS setting                   |      |  X  |   X   |     |
     job.wd         | Working directory             |      |  X  |   X   |  X  |
     job.account    | Billing account               |      |  X  |   X   |     |
     job.mail       | Mail job status               |      | [1] |  [2]  |     |
     job.stdout     | Capture stdout to file        |      |  X  |   X   |  X  |
     job.stderr     | Capture stderr to file        |      |  X  |   X   |  X  |
-    job.keepfailed | Keep outputs from failed jobs |  X   |  X  |   X   |  X  |
-    job.shell      | Job-specific shell binary     | [3]  |  X  |   X   |  X  |
-    job.shexec(T/F)| Exec job; don't submit job    |      |  X  |   X   |  X  |
+    job.keepfailed | Keep outputs from failed jobs |  X   |  X  |   X   |     |
+    job.shell      | Job-specific shell binary     | [3]  |  X  |   X   |     |
+
+
+    global setting | description                   | bash | sge | slurm | sjq |
+    ---------------+-------------------------------+------+-----+-------+-----|
+    job.shexec(T/F)| Exec job; don't submit job    |  X   |  X  |   X   |  X  |
     job.nopre (T/F)| Don't include global pre      | [4]  |  X  |   X   |  X  |
     job.nopost(T/F)| Don't include global post     | [4]  |  X  |   X   |  X  |
 
