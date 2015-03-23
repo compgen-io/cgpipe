@@ -12,7 +12,6 @@ import io.compgen.cgpipe.runner.JobDef;
 import io.compgen.cgpipe.runner.JobDependency;
 import io.compgen.cgpipe.support.StringUtils;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +82,7 @@ public class BuildTarget {
 					// pre only runs if there is a target body.
 					if (pre != null && !preRun) {
 						preRun = true;
-						curNode = curNode.parseLine(new NumberedLine("<none>", -1, "if !job.nopre"));
+						curNode = curNode.parseLine(new NumberedLine("if !job.nopre"));
 						for (NumberedLine preLine: pre) {
 							String l2 = StringUtils.stripIndent(preLine.line, indent);
 							if (StringUtils.lstrip(l).startsWith("#$")) {
@@ -92,7 +91,7 @@ public class BuildTarget {
 								curNode = curNode.parseBody(l2);
 							}
 						}
-						curNode = curNode.parseLine(new NumberedLine("<none>", -1, "endif"));
+						curNode = curNode.parseLine(new NumberedLine("endif"));
 					}
 					curNode = curNode.parseBody(l);
 				}
@@ -100,7 +99,7 @@ public class BuildTarget {
 
 			// post only runs if there is a target body.
 			if (post != null && lines.size() > 0) {
-				curNode = curNode.parseLine(new NumberedLine("<none>", -1, "if !job.nopost"));
+				curNode = curNode.parseLine(new NumberedLine("if !job.nopost"));
 				for (NumberedLine postLine: post) {
 					String l2 = StringUtils.stripIndent(postLine.line, indent);
 					if (StringUtils.lstrip(l2).startsWith("#$")) {
@@ -109,11 +108,9 @@ public class BuildTarget {
 						curNode = curNode.parseBody(l2);
 					}
 				}
-				curNode = curNode.parseLine(new NumberedLine("<none>", -1, "endif"));
+				curNode = curNode.parseLine(new NumberedLine("endif"));
 			}
 		}
-		
-//		headNode.dump();
 		
 		// Eval AST
 		RootContext jobRoot = new RootContext(capturedContext, outputs, inputs);
@@ -124,7 +121,7 @@ public class BuildTarget {
 			curNode = curNode.exec(jobRoot);
 		}
 
-		return new JobDef(jobRoot.getBody(), jobRoot.cloneValues("job."), outputs);
+		return new JobDef(jobRoot.getBody(), jobRoot.cloneValues("job."), outputs, inputs);
 	}
 
 	public boolean isSkipTarget() {

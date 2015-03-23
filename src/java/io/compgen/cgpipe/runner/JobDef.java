@@ -9,19 +9,22 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class JobDef implements JobDependency {
 	private final String body;
 	private final Map<String, VarValue> settings;
 	private final List<String> outputs;
+	private final List<String> inputs;
 	private String jobId = null;
 	private String name;
 	private List<JobDependency> depends = new ArrayList<JobDependency>();
 	
-	public JobDef(String body, Map<String, VarValue> settings, List<String> outputs) {
+	public JobDef(String body, Map<String, VarValue> settings, List<String> outputs, List<String> inputs) {
 		this.body = body;
 		this.settings = settings;
 		this.outputs = Collections.unmodifiableList(new ArrayList<String>(outputs));
+		this.inputs = Collections.unmodifiableList(new ArrayList<String>(inputs));
 	}
 	
 	public void setJobId(String jobId) {
@@ -39,6 +42,10 @@ public class JobDef implements JobDependency {
 	public String getBody() {
 		return body;
 	}
+	public List<String> getInputs() {
+		return inputs;
+	}
+
 	public List<String> getOutputs() {
 		return outputs;
 	}
@@ -85,6 +92,10 @@ public class JobDef implements JobDependency {
 		return defval;		
 	}
 
+	public Set<String> getSettings() {
+		return settings.keySet();
+	}
+	
 	public Iterable<String> getSettings(final String name) {
 		return new Iterable<String>() {
 			@Override

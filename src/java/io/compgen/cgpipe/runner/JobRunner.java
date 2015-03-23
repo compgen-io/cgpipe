@@ -107,20 +107,6 @@ public abstract class JobRunner {
 			} catch (IOException e) {
 				throw new RunnerException(e);
 			}
-		
-			// Prune away failed jobs... (we do this after loading the file to avoid checking repeated job submissions)
-			List<String> removeList = new ArrayList<String>();
-			for (String output: obj.submittedJobs.keySet()) {
-				JobDependency job = obj.submittedJobs.get(output);
-				if (!obj.isJobIdValid(job.getJobId())) {
-					removeList.add(output);
-				}
-			}
-	
-			for (String rem: removeList) {
-				obj.submittedJobs.remove(rem);
-			}
-		
 		}
 		return obj;
 	}
@@ -274,7 +260,8 @@ public abstract class JobRunner {
 				log.error("Error submitting job: "+ target);
 				throw new RunnerException("Error submitting job: "+job);
 			}
-			log.debug("submitted: "+ job.getJobId()+" ("+job.getName()+")");
+
+			logJob(job);
 			
 			target.setSubmittedJobDep(job);
 			for (String out: target.getOutputs()) {
@@ -292,11 +279,19 @@ public abstract class JobRunner {
 
 		if (submittedJobs.containsKey(input)) {
 			log.debug("Found job providing: "+ input + " ("+submittedJobs.get(input).getJobId()+")");
-			return submittedJobs.get(input);
+			JobDependency job = submittedJobs.get(input);
+			
+			if (isJobIdValid(job.getJobId())) {
+				return job;
+			}
+
+			log.debug("Job ID: "+ job.getJobId()+" marked as failed...");
+			submittedJobs.remove(input);
 		}
 		
 		return null;
 	}
+	
 	public void done() throws RunnerException {
 		if (teardown != null) {
 			if (teardown.getSettingBool("job.shexec", false)) {
@@ -307,6 +302,48 @@ public abstract class JobRunner {
 				submit(teardown);
 			}
 		}
+		
 		innerDone();
+	}
+	
+	protected void logJob(JobDef job) {
+		log.info("Submitted job: "+job.getJobId() +" "+ job.getName());
+		for (String k:job.getSettings()) {
+			if (k.startsWith("job.")) {
+				log.debug("setting: "+k+" => "+job.getSetting(k));
+			}
+		}
+		for (String out:job.getOutputs()) {
+			log.debug("output: "+out);
+		}
+		for (String inp:job.getInputs()) {
+			log.debug("input: "+inp);
+		}
+		for (String s: job.getBody().split("\n")) {
+			log.info("src: "+StringUtils.strip(s));
+		}
+
+		if (joblog != null && job.getJobId() != null && !job.getJobId().equals("")) {
+			joblog.println(job.getJobId()+"\t"+"JOB\t"+job.getName());
+			for (JobDependency dep:job.getDependencies()) {
+				if (job.getJobId()!=null && job.getJobId() != "") {
+					joblog.println(job.getJobId()+"\t"+"DEP\t"+dep.getJobId());
+				}
+			}
+			for (String out:job.getOutputs()) {
+				joblog.println(job.getJobId()+"\t"+"OUTPUT\t"+out);
+			}
+			for (String inp:job.getInputs()) {
+				joblog.println(job.getJobId()+"\t"+"INPUT\t"+inp);
+			}
+			for (String s: job.getBody().split("\n")) {
+				joblog.println(job.getJobId()+"\t"+"SRC\t"+s);
+			}
+			for (String k:job.getSettings()) {
+				if (k.startsWith("job.")) {
+					joblog.println(job.getJobId()+"\t"+"SETTING\t"+k+"\t"+job.getSetting(k));
+				}
+			}
+		}
 	}
 }
