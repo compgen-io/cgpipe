@@ -5,7 +5,7 @@ import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.node.ASTNode;
 import io.compgen.cgpipe.parser.node.NoOpNode;
-import io.compgen.cgpipe.support.StringUtils;
+import io.compgen.support.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.File;

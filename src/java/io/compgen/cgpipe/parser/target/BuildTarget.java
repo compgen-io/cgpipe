@@ -10,7 +10,7 @@ import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.cgpipe.runner.JobDef;
 import io.compgen.cgpipe.runner.JobDependency;
-import io.compgen.cgpipe.support.StringUtils;
+import io.compgen.support.StringUtils;
 
 import java.util.Collections;
 import java.util.HashMap;

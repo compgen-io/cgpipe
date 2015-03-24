@@ -11,7 +11,7 @@ import io.compgen.cgpipe.parser.tokens.Tokenizer;
 import io.compgen.cgpipe.parser.variable.VarRange;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.cgpipe.support.StringUtils;
+import io.compgen.support.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -378,8 +378,8 @@ public class Eval {
 
 			int retcode = proc.waitFor();
 			
-			String out = StringUtils.slurp(is);
-			String err = StringUtils.slurp(es);
+			String out = StringUtils.readInputStream(is);
+			String err = StringUtils.readInputStream(es);
 
 			is.close();
 			es.close();

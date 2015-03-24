@@ -7,7 +7,7 @@ import io.compgen.cgpipe.parser.NumberedLine;
 import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.target.BuildTarget;
 import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.cgpipe.support.StringUtils;
+import io.compgen.support.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -125,8 +125,8 @@ public abstract class JobRunner {
 
 			int retcode = proc.waitFor();
 			
-			String out = StringUtils.slurp(is);
-			String err = StringUtils.slurp(es);
+			String out = StringUtils.readInputStream(is);
+			String err = StringUtils.readInputStream(es);
 
 			log.trace("retcode: "+retcode);
 			log.trace("stdout: " + out);

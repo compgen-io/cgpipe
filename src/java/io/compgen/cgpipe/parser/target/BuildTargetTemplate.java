@@ -6,7 +6,7 @@ import io.compgen.cgpipe.parser.NumberedLine;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.tokens.TokenList;
 import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.cgpipe.support.StringUtils;
+import io.compgen.support.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

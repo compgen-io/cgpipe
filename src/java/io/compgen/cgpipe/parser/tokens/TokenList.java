@@ -1,7 +1,7 @@
 package io.compgen.cgpipe.parser.tokens;
 
 import io.compgen.cgpipe.parser.NumberedLine;
-import io.compgen.cgpipe.support.StringUtils;
+import io.compgen.support.StringUtils;
 
 import java.util.Iterator;
 import java.util.List;

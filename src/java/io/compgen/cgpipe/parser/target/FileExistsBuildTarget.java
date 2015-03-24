@@ -4,7 +4,7 @@ import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.parser.NumberedLine;
 import io.compgen.cgpipe.runner.JobDef;
-import io.compgen.cgpipe.support.ListBuilder;
+import io.compgen.support.ListBuilder;
 
 import java.util.List;
 

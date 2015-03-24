@@ -40,8 +40,9 @@
             </manifest>
 	        <fileset dir="${build.dir}/classes"/>
             <zipfileset src="${lib.dir}/commons-logging-1.2.jar"/>
-            <zipfileset src="${lib.dir}/cmdlinej-0.4-0a9ba46.jar"/>
-	        <zipfileset src="${lib.dir}/sjq-0.3-ef787c1.jar"/>
+            <zipfileset src="${lib.dir}/compgen-cmdline-0.4.1-a345bb0.jar"/>
+            <zipfileset src="${lib.dir}/compgen-support-0.1-14f9795.jar"/>
+	        <zipfileset src="${lib.dir}/sjq-0.3-3db8e09.jar"/>
 	    </jarjar>
         <delete file="${dist.dir}/${project.name}"/>
  		<concat destfile="${dist.dir}/${ant.project.name}" binary="true">
