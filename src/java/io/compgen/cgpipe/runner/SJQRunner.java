@@ -6,6 +6,7 @@ import io.compgen.cgpipe.support.IterUtils;
 import io.compgen.cgpipe.support.IterUtils.MapFunc;
 import io.compgen.cgpipe.support.StringUtils;
 import io.compgen.exceptions.CommandArgumentException;
+import io.compgen.sjq.client.AuthException;
 import io.compgen.sjq.client.ClientException;
 import io.compgen.sjq.client.SJQClient;
 import io.compgen.sjq.server.SJQServer;
@@ -26,6 +27,7 @@ public class SJQRunner extends JobRunner {
 	private SJQClient client = null;
 	
 	private File socketFile = new File(CGPipe.CGPIPE_HOME, ".sjqserv");
+	private File passwdFile = new File(CGPipe.CGPIPE_HOME, ".sjqpasswd");
 	private int maxProcs = Runtime.getRuntime().availableProcessors();
 	private String maxMem = null;
 	private String tempDir = null;
@@ -34,23 +36,41 @@ public class SJQRunner extends JobRunner {
 	private List<String> submittedJobs = new ArrayList<String>();
 	
 	public void connect() throws IOException, CommandArgumentException, SJQServerException {
+		// protect this connection with a random 50 char string.
+		String passwd = StringUtils.randomString(50);
+		
 		if (!socketFile.exists()) {
+			passwdFile.createNewFile();
+			// chmod 600
+			passwdFile.setReadable(false,  false);
+			passwdFile.setWritable(false,  false);
+			passwdFile.setExecutable(false,  false);
+			passwdFile.setReadable(true,  true);
+			passwdFile.setWritable(true,  true);
+			// remove me when this server is done
+			passwdFile.deleteOnExit();
+			StringUtils.writeFile(passwdFile, passwd);
+			
 			server = new SJQServer();
 			server.setMaxMemory(maxMem);
 			server.setMaxProcs(maxProcs);
 			server.setPortFilename(socketFile.getAbsolutePath());
+			server.setPasswdFile(passwdFile.getAbsolutePath());
 			server.setTempDir(tempDir);
 			server.setSilent(false);
 			server.setPort(port);
-			server.setTimeout(10);
+			server.setTimeout(30);
 			server.start();
+		} else {
+			passwd = StringUtils.readFile(passwdFile); 
 		}
+		
 		try {
 			String addr = StringUtils.strip(StringUtils.readFile(socketFile));
 			if (addr != null && !addr.equals("")) {
 				String ip = addr.split(":")[0];
 				int port = Integer.parseInt(addr.split(":")[1]);
-				client = new SJQClient(ip, port);
+				client = new SJQClient(ip, port, passwd);
 				return;
 			}
 		} catch (IOException e) {
@@ -86,7 +106,7 @@ public class SJQRunner extends JobRunner {
 				log.debug(jobId + " " + line);
 			}
 			return jobId != null;
-		} catch (ClientException e) {
+		} catch (ClientException | AuthException e) {
 			e.printStackTrace();
 			throw new RunnerException(e);
 		}
@@ -97,7 +117,7 @@ public class SJQRunner extends JobRunner {
 		try {
 			String[] status = client.getStatus(jobId).split(" ");
 			return (status[1].equals("H") || status[1].equals("Q")  || status[1].equals("R")); 
-		} catch (ClientException e) {
+		} catch (ClientException | AuthException e) {
 			return false;
 		}
 	}
@@ -122,6 +142,8 @@ public class SJQRunner extends JobRunner {
 			this.tempDir = val;
 		} else if (k.equals("cgpipe.runner.sjq.sockfile")) {
 			this.socketFile = new File(val);
+		} else if (k.equals("cgpipe.runner.sjq.passwdfile")) {
+			this.passwdFile = new File(val);
 		} else if (k.equals("cgpipe.runner.sjq.maxprocs")) {
 			this.maxProcs = Integer.parseInt(val);
 		} else if (k.equals("cgpipe.runner.sjq.port")) {
@@ -135,7 +157,7 @@ public class SJQRunner extends JobRunner {
 			for (String jobId: submittedJobs) {
 				try {
 					client.killJob(jobId);
-				} catch (ClientException e) {
+				} catch (ClientException | AuthException e) {
 				}
 			}
 		}
