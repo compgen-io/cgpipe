@@ -1,4 +1,5 @@
 Included software: jarjar (build, Apache)
+                   Error Prone (build, Apache)
 
 Embedded libraries: Apache Commons Logging (Apache)
 
