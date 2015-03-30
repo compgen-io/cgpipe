@@ -6,8 +6,8 @@ import io.compgen.cgpipe.parser.Eval;
 import io.compgen.cgpipe.parser.NumberedLine;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.tokens.TokenList;
-import io.compgen.support.Pair;
-import io.compgen.support.StringUtils;
+import io.compgen.common.Pair;
+import io.compgen.common.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;

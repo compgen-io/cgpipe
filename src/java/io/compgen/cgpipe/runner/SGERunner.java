@@ -1,7 +1,7 @@
 package io.compgen.cgpipe.runner;
 
 import io.compgen.cgpipe.exceptions.RunnerException;
-import io.compgen.support.StringUtils;
+import io.compgen.common.StringUtils;
 
 import java.io.File;
 import java.io.IOException;

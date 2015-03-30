@@ -95,9 +95,26 @@ Variables may also be set at the command-line like this: `cgpipe -foo bar -baz 1
 This is the same as saying:
 
     foo = "bar"
-    baz = []
-    baz += 1
-    baz += 2
+    bar = 2.59
+
+## Lists
+
+You can also create and access elements in a list:
+
+    foo = []
+    foo = [1, 2, "three"]
+
+    print foo[2]
+    >>> "three"
+
+You can also append to lists:
+
+    foo = ["foo"]
+    foo += "bar"
+    foo += "baz"
+
+    print foo
+    >>> "foo bar baz"
 
 
 ## Math

@@ -2,7 +2,7 @@ package io.compgen.cgpipe.runner;
 
 import io.compgen.cgpipe.parser.variable.VarInt;
 import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.support.StringUtils;
+import io.compgen.common.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;

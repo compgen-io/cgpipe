@@ -25,3 +25,12 @@ foo += bar
 for i in foo
     print i
 done
+
+baz = ["foo","bar","baz"]
+print baz[0]
+print baz[1]
+print baz[2]
+print baz[:-1]
+print baz[-1:]
+print baz[1:2]
+print baz[1:]

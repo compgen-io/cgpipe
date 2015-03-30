@@ -1,7 +1,7 @@
 package io.compgen.cgpipe.parser.variable;
 
 import io.compgen.cgpipe.exceptions.VarTypeException;
-import io.compgen.support.StringUtils;
+import io.compgen.common.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,5 +39,16 @@ public class VarList extends VarValue {
 
 	public Iterable<VarValue> iterate() {
 		return Collections.unmodifiableList(vals);
+	}
+	
+	public int sizeInner() {
+		return vals.size();
+	}
+	
+	public VarValue sliceInner(int start, int end) {
+		if (end-start == 1) {
+			return vals.get(start);
+		}
+		return new VarList(this.vals.subList(start,  end));
 	}
 }

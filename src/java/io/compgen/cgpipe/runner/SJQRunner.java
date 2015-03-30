@@ -3,14 +3,14 @@ package io.compgen.cgpipe.runner;
 import io.compgen.cgpipe.CGPipe;
 import io.compgen.cgpipe.exceptions.RunnerException;
 import io.compgen.cmdline.exceptions.CommandArgumentException;
+import io.compgen.common.IterUtils;
+import io.compgen.common.StringUtils;
+import io.compgen.common.IterUtils.MapFunc;
 import io.compgen.sjq.client.AuthException;
 import io.compgen.sjq.client.ClientException;
 import io.compgen.sjq.client.SJQClient;
 import io.compgen.sjq.server.SJQServer;
 import io.compgen.sjq.server.SJQServerException;
-import io.compgen.support.IterUtils;
-import io.compgen.support.IterUtils.MapFunc;
-import io.compgen.support.StringUtils;
 
 import java.io.File;
 import java.io.IOException;

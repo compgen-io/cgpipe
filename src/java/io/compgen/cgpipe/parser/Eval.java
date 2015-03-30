@@ -8,10 +8,11 @@ import io.compgen.cgpipe.parser.op.Operator;
 import io.compgen.cgpipe.parser.tokens.Token;
 import io.compgen.cgpipe.parser.tokens.TokenList;
 import io.compgen.cgpipe.parser.tokens.Tokenizer;
+import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarRange;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.support.StringUtils;
+import io.compgen.common.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,6 +55,72 @@ public class Eval {
 			throw new ASTExecException("Unknown token: "+tokens.get(0), tokens);
 		}
 
+		if (tokens.get(0).isSliceOpen() && tokens.get(tokens.size()-1).isSliceClose()) {
+			List<VarValue> elements = new ArrayList<VarValue>();
+			List<Token> inner = new ArrayList<Token>();
+			for (Token tok: tokens.subList(1, tokens.size()-1)) {
+				if (tok.isComma()) {
+					elements.add(evalTokenExpression(new TokenList(inner, tokens.getLine()), context));
+					inner.clear();
+				} else {
+					inner.add(tok);
+				}
+			}
+
+			if (inner.size()>0) {
+				elements.add(evalTokenExpression(new TokenList(inner, tokens.getLine()), context));
+			}
+			
+			return new VarList(elements);
+		}
+
+		if ((tokens.get(0).isVariable() || tokens.get(0).isValue()) && tokens.get(1).isSliceOpen()) {
+			List<Token> outer = new ArrayList<Token>();
+
+			VarValue obj;
+			if (tokens.get(0).isValue()) {
+				obj = tokens.get(0).getValue();
+			} else {
+				obj = evalTokenExpression(tokens.subList(0, 1), context);
+			}
+			
+			VarValue start = null;
+			VarValue end = null;
+
+			int colonIdx = -1;
+			boolean inOuter = false;
+			
+			for (int i=1; i<tokens.size(); i++) {
+				if (inOuter) {
+					outer.add(tokens.get(i));
+				} else if (tokens.get(i).isColon()) {
+					start = evalTokenExpression(tokens.subList(2,i), context);
+					colonIdx = i;
+				} else if (tokens.get(i).isSliceClose()) {
+					if (colonIdx == -1) {
+						start = evalTokenExpression(tokens.subList(2,i), context);
+					} else {
+						end = evalTokenExpression(tokens.subList(colonIdx+1,i), context);
+					}
+					inOuter = true;
+				}
+			}
+			
+//			System.err.println("Slice: "+start+".."+end+ " ? "+(colonIdx > -1));
+			
+			try {
+				VarValue val = obj.slice(start, end, colonIdx > -1);
+				if (outer == null || outer.size() == 0) {
+					return val;
+				}
+				outer.add(0, Token.value(val));
+				return evalTokenExpression(new TokenList(outer, tokens.getLine()), context);
+			} catch (VarTypeException e) {
+				throw new ASTExecException(e);
+			}
+		}
+		
+		
 		List<Token> inner = new ArrayList<Token>();
 		List<Token> left = new ArrayList<Token>();
 		List<Token> right = new ArrayList<Token>();

@@ -7,7 +7,7 @@ import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.target.BuildTargetTemplate;
 import io.compgen.cgpipe.parser.tokens.Token;
 import io.compgen.cgpipe.parser.tokens.TokenList;
-import io.compgen.support.StringUtils;
+import io.compgen.common.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;

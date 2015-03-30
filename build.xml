@@ -1,6 +1,7 @@
 <project name="cgpipe" default="jar">
-    <property name="version" value="0.3"/>
+   <property name="version" value="0.3"/>
     <property name="lib.dir" value="lib"/>
+    <property name="blib.dir" value="blib"/>
     <property name="build.dir" value="build"/>
     <property name="dist.dir" value="dist"/>
     <property name="src.dir" value="src"/>
@@ -16,7 +17,25 @@
 
 	<target name="compile">
         <mkdir dir="${build.dir}/classes"/>
+        <!--
         <javac srcdir="${src.dir}/java" destdir="${build.dir}/classes" classpathref="classpath" debug="true" debuglevel="lines,vars,source"/>
+        -->
+
+        <javac
+            srcdir="${src.dir}/java"
+            destdir="${build.dir}/classes"
+            compiler="com.google.errorprone.ErrorProneAntCompilerAdapter"
+            encoding="UTF-8"
+            debug="true"
+            includeantruntime="false"
+            classpathref="classpath"
+            debuglevel="lines,vars,source"
+            >
+            <compilerclasspath>
+                <fileset file="${blib.dir}/error_prone_ant-2.0.2-SNAPSHOT.jar"/>
+            </compilerclasspath>
+        </javac>
+
     </target>
 
 	<target name="jar" depends="compile, git.revision">
@@ -32,7 +51,7 @@
         </copy>
 
 		<mkdir dir="${dist.dir}"/>
-	    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="${lib.dir}/jarjar-1.4.jar"/>
+	    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="${blib.dir}/jarjar-1.4.jar"/>
         <jar destfile="${dist.dir}/${ant.project.name}-${version}.jar" basedir="${build.dir}/classes"/>
 	    <jarjar jarfile="${dist.dir}/${ant.project.name}.jar.tmp">
             <manifest>
@@ -41,7 +60,7 @@
 	        <fileset dir="${build.dir}/classes"/>
             <zipfileset src="${lib.dir}/commons-logging-1.2.jar"/>
             <zipfileset src="${lib.dir}/compgen-cmdline-0.4.1.jar"/>
-            <zipfileset src="${lib.dir}/compgen-support-0.1.jar"/>
+            <zipfileset src="${lib.dir}/compgen-common-0.1.jar"/>
 	        <zipfileset src="${lib.dir}/sjq-0.3.jar"/>
 	    </jarjar>
         <delete file="${dist.dir}/${project.name}"/>

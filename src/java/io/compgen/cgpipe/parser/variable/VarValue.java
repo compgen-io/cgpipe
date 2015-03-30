@@ -134,4 +134,53 @@ public abstract class VarValue {
 	public static VarValue range(VarValue from, VarValue to) throws VarTypeException {
 		return new VarRange(from, to);
 	}
+
+	public VarInt size() throws VarTypeException {
+		return new VarInt(sizeInner());
+	}
+	
+	public int sizeInner() throws VarTypeException {
+		throw new VarTypeException("Invalid operation");
+	}
+	
+	public VarValue slice(VarValue startVal, VarValue endVal, boolean hasColon) throws VarTypeException {
+		int start;
+		int end;
+
+		if (!hasColon) {
+			start= startVal.toInt();
+			if (start <0) {
+	 			start = sizeInner() + start;
+	 		}
+			return sliceInner(start, start+1);
+		}
+		
+		if (startVal == null) {
+			start = 0;
+		} else {
+			start= startVal.toInt();
+			if (start <0) {
+	 			start = sizeInner() + start;
+	 		}
+		}
+		
+		if (endVal == null) {
+			end = sizeInner();
+		} else {
+			end = endVal.toInt();
+			if (end<0) {
+				end = sizeInner() + end;
+			}
+		}
+
+
+		return sliceInner(start, end);
+	}
+
+	public VarValue sliceInner(int start, int end) throws VarTypeException {
+		throw new VarTypeException("Invalid operation");
+	}
+	public int toInt() throws VarTypeException {
+		throw new VarTypeException("Invalid operation");
+	}
 }

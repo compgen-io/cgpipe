@@ -12,7 +12,7 @@ import io.compgen.cgpipe.parser.tokens.TokenList;
 import io.compgen.cgpipe.parser.tokens.Tokenizer;
 import io.compgen.cgpipe.parser.variable.VarNull;
 import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.support.StringUtils;
+import io.compgen.common.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;

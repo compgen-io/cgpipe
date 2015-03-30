@@ -1,8 +1,9 @@
 package io.compgen.cgpipe.parser.tokens;
 
 import io.compgen.cgpipe.parser.NumberedLine;
-import io.compgen.support.StringUtils;
+import io.compgen.common.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,6 +21,9 @@ public class TokenList implements Iterable<Token> {
 	}
 	
 	public TokenList subList(int from) {
+		if (from > tokens.size()) {
+			return new TokenList(new ArrayList<Token>(), line);
+		}
 		return subList(from, tokens.size());
 	}
 	public TokenList subList(int from, int to) {

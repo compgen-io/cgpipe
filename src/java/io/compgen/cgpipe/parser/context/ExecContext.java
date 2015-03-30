@@ -3,7 +3,7 @@ package io.compgen.cgpipe.parser.context;
 import io.compgen.cgpipe.parser.variable.VarNull;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.cgpipe.support.SimpleFileLoggerImpl;
-import io.compgen.support.StringUtils;
+import io.compgen.common.StringUtils;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;

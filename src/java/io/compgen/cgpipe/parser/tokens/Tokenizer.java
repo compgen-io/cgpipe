@@ -8,7 +8,7 @@ import io.compgen.cgpipe.parser.statement.Statement;
 import io.compgen.cgpipe.parser.variable.VarFloat;
 import io.compgen.cgpipe.parser.variable.VarInt;
 import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.support.StringUtils;
+import io.compgen.common.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,26 +25,38 @@ public class Tokenizer {
 	
 			tokens = delimiterSplit(tokens, ' ');
 //			System.err.println("delimiterSplit      : "+StringUtils.join(";", tokens));
-	
-			tokens = markColons(tokens);
+
+			tokens = markColonsAndSlices(tokens);
 //			System.err.println("markColons          : "+StringUtils.join(";", tokens));
 	
 			// Look for target definitions here
 			// if it exists, then we will skip the next two transformations
 			// target definition lines should only be STRING, RAW, or COLON
-			// because 1 is a valid filename, (and a valid VarInt), we need
+			// because "1" is a valid filename, (and a valid VarInt), we need
 			// to avoid parsing it out...
 			
 			boolean foundColon = false;
+			boolean inSlice = false;
 			for (Token tok: tokens) {
-				if (tok.isStatement()) {
-					// a statement is allowed before a colon (ex: for i:start..end)
-					// if you need to use the name of a statement for a filename, 
-					// then it can be quoted.
-					foundColon = false;
-					break;
+//				if (tok.isStatement()) {
+//					// a statement is allowed before a colon (ex: for i:start..end)
+//					// if you need to use the name of a statement for a filename, 
+//					// then it can be quoted.
+//					foundColon = false;
+//					break;
+//				}
+				if (tok.isSliceOpen()) {
+					if (inSlice) {
+						throw new ASTParseException("Cannot embed []");
+					}
+					inSlice = true;
 				}
-				if (tok.isColon()) {
+				if (tok.isSliceClose()) {
+					if (!inSlice) {
+						throw new ASTParseException("Missing opening [");
+					}
+				}
+				if (!inSlice && tok.isColon()) {
 					foundColon = true;
 				}
 			}
@@ -93,7 +105,7 @@ public class Tokenizer {
 		return out;
 	}
 	
-	public static List<Token> markColons(List<Token> tokens) throws ASTParseException {
+	public static List<Token> markColonsAndSlices(List<Token> tokens) throws ASTParseException {
 		if (tokens.size() == 0) {
 			return tokens;
 		}
@@ -110,6 +122,18 @@ public class Tokenizer {
 				if (tok.getStr().charAt(i) == ':') {
 					out.add(Token.raw(buf));
 					out.add(Token.colon());
+					buf = "";
+				} else if (tok.getStr().charAt(i) == ',') {
+					out.add(Token.raw(buf));
+					out.add(Token.comma());
+					buf = "";
+				} else if (tok.getStr().charAt(i) == '[') {
+					out.add(Token.raw(buf));
+					out.add(Token.sliceOpen());
+					buf = "";
+				} else if (tok.getStr().charAt(i) == ']') {
+					out.add(Token.raw(buf));
+					out.add(Token.sliceClose());
 					buf = "";
 				} else {
 					buf += tok.getStr().charAt(i);

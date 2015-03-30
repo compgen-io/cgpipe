@@ -1,7 +1,7 @@
 package io.compgen.cgpipe.parser.variable;
 
 import io.compgen.cgpipe.exceptions.VarTypeException;
-import io.compgen.support.StringUtils;
+import io.compgen.common.StringUtils;
 
 import java.util.Iterator;
 

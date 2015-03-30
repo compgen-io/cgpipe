@@ -64,6 +64,18 @@ public class Token {
 		return new Token(TokenType.SHELL, str, null, null, null);
 	}
 	
+	public static Token sliceOpen() {
+		return new Token(TokenType.SLICE_OPEN, "[", null, null, null);
+	}
+	
+	public static Token sliceClose() {
+		return new Token(TokenType.SLICE_CLOSE, "]", null, null, null);
+	}
+	
+	public static Token comma() {
+		return new Token(TokenType.COMMA, ",", null, null, null);
+	}
+	
 	public static Token splitline() {
 		return new Token(TokenType.SPLIT_LINE, "\\", null, null, null);
 	}
@@ -108,13 +120,25 @@ public class Token {
 	public boolean isParenOpen() {
 		return type == TokenType.PAREN_OPEN;
 	}
-
+	
 	public boolean isParenClose() {
 		return type == TokenType.PAREN_CLOSE;
 	}
 
+	public boolean isSliceOpen() {
+		return type == TokenType.SLICE_OPEN;
+	}
+
+	public boolean isSliceClose() {
+		return type == TokenType.SLICE_CLOSE;
+	}
+
 	public boolean isColon() {
 		return type == TokenType.COLON;
+	}
+
+	public boolean isComma() {
+		return type == TokenType.COMMA;
 	}
 
 	public boolean isString() {

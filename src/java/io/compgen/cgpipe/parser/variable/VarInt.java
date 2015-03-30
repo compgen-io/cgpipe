@@ -8,7 +8,7 @@ public class VarInt extends VarValue {
 	}
 	
 	public boolean isTrue() {
-		if (((Long) obj) == 0l) {
+		if (((Long) obj) == 0L) {
 			return false;
 		}
 		return true;
@@ -80,6 +80,14 @@ public class VarInt extends VarValue {
 			return new VarFloat(Math.pow((Long)obj, (Double)val.obj));
 		}
 		throw new VarTypeException("Invalid operation");
+	}
+
+	public int toInt() throws VarTypeException {
+		try {
+			return ((Long) obj).intValue();
+		} catch (Exception e) {
+			throw new VarTypeException(e);
+		}
 	}
 }
 	

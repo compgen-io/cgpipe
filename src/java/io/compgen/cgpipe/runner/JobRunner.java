@@ -7,7 +7,7 @@ import io.compgen.cgpipe.parser.NumberedLine;
 import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.target.BuildTarget;
 import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.support.StringUtils;
+import io.compgen.common.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -333,7 +333,7 @@ public abstract class JobRunner {
 			joblog.println(job.getJobId()+"\t"+"USER\t"+System.getProperty("user.name"));
 			
 			for (JobDependency dep:job.getDependencies()) {
-				if (job.getJobId()!=null && job.getJobId() != "") {
+				if (job.getJobId()!=null && !job.getJobId().equals("")) {
 					joblog.println(job.getJobId()+"\t"+"DEP\t"+dep.getJobId());
 				}
 			}
