@@ -9,7 +9,6 @@ import io.compgen.cgpipe.parser.tokens.Token;
 import io.compgen.cgpipe.parser.tokens.TokenList;
 import io.compgen.cgpipe.parser.tokens.Tokenizer;
 import io.compgen.cgpipe.parser.variable.VarList;
-import io.compgen.cgpipe.parser.variable.VarRange;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.common.StringUtils;
@@ -25,11 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class Eval {
-	final private static Pattern varPattern = Pattern.compile("^(.*?)\\$\\{([A-Za-z_\\.][a-zA-Z0-9_\\.]*?\\??)\\}(.*?)$");
-	final private static Pattern shellPattern = Pattern.compile("^(.*?)\\$\\(([A-Za-z_\\.][a-zA-Z0-9_\\.]*?\\??)\\)(.*?)$");
-	final private static Pattern listPattern = Pattern.compile("^(.*?)([^ \t]*)@\\{([A-Za-z_\\.][a-zA-Z0-9_\\.]*?\\??)\\}([^ \t]*)(.*?)$");
-	final private static Pattern rangePattern = Pattern.compile("^(.*?)([^ \t]*)@\\{([a-zA-Z0-9_\\.]*?)\\.\\.([a-zA-Z0-9_\\.]*?)\\}([^ \t]*)(.*?)$");
-
 	final private static Pattern outputPattern = Pattern.compile("^(.*?)\\$>([0-9]*)(.*?)$");
 	final private static Pattern inputPattern = Pattern.compile("^(.*?)\\$<([0-9]*)(.*?)$");
 	private static Log log = LogFactory.getLog(Eval.class);
@@ -41,7 +35,7 @@ public class Eval {
 		}
 		if (tokens.size() == 1) {
 			if (tokens.get(0).isString()) {
-				return new VarString(Eval.evalString(tokens.get(0).getStr(), context, tokens));
+				return new VarString(Eval.evalString(tokens.get(0).getStr(), context, tokens.getLine()));
 			}
 			if (tokens.get(0).isValue()) {
 				return tokens.get(0).getValue();
@@ -50,7 +44,7 @@ public class Eval {
 				return context.get(tokens.get(0).getStr());
 			}
 			if (tokens.get(0).isShell()) {
-				return VarValue.parseStringRaw(evalShell(tokens.get(0).getStr(), context, tokens));
+				return VarValue.parseStringRaw(evalShell(tokens.get(0).getStr(), context, tokens.getLine()));
 			}
 			throw new ASTExecException("Unknown token: "+tokens.get(0), tokens);
 		}
@@ -205,175 +199,165 @@ public class Eval {
 	}
 
 	
-	public static String evalString(String str, ExecContext context, TokenList tokens) throws ASTExecException {
+	public static String evalString(String str, ExecContext context, NumberedLine line) throws ASTExecException {
 		String tmp = "";
-		tmp = evalStringVar(str, context, tokens);
-		tmp = evalStringShell(tmp, context, tokens);
-		tmp = evalStringList(tmp, context, tokens);
-		tmp = evalStringRange(tmp, context, tokens);
-		tmp = evalStringInputs(tmp, context, tokens);
-		tmp = evalStringOutputs(tmp, context, tokens);
+		tmp = evalStringVar(str, context, line);
+		tmp = evalStringList(tmp, context, line);
+		tmp = evalStringInputs(tmp, context, line);
+		tmp = evalStringOutputs(tmp, context, line);
 		log .trace("eval string: "+str+" => "+tmp);
 		return tmp;
 	}
 
-	private static String evalStringVar(String str, ExecContext context, TokenList tokens) throws ASTExecException {
-		String tmp = "";
-		while (str.length() > 0) {
-			Matcher m = varPattern.matcher(str);
-			if (m.matches()) {
-				if (m.group(1).endsWith("\\")) {
-					tmp += m.group(1).substring(0,m.group(1).length()-1);
-					tmp += "${" + m.group(2)+"}";
-					str = m.group(3);
-				} else {
-					tmp += m.group(1);
-					if (m.group(2).endsWith("?")) {
-						String k = m.group(2).substring(0, m.group(2).length()-1);
-						if (context.contains(k)) {
-							tmp += context.get(k);
-						}
+	private static String evalStringVar(String str, ExecContext context, NumberedLine line) throws ASTExecException {
+		String out = "";
+		String buf = "";
+		
+		boolean ineval = false;
+		
+		for (int i=0; i<str.length(); i++) {
+			if (ineval) {
+				if (str.charAt(i) == '}') {
+					if (buf.endsWith("\\")) {
+						buf = buf.substring(0, buf.length()-1) + "}";
 					} else {
-						if (context.contains(m.group(2))) {
-							tmp += context.get(m.group(2));
-						} else {
-							throw new ASTExecException("Missing variable: "+m.group(2), tokens);
-						}
-					}
-					str = m.group(3);
-				}
-			} else {
-				tmp += str;
-				break;
-			}
-		}
-		return tmp;
-	}
-	
-	private static String evalStringShell(String str, ExecContext context, TokenList tokens) throws ASTExecException {
-		String tmp = "";
-		while (str.length() > 0) {
-			Matcher m = shellPattern.matcher(str);
-			if (m.matches()) {
-				if (m.group(1).endsWith("\\")) {
-					tmp += m.group(1).substring(0,m.group(1).length()-1);
-					tmp += "$(" + m.group(2)+")";
-					str = m.group(3);
-				} else {
-					tmp += m.group(1);
-					tmp += Eval.execScript(m.group(2));
-					str = m.group(3);
-				}
-			} else {
-				tmp += str;
-				break;
-			}
-		}
-		return tmp;
-	}
-	
-
-	
-	private static String evalStringList(String str, ExecContext context, TokenList tokens) throws ASTExecException {
-		String tmp = "";
-			
-		while (str.length() > 0) {
-			Matcher m = listPattern.matcher(str);
-			if (m.matches()) {
-				tmp += m.group(1);
-				
-				if (m.group(2).endsWith("\\")) {
-					tmp += m.group(2).substring(0,m.group(2).length()-1);
-					tmp += "@{" + m.group(3) + "}";
-					str = m.group(4) + m.group(5);
-				} else {
-					boolean first = true;
-					VarValue iter = null;
-					if (m.group(3).endsWith("?")) {
-						String k = m.group(3).substring(0, m.group(3).length()-1);
-						if (context.contains(k)) {
-							iter = context.get(k);
-						}
-					} else {
-						if (!context.contains(m.group(3))) {
-							throw new ASTExecException("Missing variable: "+m.group(3), tokens);
-						}
-
-						iter = context.get(m.group(3));
-					}
-
-					for (VarValue v: iter.iterate()) {
-						if (first) {
-							first = false;
-						} else {
-							tmp += " ";
+						ineval = false;
+						boolean optional = false;
+						if (buf.endsWith("?")) {
+							optional = true;
+							buf = buf.substring(0, buf.length()-1);
 						}
 						
-						tmp += m.group(2);
-						tmp += v;
-						tmp += m.group(4);
-					}							
-
-					str = m.group(5);
-				}
-				
-			} else {
-				tmp += str;
-				break;
-			}
-		}
-		return tmp;
-	}
-	
-	private static String evalStringRange(String str, ExecContext context, TokenList tokens) throws ASTExecException {
-		String tmp = "";
-		// range check
-		while (str.length() > 0) {
-			Matcher m = rangePattern.matcher(str);
-			if (m.matches()) {
-				tmp += m.group(1);
-				
-				if (m.group(2).endsWith("\\")) {
-					tmp += m.group(2).substring(0,m.group(2).length()-1);
-					tmp += "@{" + m.group(3) +".." + m.group(4) + "}";
-					str = m.group(5) + m.group(6);
-				} else {
-					try {
-						TokenList fromTokens = Tokenizer.tokenize(new NumberedLine(tokens.getLine().filename, tokens.getLine().linenum, m.group(3)));
-						TokenList toTokens = Tokenizer.tokenize(new NumberedLine(tokens.getLine().filename, tokens.getLine().linenum, m.group(4)));
-						
-						VarValue from = Eval.evalTokenExpression(fromTokens, context);
-						VarValue to = Eval.evalTokenExpression(toTokens, context);
-						
-						VarValue range = VarRange.range(from, to);
-
-						boolean first = true;
-						for (VarValue v: range.iterate()) {
-							if (first) {
-								first = false;
-							} else {
-								tmp += " ";
+						try {
+	 						TokenList tl = Tokenizer.tokenize(new NumberedLine(buf, line));
+							VarValue val = Eval.evalTokenExpression(tl, context);
+							out += val.toString();
+						} catch (ASTExecException e) {
+							if (!optional) {
+								throw e;
 							}
-							
-							tmp += m.group(2);
-							tmp += v;
-							tmp += m.group(5);
-						}							
-					} catch (VarTypeException | ASTParseException e) {
-						throw new ASTExecException(e, tokens);
+						} catch (ASTParseException e) {
+							if (!optional) {
+								throw new ASTExecException(e, line);
+							}
+						}
+						
+						buf = "";
 					}
-					str = m.group(6);
+				} else {
+					buf += str.charAt(i);
 				}
-				
+			} else if (i < str.length()-2 && str.substring(i, i+2).equals("${")) {
+				if (i==0 || str.charAt(i-1) != '\\') {
+					ineval = true;
+				} else {
+					out = out.substring(0, out.length()-1) + "${";
+				}
+				i++;
 			} else {
-				tmp += str;
-				break;
+				out += str.charAt(i);
 			}
 		}
-		return tmp;
+		
+		if (!buf.equals("")) {
+			throw new ASTExecException("Missing closing '}' in string", line);
+		}
+		
+		return out;
 	}
 
-	private static String evalStringOutputs(String str, ExecContext context, TokenList tokens) throws ASTExecException {
+	private static List<String> innerEvalStringList(String str, ExecContext context, NumberedLine line) throws ASTExecException {
+		List<String> out = new ArrayList<String>();
+		String pre = "";
+		String post = null;
+		String buf = null;
+		
+		boolean ineval = false;
+		
+		for (int i=0; i<str.length(); i++) {
+			if (ineval) {
+				if (str.charAt(i) == '}') {
+					if (buf.endsWith("\\")) {
+						buf = buf.substring(0, buf.length()-1) + "}";
+					} else {
+						ineval = false;
+						post = "";
+					}
+				} else {
+					buf += str.charAt(i);
+				}
+			} else if (i < str.length()-2 && str.substring(i, i+2).equals("@{")) {
+				if (i==0 || str.charAt(i-1) != '\\') {
+					ineval = true;
+					buf = "";
+				} else {
+					pre = pre.substring(0, pre.length()-1) + "@{";
+				}
+				i++;
+			} else if (buf==null) {
+				pre += str.charAt(i);
+			} else {
+				post += str.charAt(i);
+			}
+		}
+
+		if (buf != null && post == null) {
+			throw new ASTExecException("Missing closing '}' in string", line);
+		}
+
+		if (buf != null) {
+			if (!buf.equals("")) {
+				boolean optional = false;
+				if (buf.endsWith("?")) {
+					optional = true;
+					buf = buf.substring(0, buf.length()-1);
+				}
+				try {
+					TokenList tl = Tokenizer.tokenize(new NumberedLine(buf, line));
+					VarValue val = Eval.evalTokenExpression(tl, context);
+					for (VarValue v: val.iterate()) {
+						out.add(pre+v.toString()+post);
+					}
+				} catch (ASTExecException e) {
+					if (!optional) {
+						throw e;
+					}
+				} catch (ASTParseException e) {
+					if (!optional) {
+						throw new ASTExecException(e, line);
+					}
+				}
+			} else {
+				out.add(pre+post);
+			}
+		} else {
+			out.add(pre);
+		}
+		return out;
+	}
+
+	private static String evalStringList(String str, ExecContext context, NumberedLine line) throws ASTExecException {
+		String out = "";
+		String buf = "";
+		
+		for (int i=0; i<str.length(); i++) {
+			if (str.charAt(i) == ' ' || str.charAt(i) == '\t' || str.charAt(i) == '\r' || str.charAt(i) == '\n') {
+				if (!buf.equals("")) {
+					out += StringUtils.join(" ", innerEvalStringList(buf, context, line));
+					buf = "";
+				}
+				out += str.charAt(i);
+			} else {
+				buf += str.charAt(i);
+			}
+		}
+		if (!buf.equals("")) {
+			out += StringUtils.join(" ", innerEvalStringList(buf, context, line));
+		}
+		return out;
+	}
+
+	private static String evalStringOutputs(String str, ExecContext context, NumberedLine line) throws ASTExecException {
 		if (context.getRoot().getOutputs() != null) {
 			String tmp = "";
 			while (str.length() > 0) {
@@ -402,7 +386,7 @@ public class Eval {
 			return str;
 		}
 	}
-	private static String evalStringInputs(String str, ExecContext context, TokenList tokens) throws ASTExecException {
+	private static String evalStringInputs(String str, ExecContext context, NumberedLine line) throws ASTExecException {
 		if (context.getRoot().getInputs() != null) {
 			String tmp = "";
 			while (str.length() > 0) {
@@ -433,8 +417,8 @@ public class Eval {
 	}
 
 	
-	public static String evalShell(String str, ExecContext context, TokenList tokens) throws ASTExecException {
-		return Eval.execScript(evalString(str, context, tokens));
+	public static String evalShell(String str, ExecContext context, NumberedLine line) throws ASTExecException {
+		return Eval.execScript(evalString(str, context, line));
 	}
 
 	private static String execScript(String script) throws ASTExecException {

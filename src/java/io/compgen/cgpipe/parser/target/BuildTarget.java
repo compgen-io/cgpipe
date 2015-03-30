@@ -88,12 +88,12 @@ public class BuildTarget {
 							if (StringUtils.lstrip(l).startsWith("#$")) {
 								curNode = curNode.parseLine(preLine.stripPrefix());
 							} else {
-								curNode = curNode.parseBody(l2);
+								curNode = curNode.parseBody(l2, preLine);
 							}
 						}
 						curNode = curNode.parseLine(new NumberedLine("endif"));
 					}
-					curNode = curNode.parseBody(l);
+					curNode = curNode.parseBody(l, line);
 				}
 			}
 
@@ -105,7 +105,7 @@ public class BuildTarget {
 					if (StringUtils.lstrip(l2).startsWith("#$")) {
 						curNode = curNode.parseLine(postLine.stripPrefix());
 					} else {
-						curNode = curNode.parseBody(l2);
+						curNode = curNode.parseBody(l2, postLine);
 					}
 				}
 				curNode = curNode.parseLine(new NumberedLine("endif"));

@@ -84,8 +84,8 @@ public abstract class ASTNode {
 		return next;
 	}
 
-	public ASTNode parseBody(String l) {
-		this.next = new BodyNode(this, l);
+	public ASTNode parseBody(String l, NumberedLine line) {
+		this.next = new BodyNode(this, l, line);
 		return next;
 	}
 

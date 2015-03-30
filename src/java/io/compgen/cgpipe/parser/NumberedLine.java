@@ -27,6 +27,12 @@ public class NumberedLine {
 		this.line = line;
 	}
 	
+	public NumberedLine(String line, NumberedLine parent) {
+		this.filename = parent.filename;
+		this.linenum = parent.linenum;
+		this.line = line;
+	}
+
 	public String toString() {
 		return filename+"["+linenum+"] "+line;
 	}

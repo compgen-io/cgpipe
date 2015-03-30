@@ -31,13 +31,13 @@ public class BuildTargetTemplate {
 
 		for (String out: outputs) {
 			if (out != null && !out.equals("")) {
-				this.outputs.add(Eval.evalString(out, context, tokens));
+				this.outputs.add(Eval.evalString(out, context, tokens.getLine()));
 			}
 		}
 
 		for (String in: inputs) {
 			if (in != null && !in.equals("")) {
-				this.inputs.add(Eval.evalString(in, context, tokens));
+				this.inputs.add(Eval.evalString(in, context, tokens.getLine()));
 			}
 		}
 		

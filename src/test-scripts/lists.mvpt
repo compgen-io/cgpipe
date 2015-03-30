@@ -34,3 +34,13 @@ print baz[:-1]
 print baz[-1:]
 print baz[1:2]
 print baz[1:]
+
+# print single element
+print "${baz[0]}"
+# print sublist
+print "@{baz[:-1]}"
+
+# print baz toString()
+print "${baz}"
+print "pre_@{baz[:-1]}_suf"
+

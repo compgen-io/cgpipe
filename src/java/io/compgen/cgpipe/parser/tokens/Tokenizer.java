@@ -23,7 +23,7 @@ public class Tokenizer {
 			tokens = markSplitLine(tokens);
 //			System.err.println("markSplitLine       : "+StringUtils.join(";", tokens));
 	
-			tokens = delimiterSplit(tokens, ' ');
+			tokens = delimiterSplit(tokens, new char[]{' ', '\t'});
 //			System.err.println("delimiterSplit      : "+StringUtils.join(";", tokens));
 
 			tokens = markColonsAndSlices(tokens);
@@ -246,7 +246,7 @@ public class Tokenizer {
 //	}
 
 
-	public static List<Token> delimiterSplit(List<Token> tokens, char delim) throws ASTParseException {
+	public static List<Token> delimiterSplit(List<Token> tokens, char[] delims) throws ASTParseException {
 		List<Token> out = new ArrayList<Token>();
 
 		for (Token tok: tokens) {
@@ -257,12 +257,17 @@ public class Tokenizer {
 			
 			String buf = "";
 			for (int i=0; i<tok.getStr().length(); i++ ) {
-				if (tok.getStr().charAt(i) == delim) {
-					if (!buf.equals("")) {
-						out.add(Token.raw(buf));
+				boolean found = false;
+				for (char delim: delims) {
+					if (tok.getStr().charAt(i) == delim) {
+						found = true;
+						if (!buf.equals("")) {
+							out.add(Token.raw(buf));
+						}
+						buf = "";
 					}
-					buf = "";
-				} else {
+				}
+				if (!found) {
 					buf += tok.getStr().charAt(i);
 				}
 			}

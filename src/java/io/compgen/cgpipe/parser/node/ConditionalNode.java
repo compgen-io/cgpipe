@@ -40,12 +40,12 @@ public class ConditionalNode extends ASTNode {
 	}
 	
 	@Override
-	public ASTNode parseBody(String str) {
+	public ASTNode parseBody(String str, NumberedLine line) {
 		if (curNext == null) {
-			return super.parseBody(str);
+			return super.parseBody(str, line);
 		}
 
-		ASTNode node = curNext.parseBody(str);
+		ASTNode node = curNext.parseBody(str, line);
 		if (node != null) {
 			curNext = node;
 		}
