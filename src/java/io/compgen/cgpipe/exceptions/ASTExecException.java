@@ -17,6 +17,10 @@ public class ASTExecException extends ASTException {
 		super(e);
 	}
 
+	protected ASTExecException() {
+		super("");
+	}
+
 	public ASTExecException(String msg, TokenList tokens) {
 		super(msg, tokens.getLine());
 	}

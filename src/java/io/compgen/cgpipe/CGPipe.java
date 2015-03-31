@@ -2,6 +2,7 @@ package io.compgen.cgpipe;
 
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
+import io.compgen.cgpipe.exceptions.ExitException;
 import io.compgen.cgpipe.exceptions.RunnerException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
 import io.compgen.cgpipe.parser.Parser;
@@ -32,11 +33,13 @@ public class CGPipe {
 
 	public static void main(String[] args) {
 		String fname = null;
+		String remoteName = null;
 		String logFilename = null;
 		int verbosity = 0;
 		boolean silent = false;
 		boolean dryrun = false;
 		boolean silenceStdErr = false;
+		boolean help = false;
 		
 		List<String> targets = new ArrayList<String>();
 		Map<String, VarValue> confVals = new HashMap<String, VarValue>();
@@ -54,14 +57,16 @@ public class CGPipe {
 			} else if (args[i-1].equals("-f")) {
 				fname = arg;
 				continue;
+			} else if (args[i-1].equals("-p")) {
+				remoteName = arg;
+				continue;
 			} else if (args[i-1].equals("-l")) {
 				logFilename = arg;
 				continue;
 			}
 			
 			if (arg.equals("-h")) {
-				usage();
-				System.exit(1);
+				help = true;
 			} else if (arg.equals("-license")) {
 				license();
 				System.exit(1);
@@ -107,9 +112,18 @@ public class CGPipe {
 			}
 		}
 		
-		if (fname == null) {
+		if ((fname == null && remoteName == null) || (fname != null && remoteName != null)) {
 			usage();
 			System.exit(1);
+		}
+		
+		if (help) {
+			if (fname == null) {			
+				PipelineLoader.showHelp(remoteName);
+			} else {
+				PipelineLoader.showHelp(fname);
+			}
+			System.exit(0);
 		}
 		
 		switch (verbosity) {
@@ -136,7 +150,7 @@ public class CGPipe {
 		if (logFilename != null) {
 			confVals.put("cgpipe.log", new VarString(logFilename));
 		}
-
+		JobRunner runner = null;
 		try {
 			// Load config values from global config. 
 			RootContext root = new RootContext();
@@ -144,7 +158,7 @@ public class CGPipe {
 
 			// Parse RC file
 			if (RCFILE.exists()) {
-				Parser.exec(RCFILE, root);
+				Parser.exec(RCFILE.getAbsolutePath(), root);
 			}
 
 			// Set cmd-line arguments
@@ -162,7 +176,7 @@ public class CGPipe {
 			Parser.exec(fname, root);
 
 			// Load the job runner *after* we execute the script to capture any config changes
-			JobRunner runner = JobRunner.load(root, dryrun);
+			runner = JobRunner.load(root, dryrun);
 
 			// find a build-target, and submit the job(s) to a runner
 			if (targets.size() > 0) {
@@ -181,6 +195,14 @@ public class CGPipe {
 			runner.done();
 
 		} catch (ASTParseException | ASTExecException | RunnerException e) {
+			if (runner != null) {
+				runner.abort();
+			}
+			
+			if (e.getClass().equals(ExitException.class)) {
+				System.exit(((ExitException) e).getReturnCode());
+			}
+			
 			System.out.println("CGPIPE ERROR " + e.getMessage());
 			if (verbosity > 0) {
 				e.printStackTrace();
@@ -189,36 +211,35 @@ public class CGPipe {
 		}
 	}
 
-	private static void showFile(String fname) throws IOException {
+	private static String readFile(String fname) throws IOException {
+		String s = "";
 		InputStream is = CGPipe.class.getClassLoader().getResourceAsStream(fname);
 		if (is == null) {
 			throw new IOException("Can't load file: "+fname);
 		}
 		int c;
 		while ((c = is.read()) > -1) {
-			System.out.print((char) c);
+			s += (char) c;
 		}
 		is.close();	
+		return s;
 	}
 	
 	private static void usage() {
 		try {
-			showFile("io/compgen/cgpipe/USAGE.txt");
+			System.out.println(readFile("io/compgen/cgpipe/USAGE.txt"));
 			System.out.println("http://compgen.io/cgpipe");
-			showFile("VERSION");
+			System.out.println(readFile("VERSION"));
 			System.out.println();
 		} catch (IOException e) {
-//			e.printStackTrace();
 		}
 	}
 
 	private static void license() {
 		try {
-			showFile("LICENSE");
-			showFile("INCLUDES");
+			System.out.println(readFile("LICENSE"));
+			System.out.println(readFile("INCLUDES"));
 		} catch (IOException e) {
-//			e.printStackTrace();
 		}
 	}
-
 }
