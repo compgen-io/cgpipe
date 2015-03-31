@@ -18,6 +18,7 @@ public interface Statement {
 	public static final Statement INCLUDE = new Include();
 	public static final Statement IN = new In();
 	public static final Statement UNSET = new Unset();
+	public static final Statement EXIT = new Exit();
 	
 	public static final Statement[] statements = {
 		PRINT,
@@ -29,6 +30,7 @@ public interface Statement {
 		DONE,
 		INCLUDE,
 		IN,
-		UNSET
+		UNSET,
+		EXIT
 	};
 }
