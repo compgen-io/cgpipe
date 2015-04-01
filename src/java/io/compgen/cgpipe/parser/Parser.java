@@ -8,7 +8,6 @@ import io.compgen.cgpipe.parser.node.NoOpNode;
 import io.compgen.cgpipe.pipeline.NumberedLine;
 import io.compgen.cgpipe.pipeline.Pipeline;
 import io.compgen.cgpipe.pipeline.PipelineLoader;
-import io.compgen.common.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
