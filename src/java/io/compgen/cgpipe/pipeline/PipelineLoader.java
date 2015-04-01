@@ -16,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -49,6 +50,11 @@ public class PipelineLoader {
 	}
 
 	public Pipeline loadPipeline(String filename, String hash) throws IOException {
+		if (hash != null) {
+			log.info("Looking for file: "+filename+" hash:"+hash + " loader:"+this);
+		} else {
+			log.info("Looking for file: "+filename + " loader:"+this);
+		}
 		// absolute path loader
 		File file = new File(filename);
 		if (file.exists()) {
@@ -74,7 +80,7 @@ public class PipelineLoader {
 		if (filename.startsWith("http:") || filename.startsWith("https:")) {
 			log.debug("Using HTTP loader: " + filename);
 			PipelineLoader loader = new HttpPipelineLoader(this);
-			return loader.loadPipeline(filename);
+			return loader.loadPipeline(filename, hash);
 		}
 
 		if (filename.contains(":")) {
@@ -84,7 +90,7 @@ public class PipelineLoader {
 			if (remotes.containsKey(remoteName)) {
 				log.debug("Using Remote loader: " + remoteName+" => "+url);
 				PipelineLoader loader = remotes.get(remoteName);
-				return loader.loadPipeline(url);
+				return loader.loadPipeline(url, hash);
 			}
 		}
 
@@ -118,12 +124,13 @@ public class PipelineLoader {
 		reader.close();
 		pipeline.finalize();
 		
-		
 		byte[] digest = md.digest();
 		if (hash != null) {
-			String digestStr = String.format("%0" + md.getDigestLength() + "s", digest.toString());
-			if (!digestStr.toUpperCase().equals(hash.toUpperCase())) {
-				throw new IOException("Error loading: "+name+" - SHA1 hash doesn't match! Expected: "+hash.toUpperCase()+" Got: "+digestStr.toUpperCase());
+			hash = hash.toLowerCase();
+			String digestStr = Hex.encodeHexString(digest).toLowerCase();
+			log.debug("Expected: "+hash+" Got: "+digestStr);
+			if (!digestStr.equals(hash)) {
+				throw new IOException("Error loading: "+name+" - SHA1 hash doesn't match! Expected: "+hash+" Got: "+digestStr);
 			}
 		}
 

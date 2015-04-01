@@ -1,0 +1,3 @@
+include "compgen_io:examples/test"
+include "https://raw.githubusercontent.com/compgen-io/cgpipe-pipelines/master/examples/test"
+include "compgen_io:examples/test2"

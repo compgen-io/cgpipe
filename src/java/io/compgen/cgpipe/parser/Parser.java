@@ -80,7 +80,7 @@ public class Parser {
 				pipeline = loader.loadPipeline(filename);
 			}
 		} catch (IOException e) {
-			log.error("Error loading file: "+filename, e);
+			log.error("Error loading file: "+filename);
 			throw new ASTParseException(e);
 		}
 

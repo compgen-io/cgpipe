@@ -17,6 +17,6 @@ public class FilePipelineLoader extends PipelineLoader {
 			PipelineLoader loader = new FilePipelineLoader(this, file.getParentFile());
 			return loader.loadPipeline(new FileInputStream(file), filename, hash);
 		}
-		return parent.loadPipeline(filename, hash);
+		return super.loadPipeline(filename, hash);
 	}
 }

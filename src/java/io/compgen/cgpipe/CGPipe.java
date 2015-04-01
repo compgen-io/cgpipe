@@ -16,7 +16,6 @@ import io.compgen.cgpipe.pipeline.PipelineLoader;
 import io.compgen.cgpipe.runner.JobRunner;
 import io.compgen.cgpipe.support.SimpleFileLoggerImpl;
 import io.compgen.cgpipe.support.SimpleFileLoggerImpl.Level;
-import io.compgen.common.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -191,8 +190,6 @@ public class CGPipe {
 			}
 
 			root.update(confVals);
-
-			log.info("root keys: " + StringUtils.join(",", root.cloneString().keySet()));
 			
 			// update the URL Pipeline loader configs
 			PipelineLoader.updateRemoteHandlers(root.cloneString("cgpipe.remote"));
@@ -219,7 +216,7 @@ public class CGPipe {
 			}
 			runner.done();
 
-		} catch (ASTParseException | ASTExecException | RunnerException e) {
+		} catch (ASTParseException | ASTExecException | RunnerException  e) {
 			if (runner != null) {
 				runner.abort();
 			}
