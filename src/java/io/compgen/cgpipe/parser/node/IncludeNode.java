@@ -7,8 +7,6 @@ import io.compgen.cgpipe.parser.Parser;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.tokens.TokenList;
 
-import java.io.File;
-
 public class IncludeNode extends ASTNode {
 	private Parser nestedAST = null;
 	public IncludeNode(ASTNode parent, TokenList tokens) {
@@ -20,13 +18,7 @@ public class IncludeNode extends ASTNode {
 		String filename = Eval.evalTokenExpression(tokens, context).toString();
 		
 		try {
-			File file = context.getRoot().findFile(filename);
-			if (file == null) {
-//				context.dump();
-				throw new ASTExecException("Could not file file: "+filename, tokens);
-				
-			}
-			nestedAST = Parser.parseAST(file);
+			nestedAST = Parser.parseAST(filename, tokens.getLine().getPipeline().getLoader());
 			nestedAST.exec(context);
 		} catch (ASTParseException e) {
 			throw new ASTExecException(e);

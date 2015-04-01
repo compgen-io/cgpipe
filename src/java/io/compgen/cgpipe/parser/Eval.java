@@ -11,6 +11,7 @@ import io.compgen.cgpipe.parser.tokens.Tokenizer;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.cgpipe.pipeline.NumberedLine;
 import io.compgen.common.StringUtils;
 
 import java.io.IOException;

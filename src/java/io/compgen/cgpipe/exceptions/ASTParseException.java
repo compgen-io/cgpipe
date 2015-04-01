@@ -1,7 +1,7 @@
 package io.compgen.cgpipe.exceptions;
 
-import io.compgen.cgpipe.parser.NumberedLine;
 import io.compgen.cgpipe.parser.tokens.TokenList;
+import io.compgen.cgpipe.pipeline.NumberedLine;
 
 public class ASTParseException extends ASTException {
 

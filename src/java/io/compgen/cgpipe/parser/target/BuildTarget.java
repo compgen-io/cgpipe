@@ -2,12 +2,12 @@ package io.compgen.cgpipe.parser.target;
 
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
-import io.compgen.cgpipe.parser.NumberedLine;
 import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.node.ASTNode;
 import io.compgen.cgpipe.parser.node.JobNoOpNode;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.cgpipe.pipeline.NumberedLine;
 import io.compgen.cgpipe.runner.JobDef;
 import io.compgen.cgpipe.runner.JobDependency;
 import io.compgen.common.StringUtils;
@@ -68,12 +68,12 @@ public class BuildTarget {
 		ASTNode curNode = headNode;
 	
 		if (lines.size() > 0) {
-			int indent = StringUtils.calcIndentLevel(lines.get(0).line);
+			int indent = StringUtils.calcIndentLevel(lines.get(0).getLine());
 			boolean preRun = false;
 			
 			// Parse AST
 			for (NumberedLine line: lines) {
-				String l = StringUtils.stripIndent(line.line, indent);
+				String l = StringUtils.stripIndent(line.getLine(), indent);
 				if (StringUtils.lstrip(l).startsWith("#$")) {
 					curNode = curNode.parseLine(line.stripPrefix());
 				} else {
@@ -84,7 +84,7 @@ public class BuildTarget {
 						preRun = true;
 						curNode = curNode.parseLine(new NumberedLine("if !job.nopre"));
 						for (NumberedLine preLine: pre) {
-							String l2 = StringUtils.stripIndent(preLine.line, indent);
+							String l2 = StringUtils.stripIndent(preLine.getLine(), indent);
 							if (StringUtils.lstrip(l).startsWith("#$")) {
 								curNode = curNode.parseLine(preLine.stripPrefix());
 							} else {
@@ -101,7 +101,7 @@ public class BuildTarget {
 			if (post != null && lines.size() > 0) {
 				curNode = curNode.parseLine(new NumberedLine("if !job.nopost"));
 				for (NumberedLine postLine: post) {
-					String l2 = StringUtils.stripIndent(postLine.line, indent);
+					String l2 = StringUtils.stripIndent(postLine.getLine(), indent);
 					if (StringUtils.lstrip(l2).startsWith("#$")) {
 						curNode = curNode.parseLine(postLine.stripPrefix());
 					} else {

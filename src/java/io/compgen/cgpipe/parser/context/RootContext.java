@@ -124,28 +124,4 @@ public class RootContext extends ExecContext{
 			outputStream.println(s);
 		}
 	}
-
-	public void pushCWD(String path) {
-		curPathList.add(0,path);
-	}
-
-	public void popCWD() {
-		curPathList.remove(0);
-	}
-
-	public File findFile(String filename) {
-		File f = new File(filename);
-		if (f.exists()) {
-			return f;
-		}
-		
-		for (String path: curPathList) {
-			f = new File(path, filename);
-			if (f.exists()) {
-				return f;
-			}
-		}
-		
-		return null;
-	}
 }	

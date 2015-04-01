@@ -59,6 +59,7 @@
             </manifest>
 	        <fileset dir="${build.dir}/classes"/>
             <zipfileset src="${lib.dir}/commons-logging-1.2.jar"/>
+            <zipfileset src="${lib.dir}/commons-codec-1.10.jar"/>
             <zipfileset src="${lib.dir}/compgen-cmdline-0.4.1.jar"/>
             <zipfileset src="${lib.dir}/compgen-common-0.1.jar"/>
 	        <zipfileset src="${lib.dir}/sjq-0.3.jar"/>

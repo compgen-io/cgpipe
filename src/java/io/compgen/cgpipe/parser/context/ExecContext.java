@@ -3,12 +3,9 @@ package io.compgen.cgpipe.parser.context;
 import io.compgen.cgpipe.parser.variable.VarNull;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.cgpipe.support.SimpleFileLoggerImpl;
-import io.compgen.common.StringUtils;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -16,7 +13,6 @@ import org.apache.commons.logging.LogFactory;
 
 public class ExecContext {
 	protected final ExecContext parent;
-	protected List<String> curPathList = new ArrayList<String>();
 
 	protected ExecContext() {
 		this.parent = null;
@@ -80,7 +76,6 @@ public class ExecContext {
 
 	public Map<String, VarValue> cloneValues() {
 		return cloneValues(null);
-
 	}
 	
 	public Map<String, VarValue> cloneValues(String prefix) {
@@ -98,7 +93,27 @@ public class ExecContext {
 
 		return vars;
 	}
-	
+
+	public Map<String, String> cloneString() {
+		return cloneString(null);
+	}
+
+	public Map<String, String> cloneString(String prefix) {
+		Map<String, String> vars = new HashMap<String, String>();
+
+		ExecContext cur = this;
+		while (cur != null) {
+			for (String k:cur.vars.keySet()) {
+				if (prefix==null || k.startsWith(prefix)) {
+					vars.put(k, cur.vars.get(k).toString());
+				}
+			}
+			cur = cur.parent;
+		}
+
+		return vars;
+	}
+
 	public void update(Map<String, VarValue> vals) {
 		for (String k: vals.keySet()) {
 			set(k, vals.get(k));
@@ -114,8 +129,6 @@ public class ExecContext {
 		for (String k: vars.keySet()) {
 			System.err.println("  " + k + " => " + vars.get(k));
 		}
-		
-		System.err.println("  paths:" + StringUtils.join(", ", curPathList));
 		
 		if (parent != null) {
 			parent.dump();

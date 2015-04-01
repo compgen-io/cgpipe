@@ -2,11 +2,11 @@ package io.compgen.cgpipe.parser.node;
 
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
-import io.compgen.cgpipe.parser.NumberedLine;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.target.BuildTargetTemplate;
 import io.compgen.cgpipe.parser.tokens.Token;
 import io.compgen.cgpipe.parser.tokens.TokenList;
+import io.compgen.cgpipe.pipeline.NumberedLine;
 import io.compgen.common.StringUtils;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class TargetNode extends ASTNode {
 	public TargetNode(ASTNode parent, TokenList tokens) throws ASTParseException {
 		super(parent, tokens);
 		
-		indentLevel = StringUtils.calcIndentLevel(tokens.getLine().line);
+		indentLevel = StringUtils.calcIndentLevel(tokens.getLine().getLine());
 		
 		ASTNode p = parent;
 		while (p != null) {
@@ -54,7 +54,7 @@ public class TargetNode extends ASTNode {
 	
 	@Override
 	public ASTNode parseLine(NumberedLine line) throws ASTParseException {
-		int indent = StringUtils.calcIndentLevel(line.line);
+		int indent = StringUtils.calcIndentLevel(line.getLine());
 
 		if (indent > this.indentLevel) {
 			lines.add(line);
@@ -79,7 +79,7 @@ public class TargetNode extends ASTNode {
 	public void dump(int indent) {
 		System.err.println(StringUtils.repeat("  ", indent)+dumpString());
 		for (NumberedLine line: lines) {
-			System.err.println(StringUtils.repeat("  ", indent+1)+"[src] "+line.line);
+			System.err.println(StringUtils.repeat("  ", indent+1)+"[src] "+line.getLine());
 		}
 		if (next != null) {
 			next.dump(indent);

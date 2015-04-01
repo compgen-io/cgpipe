@@ -5,50 +5,37 @@ import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.node.ASTNode;
 import io.compgen.cgpipe.parser.node.NoOpNode;
-import io.compgen.common.StringUtils;
+import io.compgen.cgpipe.pipeline.NumberedLine;
+import io.compgen.cgpipe.pipeline.Pipeline;
+import io.compgen.cgpipe.pipeline.PipelineLoader;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class Parser {
 	private boolean readOnly = false;
 	private ASTNode headNode = null;
 	private ASTNode currentNode = null;
-	private String path=null;
-	
+	static private Log log = LogFactory.getLog(Parser.class);
+
 	public Parser() {
 		headNode = new NoOpNode(null);
 		currentNode = headNode;
 	}
 	
-	private void load(InputStream is, String filename, String path) throws ASTParseException {
+	private void load(Pipeline pipeline) throws ASTParseException {
 		if (readOnly) {
 			throw new ASTParseException("AST set - can't add another line!");
 		}
 
-		this.path = path;
-
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-		String line;
-
-		int linenum = 0;
-		NumberedLine curLine = null;
-		
-		try {
-			while ((line = reader.readLine()) != null) {
-				line = StringUtils.rstrip(line);
-				linenum++;
-				curLine = new NumberedLine(filename, linenum, line);
-				currentNode = currentNode.parseLine(curLine);
-			}
-		} catch (IOException e) {
-			throw new ASTParseException(e, curLine);
+		for (NumberedLine curLine: pipeline.getLines()) {
+			log.debug(curLine);
+			currentNode = currentNode.parseLine(curLine);
 		}
-
+		
 		this.readOnly = true;
 	}
 	
@@ -73,54 +60,83 @@ public class Parser {
 			throw new ASTExecException("AST not finalized - can't exec yet!");
 		}
 	
-		if (path != null) {
-			context.getRoot().pushCWD(path);
-		}
-		
 		currentNode = headNode;
 		
 		while (currentNode != null) {
 			currentNode = currentNode.exec(context);
 		}
-
-		if (path!=null) {
-			context.getRoot().popCWD();
-		}
 	}
 	
-	static public Parser parseAST(InputStream is, String filename, String path) throws ASTParseException {
-		Parser parser =  new Parser();
-		parser.load(is, filename, path);
+	static public Parser parseAST(String filename) throws ASTParseException {
+		return parseAST(filename, PipelineLoader.getDefaultLoader());
+	}
+
+	static public Parser parseAST(String filename, PipelineLoader loader) throws ASTParseException {
+		Pipeline pipeline;
+		try {
+			if (filename.equals("-")) {
+				return parseAST("-", System.in, loader);
+			} else {
+				pipeline = loader.loadPipeline(filename);
+			}
+		} catch (IOException e) {
+			log.error("Error loading file: "+filename, e);
+			throw new ASTParseException(e);
+		}
+
+		if (pipeline == null) {
+			log.error("Error loading file: "+filename);
+			throw new ASTParseException("Error loading file: "+filename);
+		}
+		
+		Parser parser = new Parser();
+		parser.load(pipeline);
 		return parser;
 	}
 
-	static public Parser parseAST(String filename) throws ASTParseException {
-		if (filename.equals("-")) {
-			return parseAST(System.in, null, null);
-		}
-		return parseAST(new File(filename));
+	static public Parser parseAST(String name, InputStream is) throws ASTParseException {
+		return parseAST(name, is, PipelineLoader.getDefaultLoader());
 	}
-	
-	static public Parser parseAST(File file) throws ASTParseException {
+
+	static public Parser parseAST(String name, InputStream is, PipelineLoader loader) throws ASTParseException {
+		Pipeline pipeline;
 		try {
-			FileInputStream is = new FileInputStream(file);
-			return parseAST(is, file.getCanonicalPath(), file.getParent());
+			pipeline = loader.loadPipeline(is, name);
 		} catch (IOException e) {
+			log.error("Error loading file: "+name, e);
 			throw new ASTParseException(e);
 		}
+		
+		Parser parser = new Parser();
+		parser.load(pipeline);
+		return parser;
 	}
 
 	public static void exec(String filename, ExecContext context) throws ASTParseException, ASTExecException {
 		Parser parser = parseAST(filename);
-//		parser.dump();
+//		parser.headNode.dump();
 		parser.exec(context);
 	}
-	
-	public static void exec(File file, ExecContext context) throws ASTParseException, ASTExecException {
-		Parser parser = parseAST(file);
-//		parser.dump();
+
+	public static void exec(String name, InputStream is, ExecContext context) throws ASTParseException, ASTExecException {
+		Parser parser = parseAST(name, is);
+//		parser.headNode.dump();
 		parser.exec(context);
-		
 	}
-	
+
+	public static void showHelp(String name) throws IOException {
+		boolean first = true;
+		Pipeline pipe = PipelineLoader.getDefaultLoader().loadPipeline(name);
+		for (NumberedLine line: pipe.getLines()) {
+			if (first && line.getLine().startsWith("#!")) {
+				first = false;
+				continue;
+			}
+			first = false;
+			
+			if (!line.getLine().startsWith("#")) {
+				break;
+			}
+		}
+	}
 }

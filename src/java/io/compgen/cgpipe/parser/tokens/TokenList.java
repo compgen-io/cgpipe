@@ -1,6 +1,6 @@
 package io.compgen.cgpipe.parser.tokens;
 
-import io.compgen.cgpipe.parser.NumberedLine;
+import io.compgen.cgpipe.pipeline.NumberedLine;
 import io.compgen.common.StringUtils;
 
 import java.util.ArrayList;

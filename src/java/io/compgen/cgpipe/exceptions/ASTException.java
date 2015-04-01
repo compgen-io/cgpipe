@@ -1,6 +1,6 @@
 package io.compgen.cgpipe.exceptions;
 
-import io.compgen.cgpipe.parser.NumberedLine;
+import io.compgen.cgpipe.pipeline.NumberedLine;
 
 
 public class ASTException extends Exception {
@@ -32,7 +32,7 @@ public class ASTException extends Exception {
 		if (line == null) {
 			return "<unknown>: "+ super.getMessage();
 		}
-		return line.filename+"["+line.linenum+"]: "+ super.getMessage();
+		return line.getPipeline()+"["+line.getLineNumber()+"]: "+ super.getMessage();
 	}
 
 	/**

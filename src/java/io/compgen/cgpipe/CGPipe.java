@@ -12,9 +12,11 @@ import io.compgen.cgpipe.parser.variable.VarBool;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.cgpipe.pipeline.PipelineLoader;
 import io.compgen.cgpipe.runner.JobRunner;
 import io.compgen.cgpipe.support.SimpleFileLoggerImpl;
 import io.compgen.cgpipe.support.SimpleFileLoggerImpl.Level;
+import io.compgen.common.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -119,9 +121,19 @@ public class CGPipe {
 		
 		if (help) {
 			if (fname == null) {			
-				PipelineLoader.showHelp(remoteName);
+				try {
+					Parser.showHelp(remoteName);
+				} catch (IOException e) {
+					System.err.println("Unable to find pipeline: "+remoteName);
+					System.exit(1);
+				}
 			} else {
-				PipelineLoader.showHelp(fname);
+				try {
+					Parser.showHelp(fname);
+				} catch (IOException e) {
+					System.err.println("Unable to find pipeline: "+fname);
+					System.exit(1);
+				}
 			}
 			System.exit(0);
 		}
@@ -150,17 +162,25 @@ public class CGPipe {
 		if (logFilename != null) {
 			confVals.put("cgpipe.log", new VarString(logFilename));
 		}
+		
 		JobRunner runner = null;
 		try {
 			// Load config values from global config. 
 			RootContext root = new RootContext();
-			root.pushCWD(CGPIPE_HOME.getAbsolutePath());
 
+			// Parse the default cgpiperc
+			InputStream is = CGPipe.class.getClassLoader().getResourceAsStream("io/compgen/cgpipe/cgpiperc");
+			if (is != null) {
+				log.debug("parsing: io/compgen/cgpipe/cgpiperc");
+				Parser.exec("io/compgen/cgpipe/cgpiperc", is,  root);
+			}
+			
 			// Parse RC file
 			if (RCFILE.exists()) {
+				log.debug("parsing: "+RCFILE.getAbsolutePath());
 				Parser.exec(RCFILE.getAbsolutePath(), root);
 			}
-
+			
 			// Set cmd-line arguments
 			if (silent) {
 				root.setOutputStream(null);
@@ -172,6 +192,11 @@ public class CGPipe {
 
 			root.update(confVals);
 
+			log.info("root keys: " + StringUtils.join(",", root.cloneString().keySet()));
+			
+			// update the URL Pipeline loader configs
+			PipelineLoader.updateRemoteHandlers(root.cloneString("cgpipe.remote"));
+			
 			// Parse the AST and run it
 			Parser.exec(fname, root);
 

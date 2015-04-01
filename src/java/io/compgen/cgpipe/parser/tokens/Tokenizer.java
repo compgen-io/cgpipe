@@ -2,12 +2,12 @@ package io.compgen.cgpipe.parser.tokens;
 
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
-import io.compgen.cgpipe.parser.NumberedLine;
 import io.compgen.cgpipe.parser.op.Operator;
 import io.compgen.cgpipe.parser.statement.Statement;
 import io.compgen.cgpipe.parser.variable.VarFloat;
 import io.compgen.cgpipe.parser.variable.VarInt;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.cgpipe.pipeline.NumberedLine;
 import io.compgen.common.StringUtils;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public class Tokenizer {
 
 	public static TokenList tokenize(NumberedLine line) throws ASTParseException {
 		try {
-			List<Token> tokens = extractQuotedStrings(line.line, '"', '#');
+			List<Token> tokens = extractQuotedStrings(line.getLine(), '"', '#');
 //			System.err.println("extractQuotedStrings: "+StringUtils.join(";", tokens));
 			
 			tokens = markSplitLine(tokens);

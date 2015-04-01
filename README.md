@@ -351,6 +351,12 @@ Comments are started with a `#` character. You may also include the '$' and '@'
 characters in strings or evaluated lines by escaping them with a '\' character before 
 them, such as `\$`.
 
+## Help text
+The user can request to disply help/usage text for any given pipeline. Any comment
+lines at the start of the file will be used as the help/usage text. The first non-comment
+line (including blank lines) will terminate the help text. If the script starts with a
+shebang (#!), then that line will not be included in the help text.
+
 
 # Pipeline runners (backends)
 Right now there are 4 available backends for running pipelines: a combined bash

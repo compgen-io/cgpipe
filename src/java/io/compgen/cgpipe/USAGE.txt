@@ -4,14 +4,15 @@ Usage: cgpipe {opts} {args} {target1 target2...}
 
 Options:
     -f filename   Pipeline script filename (required)
+    -h            Show help for pipeline
     -l logfile    Log debug messages here
     -j joblog     Output a summary of submitted jobs (and their outputs)
 
     -dr           Dry run (Don't actually build targets)
     
-    -nolog        Suppress logging to stderr
     -v            Verbose logging
-    -s            Silence logging to console
+    -s            Silence writing to console
+    -nolog        Suppress logging to stderr
     
     -license      Show the license information
     
@@ -21,6 +22,12 @@ Options:
     
     This will set the variable "foo" to be "bar", and "arg" to be a list:
     ["one", "two"]. These variables can then be used by the pipeline script.
+
+    The pipeline script can either be a local file or a remote pipeline. By
+    default the compgen.io pipeline repository is available at:
+    compgen_io:path/to/script
+    
+    For more details about remote repositories, check the README.md file.
     
 
 Note: If no target is specified, the first target in the file will be used
