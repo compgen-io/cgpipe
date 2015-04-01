@@ -141,7 +141,7 @@ public class Parser {
 			if (!line.getLine().startsWith("#")) {
 				break;
 			}
-			System.out.println(StringUtils.strip(line.getLine().substring(1)));
+			System.out.println(line.getLine().substring(1));
 		}
 	}
 }
