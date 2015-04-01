@@ -48,6 +48,7 @@
 		</copy>
         <copy todir="${build.dir}/classes/io/compgen/cgpipe">
             <fileset file="${src.dir}/java/io/compgen/cgpipe/USAGE.txt"/>
+            <fileset file="${src.dir}/java/io/compgen/cgpipe/cgpiperc"/>
         </copy>
 
 		<mkdir dir="${dist.dir}"/>

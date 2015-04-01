@@ -83,7 +83,7 @@ public class PipelineLoader {
 			return loader.loadPipeline(filename, hash);
 		}
 
-		if (filename.contains(":")) {
+		if (remotes != null && filename.contains(":")) {
 			String remoteName = filename.substring(0, filename.indexOf(":"));
 			String url = filename.substring(filename.indexOf(":")+1);
 			
