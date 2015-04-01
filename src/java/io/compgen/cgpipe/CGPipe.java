@@ -118,23 +118,27 @@ public class CGPipe {
 			System.exit(1);
 		}
 		
-		switch (verbosity) {
-		case 0:
-			SimpleFileLoggerImpl.setLevel(Level.INFO);
-			break;
-		case 1:
-			SimpleFileLoggerImpl.setLevel(Level.DEBUG);
-			break;
-		case 2:
-			SimpleFileLoggerImpl.setLevel(Level.TRACE);
-			break;
-		case 3:
-		default:
-			SimpleFileLoggerImpl.setLevel(Level.ALL);
-			break;
+		if (!showHelp) {
+			switch (verbosity) {
+			case 0:
+				SimpleFileLoggerImpl.setLevel(Level.INFO);
+				break;
+			case 1:
+				SimpleFileLoggerImpl.setLevel(Level.DEBUG);
+				break;
+			case 2:
+				SimpleFileLoggerImpl.setLevel(Level.TRACE);
+				break;
+			case 3:
+			default:
+				SimpleFileLoggerImpl.setLevel(Level.ALL);
+				break;
+			}
+		} else {
+			SimpleFileLoggerImpl.setLevel(Level.FATAL);
 		}
 		
-		SimpleFileLoggerImpl.setSilent(silenceStdErr);
+		SimpleFileLoggerImpl.setSilent(silenceStdErr || showHelp);
 
 		Log log = LogFactory.getLog(CGPipe.class);
 		log.info("Starting new run: "+fname);
