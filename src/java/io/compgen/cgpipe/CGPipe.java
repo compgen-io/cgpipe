@@ -40,7 +40,7 @@ public class CGPipe {
 		boolean silent = false;
 		boolean dryrun = false;
 		boolean silenceStdErr = false;
-		boolean help = false;
+		boolean showHelp = false;
 		
 		List<String> targets = new ArrayList<String>();
 		Map<String, VarValue> confVals = new HashMap<String, VarValue>();
@@ -67,7 +67,7 @@ public class CGPipe {
 			}
 			
 			if (arg.equals("-h")) {
-				help = true;
+				showHelp = true;
 			} else if (arg.equals("-license")) {
 				license();
 				System.exit(1);
@@ -118,25 +118,6 @@ public class CGPipe {
 			System.exit(1);
 		}
 		
-		if (help) {
-			if (fname == null) {			
-				try {
-					Parser.showHelp(remoteName);
-				} catch (IOException e) {
-					System.err.println("Unable to find pipeline: "+remoteName);
-					System.exit(1);
-				}
-			} else {
-				try {
-					Parser.showHelp(fname);
-				} catch (IOException e) {
-					System.err.println("Unable to find pipeline: "+fname);
-					System.exit(1);
-				}
-			}
-			System.exit(0);
-		}
-		
 		switch (verbosity) {
 		case 0:
 			SimpleFileLoggerImpl.setLevel(Level.INFO);
@@ -179,7 +160,7 @@ public class CGPipe {
 				log.debug("parsing: "+RCFILE.getAbsolutePath());
 				Parser.exec(RCFILE.getAbsolutePath(), root);
 			}
-			
+
 			// Set cmd-line arguments
 			if (silent) {
 				root.setOutputStream(null);
@@ -193,6 +174,26 @@ public class CGPipe {
 			
 			// update the URL Pipeline loader configs
 			PipelineLoader.updateRemoteHandlers(root.cloneString("cgpipe.remote"));
+
+			// Now check for help, only after we've setup the remote handlers...
+			if (showHelp) {
+				if (fname == null) {			
+					try {
+						Parser.showHelp(remoteName);
+					} catch (IOException e) {
+						System.err.println("Unable to find pipeline: "+remoteName);
+						System.exit(1);
+					}
+				} else {
+					try {
+						Parser.showHelp(fname);
+					} catch (IOException e) {
+						System.err.println("Unable to find pipeline: "+fname);
+						System.exit(1);
+					}
+				}
+				System.exit(0);
+			}
 			
 			// Parse the AST and run it
 			Parser.exec(fname, root);

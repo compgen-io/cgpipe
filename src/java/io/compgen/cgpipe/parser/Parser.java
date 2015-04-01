@@ -8,6 +8,7 @@ import io.compgen.cgpipe.parser.node.NoOpNode;
 import io.compgen.cgpipe.pipeline.NumberedLine;
 import io.compgen.cgpipe.pipeline.Pipeline;
 import io.compgen.cgpipe.pipeline.PipelineLoader;
+import io.compgen.common.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -127,6 +128,9 @@ public class Parser {
 	public static void showHelp(String name) throws IOException {
 		boolean first = true;
 		Pipeline pipe = PipelineLoader.getDefaultLoader().loadPipeline(name);
+		if (pipe == null) {
+			throw new IOException("Error loading file: "+name);
+		}
 		for (NumberedLine line: pipe.getLines()) {
 			if (first && line.getLine().startsWith("#!")) {
 				first = false;
@@ -137,6 +141,7 @@ public class Parser {
 			if (!line.getLine().startsWith("#")) {
 				break;
 			}
+			System.out.println(StringUtils.strip(line.getLine().substring(1)));
 		}
 	}
 }

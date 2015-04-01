@@ -1,0 +1,2 @@
+#!/bin/sh
+dist/cgpipe -nolog -h -f compgen_io:examples/test
