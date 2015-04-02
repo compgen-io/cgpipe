@@ -60,7 +60,9 @@ public class RootContext extends ExecContext{
 	}
 	
 	public BuildTarget build(String output) {
-		log.trace("Looking for build-target: " + output);
+		if (output != null) {
+			log.debug("Looking for build-target: " + output);
+		}
 
 		BuildTarget tgt = null;
 		
@@ -72,27 +74,42 @@ public class RootContext extends ExecContext{
 
 			if (output == null) {
 				output = tgt.getOutputs().get(0);
+				log.debug("Looking for build-target: " + output);
 			}
 			
 			Map<String, BuildTarget> deps = new HashMap<String, BuildTarget>();
 			
+			boolean foundAllInputs = true;
+			
 			for (String input: tgt.getInputs()) {
+				if (input == null) {
+					log.error("Required input is null: "+ input + " (from "+output+")");
+					foundAllInputs = false;
+					break;
+				}
+				log.debug("Looking for required input: "+ input + " (from "+output+")");
 				BuildTarget dep = build(input);
 				if (dep == null) {
-					log.error("Couldn't find target to build: "+ input);
-					return null;
+					foundAllInputs = false;
+					break;
 				}
 				deps.put(input, dep);
 			}
-			tgt.addDeps(deps);
-			log.debug("output: "+output+" provider: "+tgt);
-			return tgt;
+			
+			if (foundAllInputs) {
+				tgt.addDeps(deps);
+				log.debug("output: "+output+" provider: "+tgt);
+				return tgt;
+			} else {
+				log.debug("Missing a required dependency - attempting to find alternative build path");
+			}
 		}
 		
 		if (output!=null && new File(output).exists()) {
 			// If we have the build-target for an input, we'll find it above
 			// otherwise, if the file exists on disk, we don't necessarily 
 			// need to rebuild it. 
+			log.debug("File exists on disk: " + output);
 			return new FileExistsBuildTarget(output);
 		}
 		

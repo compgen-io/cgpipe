@@ -80,12 +80,13 @@ public class BuildTarget {
 					// Handle the pre- and post- blocks as conditionals, so that they can be selectively disabled.
 					// Only handle the pre right before any body lines so that can disable it if needed.
 					// pre only runs if there is a target body.
-					if (pre != null && !preRun) {
+					if (pre != null && !preRun && pre.size()>0) {
 						preRun = true;
 						curNode = curNode.parseLine(new NumberedLine("if !job.nopre"));
+						int preindent = StringUtils.calcIndentLevel(pre.get(0).getLine());
 						for (NumberedLine preLine: pre) {
-							String l2 = StringUtils.stripIndent(preLine.getLine(), indent);
-							if (StringUtils.lstrip(l).startsWith("#$")) {
+							String l2 = StringUtils.stripIndent(preLine.getLine(), preindent);
+							if (StringUtils.lstrip(l2).startsWith("#$")) {
 								curNode = curNode.parseLine(preLine.stripPrefix());
 							} else {
 								curNode = curNode.parseBody(l2, preLine);
@@ -98,10 +99,11 @@ public class BuildTarget {
 			}
 
 			// post only runs if there is a target body.
-			if (post != null && lines.size() > 0) {
+			if (post != null && lines.size() > 0 && post.size() > 0) {
 				curNode = curNode.parseLine(new NumberedLine("if !job.nopost"));
+				int postindent = StringUtils.calcIndentLevel(post.get(0).getLine());
 				for (NumberedLine postLine: post) {
-					String l2 = StringUtils.stripIndent(postLine.getLine(), indent);
+					String l2 = StringUtils.stripIndent(postLine.getLine(), postindent);
 					if (StringUtils.lstrip(l2).startsWith("#$")) {
 						curNode = curNode.parseLine(postLine.stripPrefix());
 					} else {

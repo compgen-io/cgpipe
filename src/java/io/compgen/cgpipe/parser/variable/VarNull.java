@@ -10,7 +10,7 @@ public class VarNull extends VarValue {
 	}
 
 	public String toString() {
-		return "<NULL>";
+		return null;
 	}
 	
 	public boolean isTrue() {

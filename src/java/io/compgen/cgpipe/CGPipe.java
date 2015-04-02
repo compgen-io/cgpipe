@@ -9,6 +9,7 @@ import io.compgen.cgpipe.parser.Parser;
 import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.target.BuildTarget;
 import io.compgen.cgpipe.parser.variable.VarBool;
+import io.compgen.cgpipe.parser.variable.VarInt;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
@@ -175,6 +176,7 @@ public class CGPipe {
 			}
 
 			root.update(confVals);
+			root.set("cgpipe.procs", new VarInt(Runtime.getRuntime().availableProcessors()));
 			
 			// update the URL Pipeline loader configs
 			PipelineLoader.updateRemoteHandlers(root.cloneString("cgpipe.remote"));

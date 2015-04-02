@@ -65,15 +65,12 @@ public class SJQRunner extends JobRunner {
 			passwd = StringUtils.readFile(passwdFile); 
 		}
 		
-		try {
-			String addr = StringUtils.strip(StringUtils.readFile(socketFile));
-			if (addr != null && !addr.equals("")) {
-				String ip = addr.split(":")[0];
-				int port = Integer.parseInt(addr.split(":")[1]);
-				client = new SJQClient(ip, port, passwd);
-				return;
-			}
-		} catch (IOException e) {
+		String addr = StringUtils.strip(StringUtils.readFile(socketFile));
+		if (addr != null && !addr.equals("")) {
+			String ip = addr.split(":")[0];
+			int port = Integer.parseInt(addr.split(":")[1]);
+			client = new SJQClient(ip, port, passwd);
+			return;
 		}
 	}
 	
@@ -82,8 +79,7 @@ public class SJQRunner extends JobRunner {
 		if (client == null) {
 			try {
 				connect();
-			} catch (IOException | CommandArgumentException
-					| SJQServerException e) {
+			} catch (IOException | CommandArgumentException | SJQServerException e) {
 				e.printStackTrace();
 				throw new RunnerException(e);
 			}
@@ -113,7 +109,15 @@ public class SJQRunner extends JobRunner {
 	}
 
 	@Override
-	public boolean isJobIdValid(String jobId) {
+	public boolean isJobIdValid(String jobId) throws RunnerException {
+		if (client == null) {
+			try {
+				connect();
+			} catch (IOException | CommandArgumentException | SJQServerException e) {
+				e.printStackTrace();
+				throw new RunnerException(e);
+			}
+		}
 		try {
 			String[] status = client.getStatus(jobId).split(" ");
 			return (status[1].equals("H") || status[1].equals("Q")  || status[1].equals("R")); 

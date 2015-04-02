@@ -71,7 +71,7 @@ public abstract class ASTNode {
 //				System.err.println("Eval: " + StringUtils.join(",", tokens));
 				VarValue val = Eval.evalTokenExpression(tokens, context);
 				if (val == VarNull.NULL) {
-					throw new ASTExecException("Null expression", tokens);
+					throw new ASTExecException("Null expression: " + tokens);
 				}
 //				System.err.println("<<< " + val.toString());
 				return next;

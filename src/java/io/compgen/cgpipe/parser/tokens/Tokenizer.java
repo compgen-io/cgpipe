@@ -62,6 +62,8 @@ public class Tokenizer {
 			}
 			
 			if (!foundColon) {
+				tokens = markParens(tokens);
+				tokens = markStatements(tokens);
 				tokens = markOperators(tokens);
 //				System.err.println("markOperators       : "+StringUtils.join(";", tokens));
 		
@@ -201,49 +203,6 @@ public class Tokenizer {
 		
 		return out;
 	}
-//	
-//	public static List<Token> findShell(List<Token> tokens) throws ASTParseException {
-//		List<Token> out = new ArrayList<Token>();
-//
-//		for (Token tok: tokens) {
-//			if (tok.getType()!=TokenClass.RAW) {
-//				out.add(tok);
-//				continue;
-//			}
-//			
-//			boolean inshell = false;
-//			
-//			String buf = "";
-//			for (int i=0; i<tok.getStr().length(); i++ ) {
-//				if (inshell) {
-//					if (tok.getStr().charAt(i) == ')') {
-//						inshell = false;
-//						out.add(Token.shell(buf));
-//						buf = "";
-//					} else {
-//						buf += tok.getStr().charAt(i);
-//					}
-//					
-//				} else {
-//					if (i < tok.getStr().length()-1 && tok.getStr().substring(i, i+2).equals("$(")) {
-//						if (!buf.equals("")) {
-//							out.add(Token.raw(buf));
-//						}
-//						inshell = true;
-//						buf = "";
-//						i += 1;
-//					} else {
-//						buf += tok.getStr().charAt(i);
-//					}
-//				}
-//			}
-//			if (!buf.equals("")) {
-//				out.add(Token.raw(buf));
-//			}
-//		}
-//		
-//		return out;
-//	}
 
 
 	public static List<Token> delimiterSplit(List<Token> tokens, char[] delims) throws ASTParseException {
@@ -279,6 +238,73 @@ public class Tokenizer {
 		return out;
 	}
 
+	public static List<Token> markParens(List<Token> tokens) throws ASTParseException {
+		List<Token> out = new ArrayList<Token>();
+
+		for (Token tok: tokens) {
+			if (!tok.isRaw()) {
+				out.add(tok);
+				continue;
+			}
+			String buf = "";
+			int i=0;
+			while (i<tok.getStr().length()) {
+				boolean found = false;
+				if (tok.getStr().substring(i,i+1).equals("(")) {
+					if (!buf.equals("")) {
+						out.add(Token.raw(buf));
+					}
+					out.add(Token.parenOpen());
+					buf = "";
+					found = true;
+					i += 1;
+				} else if (tok.getStr().substring(i,i+1).equals(")")) {
+					if (!buf.equals("")) {
+						out.add(Token.raw(buf));
+					}
+					out.add(Token.parenClose());
+					buf = "";
+					found = true;
+					i += 1;
+				}
+				if (!found) {
+					buf += tok.getStr().charAt(i);
+					i += 1;
+				}
+			}
+			if (!buf.equals("")) {
+				out.add(Token.raw(buf));
+			}
+		}
+		
+		return out;
+	}
+
+	public static List<Token> markStatements(List<Token> tokens) throws ASTParseException {
+		List<Token> out = new ArrayList<Token>();
+
+		for (Token tok: tokens) {
+			if (!tok.isRaw()) {
+				out.add(tok);
+				continue;
+			}
+
+			boolean found = false;
+			for (Statement stmt: Statement.statements) {
+				if (tok.getStr().equals(stmt.getName())) {
+					out.add(Token.statement(stmt));
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				out.add(tok);
+			}
+		}
+		
+		return out;
+	}
+
 	public static List<Token> markOperators(List<Token> tokens) throws ASTParseException {
 		List<Token> out = new ArrayList<Token>();
 
@@ -291,52 +317,18 @@ public class Tokenizer {
 			int i=0;
 			while (i<tok.getStr().length()) {
 				boolean found = false;
-				for (Statement stmt: Statement.statements) {
-					if (tok.getStr().length() - i >= stmt.getName().length()) {
-						if (stmt.getName().equals(tok.getStr().substring(i, i+stmt.getName().length()))) {
+				// Statements must be followed by whitespace (or a paren?)
+				for (Operator op: Operator.operators) {
+					if (tok.getStr().length() >= i+op.getSymbol().length()) {
+						if (op.getSymbol().equals(tok.getStr().substring(i,  i+op.getSymbol().length()))) {
 							if (!buf.equals("")) {
 								out.add(Token.raw(buf));
 							}
-							out.add(Token.statement(stmt));
+							out.add(Token.op(op));
 							buf = "";
 							found = true;
-							i += stmt.getName().length();
+							i += op.getSymbol().length();
 							break;
-						}
-					}
-				}
-				if (!found) {
-					for (Operator op: Operator.operators) {
-						if (tok.getStr().length() >= i+op.getSymbol().length()) {
-							if (op.getSymbol().equals(tok.getStr().substring(i,  i+op.getSymbol().length()))) {
-								if (!buf.equals("")) {
-									out.add(Token.raw(buf));
-								}
-								out.add(Token.op(op));
-								buf = "";
-								found = true;
-								i += op.getSymbol().length();
-								break;
-							}
-						}
-					}
-					if (!found) {
-						if (tok.getStr().substring(i,i+1).equals("(")) {
-							if (!buf.equals("")) {
-								out.add(Token.raw(buf));
-							}
-							out.add(Token.parenOpen());
-							buf = "";
-							found = true;
-							i += 1;
-						} else if (tok.getStr().substring(i,i+1).equals(")")) {
-							if (!buf.equals("")) {
-								out.add(Token.raw(buf));
-							}
-							out.add(Token.parenClose());
-							buf = "";
-							found = true;
-							i += 1;
 						}
 					}
 				}
@@ -353,7 +345,6 @@ public class Tokenizer {
 		return out;
 	}
 
-	
 	public static List<Token> extractQuotedStrings(String line, char quoteChar, char commentChar) throws ASTParseException {
 		String buf = "";
 		List<Token> tokens = new ArrayList<Token>();

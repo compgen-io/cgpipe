@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 public abstract class JobRunner {
 	abstract public boolean submit(JobDef jobdef) throws RunnerException;
-	abstract public boolean isJobIdValid(String jobId);
+	abstract public boolean isJobIdValid(String jobId) throws RunnerException;
 	abstract public void innerDone() throws RunnerException;
 	abstract protected void setConfig(String k, String val);
 
@@ -274,18 +274,18 @@ public abstract class JobRunner {
 		}
 	}	
 
-	private JobDependency findJobProviding(String input) {
+	private JobDependency findJobProviding(String input) throws RunnerException {
 		log.trace("Looking for output: "+ input);
 
 		if (submittedJobs.containsKey(input)) {
-			log.debug("Found job providing: "+ input + " ("+submittedJobs.get(input).getJobId()+")");
+			log.debug("Found existing job providing: "+ input + " ("+submittedJobs.get(input).getJobId()+")");
 			JobDependency job = submittedJobs.get(input);
 			
 			if (isJobIdValid(job.getJobId())) {
 				return job;
 			}
 
-			log.debug("Job ID: "+ job.getJobId()+" marked as failed...");
+			log.debug("Existing job: "+ job.getJobId()+" is no longer valid... resubmitting");
 			submittedJobs.remove(input);
 		}
 		
@@ -329,7 +329,7 @@ public abstract class JobRunner {
 
 		if (joblog != null && job.getJobId() != null && !job.getJobId().equals("")) {
 			joblog.println(job.getJobId()+"\t"+"JOB\t"+job.getName());
-			joblog.println(job.getJobId()+"\t"+"TIMESTAMP\t"+System.currentTimeMillis());
+			joblog.println(job.getJobId()+"\t"+"SUBMIT\t"+System.currentTimeMillis());
 			joblog.println(job.getJobId()+"\t"+"USER\t"+System.getProperty("user.name"));
 			
 			for (JobDependency dep:job.getDependencies()) {

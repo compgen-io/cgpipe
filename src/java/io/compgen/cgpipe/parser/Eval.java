@@ -8,10 +8,12 @@ import io.compgen.cgpipe.parser.op.Operator;
 import io.compgen.cgpipe.parser.tokens.Token;
 import io.compgen.cgpipe.parser.tokens.TokenList;
 import io.compgen.cgpipe.parser.tokens.Tokenizer;
+import io.compgen.cgpipe.parser.variable.VarInt;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.cgpipe.pipeline.NumberedLine;
+import io.compgen.common.Pair;
 import io.compgen.common.StringUtils;
 
 import java.io.IOException;
@@ -204,6 +206,7 @@ public class Eval {
 		String tmp = "";
 		tmp = evalStringVar(str, context, line);
 		tmp = evalStringList(tmp, context, line);
+		tmp = evalStringShell(tmp, context, line);
 		tmp = evalStringInputs(tmp, context, line);
 		tmp = evalStringOutputs(tmp, context, line);
 		log .trace("eval string: "+str+" => "+tmp);
@@ -224,7 +227,9 @@ public class Eval {
 					} else {
 						ineval = false;
 						boolean optional = false;
-						if (buf.endsWith("?")) {
+						if (buf.endsWith("\\?")) {
+							buf = buf.substring(0, buf.length()-2) + "?";
+						} else if (buf.endsWith("?")) {
 							optional = true;
 							buf = buf.substring(0, buf.length()-1);
 						}
@@ -262,6 +267,43 @@ public class Eval {
 		
 		if (!buf.equals("")) {
 			throw new ASTExecException("Missing closing '}' in string", line);
+		}
+		
+		return out;
+	}
+	private static String evalStringShell(String str, ExecContext context, NumberedLine line) throws ASTExecException {
+		String out = "";
+		String buf = "";
+		
+		boolean inshell = false;
+		
+		for (int i=0; i<str.length(); i++) {
+			if (inshell) {
+				if (str.charAt(i) == ')') {
+					if (buf.endsWith("\\")) {
+						buf = buf.substring(0, buf.length()-1) + ")";
+					} else {
+						inshell = false;
+						out += evalShell(buf, context, line);
+						buf = "";
+					}
+				} else {
+					buf += str.charAt(i);
+				}
+			} else if (i < str.length()-2 && str.substring(i, i+2).equals("$(")) {
+				if (i==0 || str.charAt(i-1) != '\\') {
+					inshell = true;
+				} else {
+					out = out.substring(0, out.length()-1) + "$(";
+				}
+				i++;
+			} else {
+				out += str.charAt(i);
+			}
+		}
+		
+		if (!buf.equals("")) {
+			throw new ASTExecException("Missing closing ')' in string", line);
 		}
 		
 		return out;
@@ -416,30 +458,33 @@ public class Eval {
 			return str;
 		}
 	}
-
 	
 	public static String evalShell(String str, ExecContext context, NumberedLine line) throws ASTExecException {
-		return Eval.execScript(evalString(str, context, line));
+		log.trace("evalShell: "+str);
+		Pair<String, Integer> ret = Eval.execScript(evalString(str, context, line));
+		context.set("$?", new VarInt(ret.two));
+		return ret.one;
 	}
 
-	private static String execScript(String script) throws ASTExecException {
+	private static Pair<String, Integer> execScript(String script) throws ASTExecException {
 		try {
+			log.trace("execScript: "+script);
 			Process proc = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c" , script});
 			InputStream is = proc.getInputStream();
-			InputStream es = proc.getErrorStream();
+//			InputStream es = proc.getErrorStream();
 
 			int retcode = proc.waitFor();
 			
 			String out = StringUtils.readInputStream(is);
-			String err = StringUtils.readInputStream(es);
+//			String err = StringUtils.readInputStream(es);
 
 			is.close();
-			es.close();
+//			es.close();
 			
-			if (retcode == 0) {
-				return StringUtils.rstrip(out);
-			}
-			throw new ASTExecException("Error processing shell command: "+script+" - "+err);
+			return new Pair<String, Integer>(StringUtils.rstrip(out), retcode);
+//			if (retcode == 0) {
+//			}
+//			throw new ASTExecException("Error processing shell command: "+script+" - "+err);
 
 		} catch (IOException | InterruptedException e) {
 			throw new ASTExecException(e);

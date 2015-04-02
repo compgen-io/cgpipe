@@ -1,5 +1,6 @@
 package io.compgen.cgpipe.support;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
@@ -46,9 +47,18 @@ public class SimpleFileLoggerImpl implements Log, Serializable {
 		if (logFilename.equals("-")) {
 			SimpleFileLoggerImpl.out  = System.err;
 		} else {
-			SimpleFileLoggerImpl.out  = new PrintStream(new FileOutputStream(logFilename, true));
+			File logFile = new File(logFilename);
+			if (!logFile.getParentFile().exists()) {
+				logFile.getParentFile().mkdirs();
+			}
+			
+			SimpleFileLoggerImpl.out  = new PrintStream(new FileOutputStream(logFile, true));
 		}
 		for (String line: buffer) {
+			if (!SimpleFileLoggerImpl.written) {
+				out.println("-----------------------------------------");
+				SimpleFileLoggerImpl.written = true;
+			}
 			out.println(line);
 		}
 		buffer.clear();
@@ -103,7 +113,9 @@ public class SimpleFileLoggerImpl implements Log, Serializable {
 			}
 		}
 		if (level == Level.FATAL) {
-			System.err.println(arg0+": " + (arg1 == null ? "Unknown error" : arg1.getMessage()));
+			System.err.println("FATAL: " + arg0+": " + (arg1 == null ? "Unknown error" : arg1.getMessage()));
+		} else if (level == Level.ERROR) {
+			System.err.println("ERROR: " + arg0);
 		}
 	}
 
