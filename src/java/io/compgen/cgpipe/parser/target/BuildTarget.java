@@ -23,7 +23,7 @@ public class BuildTarget {
 	private List<String> outputs;
 	private Map<String, VarValue> capturedContext;
 	private List<NumberedLine> lines;
-	private boolean skipTarget = false;
+	private boolean skippable = false;
 	private JobDependency submittedJobDep=null;
 
 	private Map<String, BuildTarget> deps = new HashMap<String, BuildTarget>();
@@ -126,12 +126,12 @@ public class BuildTarget {
 		return new JobDef(jobRoot.getBody(), jobRoot.cloneValues("job."), outputs, inputs);
 	}
 
-	public boolean isSkipTarget() {
-		return skipTarget;
+	public boolean isSkippable() {
+		return skippable;
 	}
 
-	public void setSkipTarget(boolean skipTarget) {
-		this.skipTarget = skipTarget;
+	public void setSkippable(boolean skippable) {
+		this.skippable = skippable;
 	}
 
 	public void setSubmittedJobDep(JobDependency jobDep) {

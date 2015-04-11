@@ -125,9 +125,12 @@ public class PipelineLoader {
 		pipeline.finalize();
 		
 		byte[] digest = md.digest();
+		String digestStr = Hex.encodeHexString(digest).toLowerCase();
+		
+		pipeline.setHashDigest(digestStr);
+		
 		if (hash != null) {
 			hash = hash.toLowerCase();
-			String digestStr = Hex.encodeHexString(digest).toLowerCase();
 			log.debug("Expected: "+hash+" Got: "+digestStr);
 			if (!digestStr.equals(hash)) {
 				throw new IOException("Error loading: "+name+" - SHA1 hash doesn't match! Expected: "+hash+" Got: "+digestStr);

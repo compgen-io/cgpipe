@@ -27,7 +27,7 @@ public class SJQRunner extends JobRunner {
 	private SJQClient client = null;
 	
 	private File socketFile = new File(CGPipe.CGPIPE_HOME, ".sjqserv");
-	private File passwdFile = new File(CGPipe.CGPIPE_HOME, ".sjqpasswd");
+	private File passwdFile = new File(CGPipe.CGPIPE_HOME, ".sjqpass");
 	private int maxProcs = Runtime.getRuntime().availableProcessors();
 	private String maxMem = null;
 	private String tempDir = null;
@@ -37,7 +37,7 @@ public class SJQRunner extends JobRunner {
 	
 	public void connect() throws IOException, CommandArgumentException, SJQServerException {
 		// protect this connection with a random 50 char string.
-		String passwd = StringUtils.randomString(50);
+		String passwd;
 		
 		if (!socketFile.exists()) {
 			passwdFile.createNewFile();
@@ -49,12 +49,14 @@ public class SJQRunner extends JobRunner {
 			passwdFile.setWritable(true,  true);
 			// remove me when this server is done
 			passwdFile.deleteOnExit();
+			
+			passwd = StringUtils.randomString(50);
 			StringUtils.writeFile(passwdFile, passwd);
 			
 			server = new SJQServer();
 			server.setMaxMemory(maxMem);
 			server.setMaxProcs(maxProcs);
-			server.setPortFilename(socketFile.getAbsolutePath());
+			server.setConnFilename(socketFile.getAbsolutePath());
 			server.setPasswdFile(passwdFile.getAbsolutePath());
 			server.setTempDir(tempDir);
 			server.setSilent(false);
@@ -62,7 +64,7 @@ public class SJQRunner extends JobRunner {
 			server.setTimeout(30);
 			server.start();
 		} else {
-			passwd = StringUtils.readFile(passwdFile); 
+			passwd = StringUtils.strip(StringUtils.readFile(passwdFile)); 
 		}
 		
 		String addr = StringUtils.strip(StringUtils.readFile(socketFile));
@@ -70,7 +72,6 @@ public class SJQRunner extends JobRunner {
 			String ip = addr.split(":")[0];
 			int port = Integer.parseInt(addr.split(":")[1]);
 			client = new SJQClient(ip, port, passwd);
-			return;
 		}
 	}
 	
@@ -129,6 +130,7 @@ public class SJQRunner extends JobRunner {
 	@Override
 	public void innerDone() throws RunnerException {
 		log.info("submitted jobs: "+StringUtils.join(",", submittedJobs));
+		System.out.println(StringUtils.join("\n", submittedJobs));
 		try {
 			client.close();
 		} catch (ClientException e) {

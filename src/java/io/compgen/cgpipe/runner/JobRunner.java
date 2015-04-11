@@ -190,7 +190,7 @@ public abstract class JobRunner {
 	public void submitAll(BuildTarget initialTarget, RootContext context) throws RunnerException {
 		setup(context);
 		markSkippable(initialTarget, context, initialTarget.getOutputs().get(0));
-		submitTargets(initialTarget, context, initialTarget.getOutputs().get(0));
+		submitTargets(initialTarget, context, initialTarget.getOutputs().get(0), true);
 	}
 
 	private long markSkippable(BuildTarget target, RootContext context, String outputName) throws RunnerException {
@@ -211,20 +211,20 @@ public abstract class JobRunner {
 			if (outputFile.exists()) {
 				if (outputFile.lastModified() > lastModified) {
 					log.debug("Marking output-target as skippable: "+outputName);
-					target.setSkipTarget(true);
+					target.setSkippable(true);
 					return outputFile.lastModified();
 				}
 			}
 		}
 
 		log.debug("Marking output-target as not skippable: "+outputName + ((lastModified > -1) ? " older than dep" : " dep doesn't exist or will be submitted"));
-		target.setSkipTarget(false);
+		target.setSkippable(false);
 		return -1;
 	}
 
-	private JobDependency submitTargets(BuildTarget target, RootContext context, String outputName) throws RunnerException {
+	private JobDependency submitTargets(BuildTarget target, RootContext context, String outputName, boolean isRoot) throws RunnerException {
 		// Can we skip this target (file exists)
-		if (target.isSkipTarget()) {
+		if (target.isSkippable()) {
 			return null;
 		}
 		
@@ -244,24 +244,38 @@ public abstract class JobRunner {
 		List<JobDependency> deps = new ArrayList<JobDependency>();
 		
 		try {
+			JobDef job = target.eval(prelines, postlines);
+			
+			boolean blankRoot = false;
+			if (isRoot) {
+				String tmp = job.getBody().replaceAll("[ \\t\\r\\n]", "");
+				if (tmp.equals("")) {
+					blankRoot = true;
+				}
+			}
+
 			for (String out: target.getDepends().keySet()) {
-				JobDependency dep = submitTargets(target.getDepends().get(out), context, out);
+				JobDependency dep = submitTargets(target.getDepends().get(out), context, out, blankRoot);
 				if (dep != null) {
 					deps.add(dep);
 				}
 			}
 		
-			JobDef job = target.eval(prelines, postlines);
 			job.addDependencies(deps);
-			submit(job);
+			if (!blankRoot) {
+				submit(job);
 			
-			if (job.getJobId() == null) {
-				abort();
-				log.error("Error submitting job: "+ target);
-				throw new RunnerException("Error submitting job: "+job);
+				if (job.getJobId() == null) {
+					abort();
+					log.error("Error submitting job: "+ target);
+					throw new RunnerException("Error submitting job: "+job);
+				}
+	
+				logJob(job);
+			} else {
+				log.debug("Skipping empty target: "+target);
+				job.setJobId("");
 			}
-
-			logJob(job);
 			
 			target.setSubmittedJobDep(job);
 			for (String out: target.getOutputs()) {
@@ -348,7 +362,13 @@ public abstract class JobRunner {
 			}
 			for (String k:job.getSettings()) {
 				if (k.startsWith("job.")) {
-					joblog.println(job.getJobId()+"\t"+"SETTING\t"+k+"\t"+job.getSetting(k));
+					if (k.equals("job.custom")) {
+						for (String s: job.getSettings("job.custom")) {
+							joblog.println(job.getJobId()+"\t"+"SETTING\t"+k+"\t"+s);
+						}
+					} else {
+						joblog.println(job.getJobId()+"\t"+"SETTING\t"+k+"\t"+job.getSetting(k));
+					}
 				}
 			}
 		}

@@ -1,0 +1,2 @@
+print cgpipe.current.filename
+print cgpipe.current.hash

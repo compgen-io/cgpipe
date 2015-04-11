@@ -44,6 +44,13 @@ public class Eval {
 				return tokens.get(0).getValue();
 			}
 			if (tokens.get(0).isVariable()) {
+				
+				if (tokens.get(0).getStr().equals("cgpipe.current.filename")) {
+					return new VarString(tokens.getLine().getPipeline().getName());
+				} else if (tokens.get(0).getStr().equals("cgpipe.current.hash")) {
+					return new VarString(tokens.getLine().getPipeline().getHashDigest());
+				}
+				
 				return context.get(tokens.get(0).getStr());
 			}
 			if (tokens.get(0).isShell()) {

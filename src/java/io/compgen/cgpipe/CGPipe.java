@@ -19,8 +19,11 @@ import io.compgen.cgpipe.support.SimpleFileLoggerImpl;
 import io.compgen.cgpipe.support.SimpleFileLoggerImpl.Level;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,12 +34,13 @@ import org.apache.commons.logging.LogFactory;
 
 public class CGPipe {
 	public static final File CGPIPE_HOME = new File(System.getenv("CGPIPE_HOME") != null ? System.getenv("CGPIPE_HOME") : System.getProperty("user.home"));
-	public static final File RCFILE = new File(CGPIPE_HOME,".cgpiperc");  
+	public static final File RCFILE = new File(CGPIPE_HOME,".cgpiperc");
 
 	public static void main(String[] args) {
 		String fname = null;
-		String remoteName = null;
 		String logFilename = null;
+		String outputFilename = null;
+		PrintStream outputStream = null;  
 		int verbosity = 0;
 		boolean silent = false;
 		boolean dryrun = false;
@@ -59,11 +63,11 @@ public class CGPipe {
 			} else if (args[i-1].equals("-f")) {
 				fname = arg;
 				continue;
-			} else if (args[i-1].equals("-p")) {
-				remoteName = arg;
-				continue;
 			} else if (args[i-1].equals("-l")) {
 				logFilename = arg;
+				continue;
+			} else if (args[i-1].equals("-o")) {
+				outputFilename = arg;
 				continue;
 			}
 			
@@ -114,7 +118,7 @@ public class CGPipe {
 			}
 		}
 		
-		if ((fname == null && remoteName == null) || (fname != null && remoteName != null)) {
+		if (fname == null) {
 			usage();
 			System.exit(1);
 		}
@@ -170,6 +174,11 @@ public class CGPipe {
 			if (silent) {
 				root.setOutputStream(null);
 			}
+			
+			if (outputFilename != null) {
+				outputStream = new PrintStream(new FileOutputStream(outputFilename));
+				root.setOutputStream(outputStream);
+			}
 
 			for (String k1:confVals.keySet()) {
 				log.info("config: "+k1+" => "+confVals.get(k1).toString());
@@ -183,22 +192,12 @@ public class CGPipe {
 
 			// Now check for help, only after we've setup the remote handlers...
 			if (showHelp) {
-				if (fname == null) {			
-					try {
-						Parser.showHelp(remoteName);
-					} catch (IOException e) {
-						System.err.println("Unable to find pipeline: "+remoteName);
-						System.exit(1);
-					}
-				} else {
-					try {
-						Parser.showHelp(fname);
-					} catch (IOException e) {
-						System.err.println("Unable to find pipeline: "+fname);
-						System.exit(1);
-					}
+				try {
+					Parser.showHelp(fname);
+				} catch (IOException e) {
+					System.err.println("Unable to find pipeline: "+fname);
+					System.exit(1);
 				}
-				System.exit(0);
 			}
 			
 			// Parse the AST and run it
@@ -223,7 +222,14 @@ public class CGPipe {
 			}
 			runner.done();
 
-		} catch (ASTParseException | ASTExecException | RunnerException  e) {
+			if (outputStream != null) {
+				outputStream.close();
+			}
+
+		} catch (ASTParseException | ASTExecException | RunnerException | FileNotFoundException  e) {
+			if (outputStream != null) {
+				outputStream.close();
+			}
 			if (runner != null) {
 				runner.abort();
 			}

@@ -9,6 +9,7 @@ public class Pipeline {
 	private String name;
 	protected List<NumberedLine> lines;
 	private boolean finalized = false;
+	private String hashDigest = null;
 	
 	public Pipeline(String name, PipelineLoader loader) {
 		this.loader = loader;
@@ -40,5 +41,13 @@ public class Pipeline {
 	
 	public PipelineLoader getLoader() {
 		return loader;
+	}
+
+	public void setHashDigest(String digestStr) {
+		this.hashDigest  = digestStr;
+	}
+	
+	public String getHashDigest() {
+		return hashDigest;
 	}
 }

@@ -3,10 +3,12 @@ cgpipe - HPC/HTC analysis pipelines
 Usage: cgpipe {opts} {args} {target1 target2...}
 
 Options:
-    -f filename   Pipeline script filename (required)
+    -f filename   Pipeline script filename (local or remote, required)
     -h            Show help for pipeline
     -l logfile    Log debug messages here
-    -j joblog     Output a summary of submitted jobs (and their outputs)
+    -o outfile    Write all printed lines to this file
+    -j joblog     Output a summary of submitted jobs 
+                  (and their outputs, jobids, etc)
 
     -dr           Dry run (Don't actually build targets)
     
