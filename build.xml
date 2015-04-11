@@ -73,6 +73,10 @@
         <delete file="${dist.dir}/${ant.project.name}.jar.tmp"/>
 		<chmod file="${dist.dir}/${ant.project.name}" perm="755"/>
 	</target>
+    <target name="docs" description="Store git revision in ${repository.version}" if="git.present">
+        <exec executable="./build_docs.sh" failifexecutionfails="false" errorproperty="">
+        </exec>
+    </target>
 
 	<!-- See http://stackoverflow.com/questions/2974106/how-to-lookup-the-latest-git-commit-hash-from-an-ant-build-script -->
 	<available file=".git" type="dir" property="git.present"/>
@@ -90,6 +94,5 @@
 	        </and>
 	    </condition>
 	</target>
-
 </project>
 
