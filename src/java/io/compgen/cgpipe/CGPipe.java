@@ -5,6 +5,7 @@ import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.ExitException;
 import io.compgen.cgpipe.exceptions.RunnerException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
+import io.compgen.cgpipe.loader.SourceLoader;
 import io.compgen.cgpipe.parser.Parser;
 import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.target.BuildTarget;
@@ -13,7 +14,6 @@ import io.compgen.cgpipe.parser.variable.VarInt;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.cgpipe.pipeline.PipelineLoader;
 import io.compgen.cgpipe.runner.JobRunner;
 import io.compgen.cgpipe.support.SimpleFileLoggerImpl;
 import io.compgen.cgpipe.support.SimpleFileLoggerImpl.Level;
@@ -41,6 +41,7 @@ public class CGPipe {
 		String logFilename = null;
 		String outputFilename = null;
 		PrintStream outputStream = null;  
+
 		int verbosity = 0;
 		boolean silent = false;
 		boolean dryrun = false;
@@ -187,13 +188,14 @@ public class CGPipe {
 			root.update(confVals);
 			root.set("cgpipe.procs", new VarInt(Runtime.getRuntime().availableProcessors()));
 			
-			// update the URL Pipeline loader configs
-			PipelineLoader.updateRemoteHandlers(root.cloneString("cgpipe.remote"));
+			// update the URL Source loader configs
+			SourceLoader.updateRemoteHandlers(root.cloneString("cgpipe.remote"));
 
 			// Now check for help, only after we've setup the remote handlers...
 			if (showHelp) {
 				try {
 					Parser.showHelp(fname);
+					System.exit(0);
 				} catch (IOException e) {
 					System.err.println("Unable to find pipeline: "+fname);
 					System.exit(1);

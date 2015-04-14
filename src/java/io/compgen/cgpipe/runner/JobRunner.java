@@ -3,10 +3,10 @@ package io.compgen.cgpipe.runner;
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.RunnerException;
+import io.compgen.cgpipe.loader.NumberedLine;
 import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.target.BuildTarget;
 import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.cgpipe.pipeline.NumberedLine;
 import io.compgen.common.StringUtils;
 
 import java.io.BufferedReader;
@@ -342,7 +342,7 @@ public abstract class JobRunner {
 		}
 
 		if (joblog != null && job.getJobId() != null && !job.getJobId().equals("")) {
-			joblog.println(job.getJobId()+"\t"+"JOB\t"+job.getName());
+			joblog.println(job.getJobId()+"\t"+"NAME\t"+job.getName());
 			joblog.println(job.getJobId()+"\t"+"SUBMIT\t"+System.currentTimeMillis());
 			joblog.println(job.getJobId()+"\t"+"USER\t"+System.getProperty("user.name"));
 			

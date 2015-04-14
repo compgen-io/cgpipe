@@ -1,6 +1,6 @@
 package io.compgen.cgpipe.exceptions;
 
-import io.compgen.cgpipe.pipeline.NumberedLine;
+import io.compgen.cgpipe.loader.NumberedLine;
 
 
 public class ASTException extends Exception {

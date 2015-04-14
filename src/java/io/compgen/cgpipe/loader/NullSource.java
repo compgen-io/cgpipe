@@ -1,11 +1,11 @@
-package io.compgen.cgpipe.pipeline;
+package io.compgen.cgpipe.loader;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NullPipeline extends Pipeline {
+public class NullSource extends Source {
 	List<NumberedLine> lines = new ArrayList<NumberedLine>();
-	public NullPipeline(NumberedLine line) {
+	public NullSource(NumberedLine line) {
 		super("<null>", null);
 		lines.add(line);
 		finalize();

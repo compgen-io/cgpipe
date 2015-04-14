@@ -11,7 +11,7 @@ print $(echo "1") + "1"
 
 foo="hello"
 
-print $(echo '\${foo} world')
+print $(echo '\\${foo} world')
 print $(echo "${foo} world")
 
 # this works too...

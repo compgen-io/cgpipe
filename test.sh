@@ -27,16 +27,16 @@ else
         CGPIPE_HOME=test/run $1 &> .testout
     fi
 
-    TEST=$(cat .testout | grep -v '^#' | grep -v '^$' | sed -e 's/CGPIPE ERROR.*/CGPIPE ERROR/g' | $MD)
-    GOOD=$(cat $1.good | grep -v '^#' | grep -v '^$' | $MD)
+    TEST=$(cat .testout | grep -v '^#' | grep -v '^$' | sed -e 's/^[[:blank:]]*//g' | sed -e 's/CGPIPE ERROR.*/CGPIPE ERROR/g' | $MD)
+    GOOD=$(cat $1.good | grep -v '^#' | grep -v '^$' |sed -e 's/^[[:blank:]]*//g' | $MD)
     if [ "$TEST" != "$GOOD" ]; then
         echo "$1 ERROR"
     else
         echo "$1 OK"
     fi
     if [ "$VERBOSE" != "" ]; then
-        cat .testout | grep -v '^#' | grep -v '^$' | sed -e 's/CGPIPE ERROR.*/CGPIPE ERROR/g' > .testout1
-        cat $1.good | grep -v '^#' | grep -v '^$' | sed -e 's/CGPIPE ERROR.*/CGPIPE ERROR/g' > .testout2
+        cat .testout | grep -v '^#' | grep -v '^$'  | sed -e 's/^[[:blank:]]*//g' | sed -e 's/CGPIPE ERROR.*/CGPIPE ERROR/g' > .testout1
+        cat $1.good | grep -v '^#' | grep -v '^$'  | sed -e 's/^[[:blank:]]*//g' | sed -e 's/CGPIPE ERROR.*/CGPIPE ERROR/g' > .testout2
         echo "[EXPECTED]"
         cat .testout2
         echo ""

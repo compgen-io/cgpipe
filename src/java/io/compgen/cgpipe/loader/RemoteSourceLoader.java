@@ -1,4 +1,4 @@
-package io.compgen.cgpipe.pipeline;
+package io.compgen.cgpipe.loader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,18 +9,18 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class RemotePipelineLoader extends PipelineLoader {
+public class RemoteSourceLoader extends SourceLoader {
 	private String baseUrl;
 	private String username=null;
 	private String password=null;
 	
-	private static Log log = LogFactory.getLog(RemotePipelineLoader.class);
+	private static Log log = LogFactory.getLog(RemoteSourceLoader.class);
 	
-	public RemotePipelineLoader(PipelineLoader parent) {
+	public RemoteSourceLoader(SourceLoader parent) {
 		super(parent);
 	}
 
-	public RemotePipelineLoader(RemotePipelineLoader parent, String newUrl) {
+	public RemoteSourceLoader(RemoteSourceLoader parent, String newUrl) {
 		super(parent);
 		
 		this.baseUrl = parent.baseUrl;
@@ -45,7 +45,7 @@ public class RemotePipelineLoader extends PipelineLoader {
 		this.password = password;
 	}
 	
-	public Pipeline loadPipeline(String filename, String hash) throws IOException  {
+	public Source loadPipeline(String filename, String hash) throws IOException  {
 		if (baseUrl == null) {
 			throw new IOException("Missing baseUrl for remote loader!");
 		}
@@ -70,7 +70,7 @@ public class RemotePipelineLoader extends PipelineLoader {
 	        }
 		}
 		if (is != null) {
-			RemotePipelineLoader loader = new RemotePipelineLoader(this, filename);
+			RemoteSourceLoader loader = new RemoteSourceLoader(this, filename);
 			return loader.loadPipeline(is, filename, hash);
 		}
 		return super.loadPipeline(filename,  hash);

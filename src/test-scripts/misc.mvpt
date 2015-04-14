@@ -58,20 +58,24 @@ output3: output2
     touch output3
 
 output1 "output2":
-    #$ if foo == "bar"
+    <% if foo == "bar" %>
     touch output1.bar
-    #$ else
+    <% else %>
     touch output1.notbar
-    #$ endif
+    <% endif %>
 
-    #$ for i in 1..5
-        #$ if i == 4
-            echo "FOUR!"
-        #$ else
-        echo "hi - ${i}"
-        #$ endif
-    #$ done
-
+    <%
+        for i in 1..5
+            if i == 4
+                # print redirects to the target body in this context...
+                print "echo \"FOUR!\""
+            else
+    %>
+            echo "hi - ${i}"
+    <%
+            endif
+        done
+    %>
     touch output@{1..2}
 
 

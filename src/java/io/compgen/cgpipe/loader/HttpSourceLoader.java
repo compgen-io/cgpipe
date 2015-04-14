@@ -1,15 +1,15 @@
-package io.compgen.cgpipe.pipeline;
+package io.compgen.cgpipe.loader;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-public class HttpPipelineLoader extends PipelineLoader {
-	public HttpPipelineLoader(PipelineLoader parent) {
+public class HttpSourceLoader extends SourceLoader {
+	public HttpSourceLoader(SourceLoader parent) {
 		super(parent);
 	}
 	
-	public Pipeline loadPipeline(String filename, String hash) throws IOException {
+	public Source loadPipeline(String filename, String hash) throws IOException {
 		try {
 	        InputStream is = new URL(filename).openStream();
 			if (is != null) {

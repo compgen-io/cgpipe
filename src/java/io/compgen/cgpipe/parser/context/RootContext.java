@@ -39,8 +39,10 @@ public class RootContext extends ExecContext{
 
 	public RootContext(Map<String, VarValue> init, List<String> outputs, List<String> inputs) {
 		super();
-		for (String k: init.keySet()) {
-			set(k, init.get(k));
+		if (init != null) {
+			for (String k: init.keySet()) {
+				set(k, init.get(k));
+			}
 		}
 		this.outputs = outputs;
 		this.inputs = inputs;
@@ -139,6 +141,8 @@ public class RootContext extends ExecContext{
 	public void println(String s) {
 		if (outputStream != null) {
 			outputStream.println(s);
+		} else {
+			addBodyLine(s);
 		}
 	}
 }	

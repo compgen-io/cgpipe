@@ -2,12 +2,12 @@ package io.compgen.cgpipe.parser;
 
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
+import io.compgen.cgpipe.loader.NumberedLine;
+import io.compgen.cgpipe.loader.Source;
+import io.compgen.cgpipe.loader.SourceLoader;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.node.ASTNode;
 import io.compgen.cgpipe.parser.node.NoOpNode;
-import io.compgen.cgpipe.pipeline.NumberedLine;
-import io.compgen.cgpipe.pipeline.Pipeline;
-import io.compgen.cgpipe.pipeline.PipelineLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,12 +26,12 @@ public class Parser {
 		currentNode = headNode;
 	}
 	
-	private void load(Pipeline pipeline) throws ASTParseException {
+	private void load(Source source) throws ASTParseException {
 		if (readOnly) {
 			throw new ASTParseException("AST set - can't add another line!");
 		}
 
-		for (NumberedLine curLine: pipeline.getLines()) {
+		for (NumberedLine curLine: source.getLines()) {
 			log.debug(curLine);
 			currentNode = currentNode.parseLine(curLine);
 		}
@@ -67,48 +67,50 @@ public class Parser {
 		}
 	}
 	
+
+	
 	static public Parser parseAST(String filename) throws ASTParseException {
-		return parseAST(filename, PipelineLoader.getDefaultLoader());
+		return parseAST(filename, SourceLoader.getDefaultLoader());
 	}
 
-	static public Parser parseAST(String filename, PipelineLoader loader) throws ASTParseException {
-		Pipeline pipeline;
+	static public Parser parseAST(String filename, SourceLoader loader) throws ASTParseException {
+		Source source;
 		try {
 			if (filename.equals("-")) {
 				return parseAST("-", System.in, loader);
 			} else {
-				pipeline = loader.loadPipeline(filename);
+				source = loader.loadPipeline(filename);
 			}
 		} catch (IOException e) {
 			log.error("Error loading file: "+filename);
 			throw new ASTParseException(e);
 		}
 
-		if (pipeline == null) {
+		if (source == null) {
 			log.error("Error loading file: "+filename);
 			throw new ASTParseException("Error loading file: "+filename);
 		}
 		
 		Parser parser = new Parser();
-		parser.load(pipeline);
+		parser.load(source);
 		return parser;
 	}
 
 	static public Parser parseAST(String name, InputStream is) throws ASTParseException {
-		return parseAST(name, is, PipelineLoader.getDefaultLoader());
+		return parseAST(name, is, SourceLoader.getDefaultLoader());
 	}
 
-	static public Parser parseAST(String name, InputStream is, PipelineLoader loader) throws ASTParseException {
-		Pipeline pipeline;
+	static public Parser parseAST(String name, InputStream is, SourceLoader loader) throws ASTParseException {
+		Source source;
 		try {
-			pipeline = loader.loadPipeline(is, name);
+			source = loader.loadPipeline(is, name);
 		} catch (IOException e) {
 			log.error("Error loading file: "+name, e);
 			throw new ASTParseException(e);
 		}
 		
 		Parser parser = new Parser();
-		parser.load(pipeline);
+		parser.load(source);
 		return parser;
 	}
 
@@ -126,7 +128,7 @@ public class Parser {
 
 	public static void showHelp(String name) throws IOException {
 		boolean first = true;
-		Pipeline pipe = PipelineLoader.getDefaultLoader().loadPipeline(name);
+		Source pipe = SourceLoader.getDefaultLoader().loadPipeline(name);
 		if (pipe == null) {
 			throw new IOException("Error loading file: "+name);
 		}

@@ -1,21 +1,27 @@
 val="test1"
 one: two three.foo
-    #$ print "foo"
-    #$ print val
+    <% 
+    print "foo"
+    print val
+    %>
     touch one
 
 val="test2"
 two: three.foo #fake
-    #$ print "bar"
-    #$ print val
+    <% 
+    print "bar"
+    print val
+    %>
     touch two
 
 val="test3"
 %.foo:
-    #$ print "baz"
-    #$ print val
-    #$ print "$>"
-    #$ job.extras = "extra"
+    <%
+    print "baz"
+    print val
+    print "$>"
+    job.extras = "extra"
+    %>
     touch three
 
 extra:

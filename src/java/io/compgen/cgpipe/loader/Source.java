@@ -1,17 +1,17 @@
-package io.compgen.cgpipe.pipeline;
+package io.compgen.cgpipe.loader;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Pipeline {
-	private PipelineLoader loader;
+public class Source {
+	private SourceLoader loader;
 	private String name;
 	protected List<NumberedLine> lines;
 	private boolean finalized = false;
 	private String hashDigest = null;
 	
-	public Pipeline(String name, PipelineLoader loader) {
+	public Source(String name, SourceLoader loader) {
 		this.loader = loader;
 		this.name = name;
 		this.lines = new ArrayList<NumberedLine>();
@@ -39,7 +39,7 @@ public class Pipeline {
 		return name;
 	}
 	
-	public PipelineLoader getLoader() {
+	public SourceLoader getLoader() {
 		return loader;
 	}
 

@@ -2,12 +2,12 @@ package io.compgen.cgpipe.parser.tokens;
 
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
+import io.compgen.cgpipe.loader.NumberedLine;
 import io.compgen.cgpipe.parser.op.Operator;
 import io.compgen.cgpipe.parser.statement.Statement;
 import io.compgen.cgpipe.parser.variable.VarFloat;
 import io.compgen.cgpipe.parser.variable.VarInt;
 import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.cgpipe.pipeline.NumberedLine;
 import io.compgen.common.StringUtils;
 
 import java.util.ArrayList;
@@ -350,9 +350,19 @@ public class Tokenizer {
 		List<Token> tokens = new ArrayList<Token>();
 		boolean inquote = false;
 		boolean inshell = false;
+		boolean lastSlash = false;
 		for (int i=0; i<line.length(); i++) {
+			if (buf.endsWith("\\")) {
+				if (!lastSlash) {
+					buf = buf.substring(0, buf.length()-1) + getSlashedString(line.charAt(i));
+					lastSlash = true;
+					continue;
+				}
+			}
+			lastSlash = false;
+			
 			if (inquote) {
-				if (line.charAt(i) == quoteChar && !buf.endsWith("\\")) {
+				if (line.charAt(i) == quoteChar) { // && !buf.endsWith("\\")) {
 					tokens.add(Token.string(buf));
 					inquote = false;
 					buf = "";
@@ -360,7 +370,7 @@ public class Tokenizer {
 					buf += line.charAt(i);
 				}
 			} else if (inshell) {
-				if (line.charAt(i) == ')' && !buf.endsWith("\\")) {
+				if (line.charAt(i) == ')') { // && !buf.endsWith("\\")) {
 					tokens.add(Token.shell(buf));
 					inshell = false;
 					buf = "";
@@ -368,14 +378,14 @@ public class Tokenizer {
 					buf += line.charAt(i);
 				}
 			}  else {
-				if (i < line.length()-2 && line.substring(i, i+2).equals("$(") && !buf.endsWith("\\")) {
+				if (i < line.length()-2 && line.substring(i, i+2).equals("$(")) { // && !buf.endsWith("\\")) {
 					if (!buf.equals("")) {
 						tokens.add(Token.raw(buf));
 					}
 					buf = "";
 					inshell = true;
 					i++;
-				} else if (line.charAt(i) == quoteChar && !buf.endsWith("\\")) {
+				} else if (line.charAt(i) == quoteChar) { // && !buf.endsWith("\\")) {
 					if (!buf.equals("")) {
 						tokens.add(Token.raw(buf));
 					}
@@ -403,5 +413,15 @@ public class Tokenizer {
 		
 		return tokens;
 	}
-	
+	private static char getSlashedString(char ch) {
+		switch (ch) {
+		case 'n':
+			return '\n';
+		case 'r':
+			return '\r';
+		case 't':
+			return '\t';
+		}
+		return ch;
+	}
 }

@@ -2,11 +2,11 @@ package io.compgen.cgpipe.parser.node;
 
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
+import io.compgen.cgpipe.loader.NumberedLine;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.target.BuildTargetTemplate;
 import io.compgen.cgpipe.parser.tokens.Token;
 import io.compgen.cgpipe.parser.tokens.TokenList;
-import io.compgen.cgpipe.pipeline.NumberedLine;
 import io.compgen.common.StringUtils;
 
 import java.util.ArrayList;

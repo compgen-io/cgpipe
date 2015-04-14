@@ -3,6 +3,7 @@ package io.compgen.cgpipe.parser;
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
+import io.compgen.cgpipe.loader.NumberedLine;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.op.Operator;
 import io.compgen.cgpipe.parser.tokens.Token;
@@ -12,7 +13,6 @@ import io.compgen.cgpipe.parser.variable.VarInt;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.cgpipe.pipeline.NumberedLine;
 import io.compgen.common.Pair;
 import io.compgen.common.StringUtils;
 

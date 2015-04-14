@@ -2,12 +2,11 @@ package io.compgen.cgpipe.parser.target;
 
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
+import io.compgen.cgpipe.loader.NumberedLine;
+import io.compgen.cgpipe.parser.TemplateParser;
 import io.compgen.cgpipe.parser.context.RootContext;
-import io.compgen.cgpipe.parser.node.ASTNode;
-import io.compgen.cgpipe.parser.node.JobNoOpNode;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.cgpipe.pipeline.NumberedLine;
 import io.compgen.cgpipe.runner.JobDef;
 import io.compgen.cgpipe.runner.JobDependency;
 import io.compgen.common.StringUtils;
@@ -64,64 +63,10 @@ public class BuildTarget {
 	}
 
 	public JobDef eval(List<NumberedLine> pre, List<NumberedLine> post) throws ASTParseException, ASTExecException {
-		ASTNode headNode = new JobNoOpNode(null);
-		ASTNode curNode = headNode;
-	
-		if (lines.size() > 0) {
-			int indent = StringUtils.calcIndentLevel(lines.get(0).getLine());
-			boolean preRun = false;
-			
-			// Parse AST
-			for (NumberedLine line: lines) {
-				String l = StringUtils.stripIndent(line.getLine(), indent);
-				if (StringUtils.lstrip(l).startsWith("#$")) {
-					curNode = curNode.parseLine(line.stripPrefix());
-				} else {
-					// Handle the pre- and post- blocks as conditionals, so that they can be selectively disabled.
-					// Only handle the pre right before any body lines so that can disable it if needed.
-					// pre only runs if there is a target body.
-					if (pre != null && !preRun && pre.size()>0) {
-						preRun = true;
-						curNode = curNode.parseLine(new NumberedLine("if !job.nopre"));
-						int preindent = StringUtils.calcIndentLevel(pre.get(0).getLine());
-						for (NumberedLine preLine: pre) {
-							String l2 = StringUtils.stripIndent(preLine.getLine(), preindent);
-							if (StringUtils.lstrip(l2).startsWith("#$")) {
-								curNode = curNode.parseLine(preLine.stripPrefix());
-							} else {
-								curNode = curNode.parseBody(l2, preLine);
-							}
-						}
-						curNode = curNode.parseLine(new NumberedLine("endif"));
-					}
-					curNode = curNode.parseBody(l, line);
-				}
-			}
-
-			// post only runs if there is a target body.
-			if (post != null && lines.size() > 0 && post.size() > 0) {
-				curNode = curNode.parseLine(new NumberedLine("if !job.nopost"));
-				int postindent = StringUtils.calcIndentLevel(post.get(0).getLine());
-				for (NumberedLine postLine: post) {
-					String l2 = StringUtils.stripIndent(postLine.getLine(), postindent);
-					if (StringUtils.lstrip(l2).startsWith("#$")) {
-						curNode = curNode.parseLine(postLine.stripPrefix());
-					} else {
-						curNode = curNode.parseBody(l2, postLine);
-					}
-				}
-				curNode = curNode.parseLine(new NumberedLine("endif"));
-			}
-		}
-		
-		// Eval AST
 		RootContext jobRoot = new RootContext(capturedContext, outputs, inputs);
 		jobRoot.set("job.custom", new VarList());
-		
-		curNode = headNode;
-		while (curNode != null) {
-			curNode = curNode.exec(jobRoot);
-		}
+
+		TemplateParser.parseTemplate(lines, pre, post, jobRoot);
 
 		return new JobDef(jobRoot.getBody(), jobRoot.cloneValues("job."), outputs, inputs);
 	}

@@ -1,4 +1,4 @@
-package io.compgen.cgpipe.pipeline;
+package io.compgen.cgpipe.loader;
 
 import io.compgen.cgpipe.CGPipe;
 import io.compgen.cgpipe.exceptions.ASTParseException;
@@ -20,27 +20,27 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class PipelineLoader {
-	private static final PipelineLoader defaultPipelineLoader = new PipelineLoader();
+public class SourceLoader {
+	private static final SourceLoader defaultPipelineLoader = new SourceLoader();
 	
-	public static final PipelineLoader getDefaultLoader() {
+	public static final SourceLoader getDefaultLoader() {
 		return defaultPipelineLoader;
 	}
 
-	private static Log log = LogFactory.getLog(PipelineLoader.class);
+	private static Log log = LogFactory.getLog(SourceLoader.class);
 	
-	final protected PipelineLoader parent;
+	final protected SourceLoader parent;
 
-	private Map<String, RemotePipelineLoader> remotes = null;
+	private Map<String, RemoteSourceLoader> remotes = null;
 	
-	private PipelineLoader() {
+	private SourceLoader() {
 		this.parent = null;
 	}
-	public PipelineLoader(PipelineLoader parent) {
+	public SourceLoader(SourceLoader parent) {
 		this.parent = parent;
 	}
 
-	public Pipeline loadPipeline(String name) throws IOException {
+	public Source loadPipeline(String name) throws IOException {
 		String sha1Hash = null;
 		if (name.indexOf('#') > -1) {
 			sha1Hash = name.substring(name.indexOf('#')+1);
@@ -49,7 +49,7 @@ public class PipelineLoader {
 		return loadPipeline(name, sha1Hash);
 	}
 
-	public Pipeline loadPipeline(String filename, String hash) throws IOException {
+	public Source loadPipeline(String filename, String hash) throws IOException {
 		if (hash != null) {
 			log.info("Looking for file: "+filename+" hash:"+hash + " loader:"+this);
 		} else {
@@ -58,28 +58,28 @@ public class PipelineLoader {
 		// absolute path loader
 		File file = new File(filename);
 		if (file.exists()) {
-			PipelineLoader loader = new FilePipelineLoader(this, file.getParentFile());
+			SourceLoader loader = new FileSourceLoader(this, file.getParentFile());
 			return loader.loadPipeline(new FileInputStream(file), filename, hash);
 		}
 		
 		// CGHOME path loader
 		file = new File(CGPipe.CGPIPE_HOME, filename);
 		if (file.exists()) {
-			PipelineLoader loader = new FilePipelineLoader(this, file.getParentFile());
+			SourceLoader loader = new FileSourceLoader(this, file.getParentFile());
 			return loader.loadPipeline(new FileInputStream(file), filename, hash);
 		}
 		
 		if (parent != null) {
-			Pipeline pipeline = parent.loadPipeline(filename, hash);
-			if (pipeline != null) {
-				return pipeline;
+			Source source = parent.loadPipeline(filename, hash);
+			if (source != null) {
+				return source;
 			}
 		}
 		
 		// attempt to find a remote loader
 		if (filename.startsWith("http:") || filename.startsWith("https:")) {
 			log.debug("Using HTTP loader: " + filename);
-			PipelineLoader loader = new HttpPipelineLoader(this);
+			SourceLoader loader = new HttpSourceLoader(this);
 			return loader.loadPipeline(filename, hash);
 		}
 
@@ -89,7 +89,7 @@ public class PipelineLoader {
 			
 			if (remotes.containsKey(remoteName)) {
 				log.debug("Using Remote loader: " + remoteName+" => "+url);
-				PipelineLoader loader = remotes.get(remoteName);
+				SourceLoader loader = remotes.get(remoteName);
 				return loader.loadPipeline(url, hash);
 			}
 		}
@@ -97,11 +97,11 @@ public class PipelineLoader {
 		return null;
 	}
 	
-	public Pipeline loadPipeline(InputStream is, String name) throws IOException {
+	public Source loadPipeline(InputStream is, String name) throws IOException {
 		return loadPipeline(is, name, null);
 	}
 
-	public Pipeline loadPipeline(InputStream is, String name, String hash) throws IOException {
+	public Source loadPipeline(InputStream is, String name, String hash) throws IOException {
 		MessageDigest md;
 		try {
 			md = MessageDigest.getInstance("SHA1");
@@ -112,22 +112,22 @@ public class PipelineLoader {
 		DigestInputStream dis = new DigestInputStream(is, md);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(dis));
 		
-		Pipeline pipeline = new Pipeline(name, this);
+		Source source = new Source(name, this);
 		
 		String line;
 		int linenum = 0;
 
 		while ((line = reader.readLine()) != null) {
-			pipeline.addLine(StringUtils.rstrip(line), ++linenum);
+			source.addLine(StringUtils.rstrip(line), ++linenum);
 		}
 
 		reader.close();
-		pipeline.finalize();
+		source.finalize();
 		
 		byte[] digest = md.digest();
 		String digestStr = Hex.encodeHexString(digest).toLowerCase();
 		
-		pipeline.setHashDigest(digestStr);
+		source.setHashDigest(digestStr);
 		
 		if (hash != null) {
 			hash = hash.toLowerCase();
@@ -137,7 +137,7 @@ public class PipelineLoader {
 			}
 		}
 
-		return pipeline;
+		return source;
 	}
 
 	public static void updateRemoteHandlers(Map<String, String> remoteConfig) throws ASTParseException {
@@ -146,7 +146,7 @@ public class PipelineLoader {
 	}
 
 	public void innerUpdateRemoteHandlers(Map<String, String> remoteConfig) throws ASTParseException {
-		remotes = new HashMap<String, RemotePipelineLoader>();
+		remotes = new HashMap<String, RemoteSourceLoader>();
 		for (String k: remoteConfig.keySet()) {
 			String val = remoteConfig.get(k);
 			log.debug(k+" => "+val);
@@ -160,9 +160,9 @@ public class PipelineLoader {
 				
 				if (!remotes.containsKey(spl[0])) {
 					log.debug("Adding remote: " + spl[0]);
-					remotes.put(spl[0], new RemotePipelineLoader(defaultPipelineLoader));
+					remotes.put(spl[0], new RemoteSourceLoader(defaultPipelineLoader));
 				}
-				RemotePipelineLoader remote = remotes.get(spl[0]);
+				RemoteSourceLoader remote = remotes.get(spl[0]);
 				if (spl[1].equals("baseurl")) {
 					remote.setBaseUrl(val);
 				} else if (spl[1].equals("username")) {

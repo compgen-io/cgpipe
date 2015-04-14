@@ -2,7 +2,7 @@ package io.compgen.cgpipe.parser.target;
 
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
-import io.compgen.cgpipe.pipeline.NumberedLine;
+import io.compgen.cgpipe.loader.NumberedLine;
 import io.compgen.cgpipe.runner.JobDef;
 import io.compgen.common.ListBuilder;
 

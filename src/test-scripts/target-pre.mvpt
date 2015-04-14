@@ -17,7 +17,9 @@ foo:
     echo "foo"
 
 bar:
-    #$ job.nopre = true
-    #$ job.nopost = true
+    <% 
+    job.nopre = true
+    job.nopost = true
+    %>
     echo "bar"
 
