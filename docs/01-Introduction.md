@@ -23,7 +23,9 @@ In this, it is very similar to the `qmake` program that is available for SGE/OGE
 
 * Command line arguments can be easily used to set variables within the script.
 
-* Makefiles don't include any type of flow control (if/else, for-loops), but CGPipe is a full programming language that includes if/else conditions and for-loops for iterating over a list of values or a range. Additionally, everything in a CGPipe line can be scripted, including target definitions. This means that an author could define a pipeline that executed in a Map-Reduce pattern where an input file is split into `N` number of chunks, each chunk could be processed in parallel, and then the results could be merged back together after each chunk was processed. This type of pipeline could be written in a traditional Makefile (verbosely), but by allowing build targets to be included in for-loops, the number of chunks can now be a run-time option and written in an easily readable syntax.
+* Makefiles don't include any type of flow control (if/else, for-loops), but CGPipe is a full language that includes if/else conditions and for-loops for iterating over a list of values or a range. Everything in a CGPipe line can be scripted, including target definitions. This means that an author could define a pipeline that executed in a Map-Reduce pattern where an input file is split into `N` number of chunks, each chunk could be processed in parallel, and then the results could be merged back together after each chunk was processed. This type of pipeline could be written in a traditional Makefile (verbosely), but by allowing build targets to be included in for-loops, the number of chunks can now be a run-time option and written in an easily readable syntax.
+
+* Build targets are scriptable with CGPipe templates
 
 * `qmake` is only available for SGE clusters and isn't available for other job schedulers. CGPipe pipelines can execute on SGE or SLURM systems as well as on single hosts with SJQ or bash script exports (see below).
 

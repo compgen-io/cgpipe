@@ -10,7 +10,11 @@ Test scripts are available in the `src/test-scripts` directory and are named `*.
 ## Contexts
 There are two contexts in an CGPipe file: global and target. In the global
 context, all uncommented lines are evaluated. Within the target context, 
-any line prefixed with `#$` is evaluated as an CGPipe expression. 
+any lines wrapped with `<% %>` is evaluated as an CGPipe expression. The
+target context is a "template" mode, where the areas not wrapped in `<% %>`
+are treated as the body of the job-script to execute. Any whitespace present
+in the target body is kept and not stripped. In a target, any print
+statements will be added to the target body, not written to the console.
 
 When a target is defined, it captures the existing global context *at
 definition*. Target contexts are therefore detached from the global context.
@@ -21,19 +25,17 @@ and have the new value be visible outside or it's own context.
 A target is defined using the format:
 
     output_file1 {output_file2 ... } : {input_file1 input_file2 ...}
-        script snippet
-        #$ cgpipe-expression
-        script snippet
-        #$ cgpipe-expression
+        script body snippet
+        <% cgpipe-expression %>
+        script body snippet
+        script body snippet
+        <% 
+            cgpipe-expression
+            cgpipe-expression
+        %>
         ...
     # ends with outdent.
 
-Any text that is indented in the target is assumed to be part of the script
-that will be used to build the target file(s). When the indent is lost, then
-the target context is closed. The size of the indent doesn't matter, just that
-the target body text is indented more than the target definition. This means that
-the target definition can also be indented to make it easier to read build-targets
-that are included in if-else or for-loops.
 
 Notes: In both global and target contexts, for-loops will dynamically add and
 remove the iterating variable from the context.
@@ -181,7 +183,8 @@ will be evaluated for variable substitutions.
 ## Shell escaping
 You may also include the results from shell commands as well using the syntax
 `$(command)`. Anything surrounded by `$()` will be executed in the current shell.
-Anything written to stdout can be captured as a variable. 
+Anything written to stdout can be captured as a variable. The shell command will
+be evaluated as a CGPipe string and any variables substituted.
 
 Example:
 
@@ -347,7 +350,8 @@ the pipeline.
 ## Comments
 Comments are started with a `#` character. You may also include the '$' and '@'
 characters in strings or evaluated lines by escaping them with a '\' character before 
-them, such as `\$`.
+them, such as `\$`. If they will be evaluated twice, you will need to escape them twice
+(as is the case with shell evaluated strings).
 
 ## Help text
 The user can request to disply help/usage text for any given pipeline. Any comment
@@ -378,7 +382,7 @@ also be directly executed instead of scheduled.
 One use for this is to setup any output folders that may be required. For example:
 
     __setup__:
-        #$ job.shexec = true
+        <% job.shexec = true %>
         mkdir -p output
 
 
@@ -386,6 +390,6 @@ Another common use-case for this is having a `clean` target to remove all
 output files to perform a fresh set of calculations. For example:
 
     clean:
-        #$ job.shexec = true
+        <% job.shexec = true %>
         rm *.bam
 
