@@ -1,12 +1,8 @@
+#!/bin/bash
+func_1() {
 baz
 test3
 three.foo
-bar
-test2
-foo
-test1
-#!/bin/bash
-func_1() {
 touch three
 }
 
@@ -17,11 +13,15 @@ touch three
 #}
 
 func_2() {
+bar
+test2
 touch two
 
 }
 
 func_3() {
+foo
+test1
 touch one
 
 }
