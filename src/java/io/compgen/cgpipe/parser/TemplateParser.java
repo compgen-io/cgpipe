@@ -29,16 +29,16 @@ public class TemplateParser {
 	private boolean processedPre = false;
 	private boolean inScript = false;
 	
-	public TemplateParser(List<NumberedLine> pre, List<NumberedLine> post) {
+	private TemplateParser(List<NumberedLine> pre, List<NumberedLine> post) {
 		this.pre = pre;
 		this.post = post;
 	}
 
-	public void addScriptLine(NumberedLine line) throws ASTParseException {
+	private void addScriptLine(NumberedLine line) throws ASTParseException {
 		curNode = curNode.parseLine(line);
 	}
 
-	public void addBodyLine(String body, NumberedLine line) throws ASTParseException {
+	private void addBodyLine(String body, NumberedLine line) throws ASTParseException {
 		processPre();
 		curNode = curNode.parseBody(body, line);
 	}

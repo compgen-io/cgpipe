@@ -58,11 +58,8 @@ output3: output2
     touch output3
 
 output1 "output2":
-    <% if foo == "bar" %>
-    touch output1.bar
-    <% else %>
-    touch output1.notbar
-    <% endif %>
+    <% if foo == "bar" %> touch output1.bar
+    <% else %> touch output1.notbar <% endif %>
 
     <%
         for i in 1..5

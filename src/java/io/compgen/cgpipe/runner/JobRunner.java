@@ -32,7 +32,15 @@ public abstract class JobRunner {
 	abstract public void innerDone() throws RunnerException;
 	abstract protected void setConfig(String k, String val);
 
-	protected String defaultShell = "/bin/sh";
+	public static String defaultShell = null;
+	static {
+		for (String path: new String[] {"/bin/bash", "/usr/bin/bash", "/usr/local/bin/bash", "/bin/sh"}) {
+			if (new File(path).exists()) {
+				defaultShell=path;
+				break;
+			}
+		}
+	}
 	
 	static protected Log log = LogFactory.getLog(JobRunner.class);
 	
@@ -54,6 +62,10 @@ public abstract class JobRunner {
 		if (runner == null) {
 			runner = "shell";
 		}
+
+		if (cxt.contains("cgpipe.shell")) {
+			defaultShell = cxt.getString("cgpipe.shell");
+		}
 		
 		JobRunner.log.info("job-runner: " +runner);
 		JobRunner obj = null;
@@ -70,10 +82,6 @@ public abstract class JobRunner {
 			break;
 		default:
 			throw new RunnerException("Can't load job runner: "+runner);
-		}
-
-		if (cxt.contains("cgpipe.shell")) {
-			obj.defaultShell = cxt.getString("cgpipe.shell");
 		}
 		
 		String prefix = "cgpipe.runner."+runner;

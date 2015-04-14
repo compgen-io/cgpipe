@@ -2,7 +2,6 @@ package io.compgen.cgpipe.runner;
 
 import io.compgen.cgpipe.exceptions.RunnerException;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,21 +9,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class ShellScriptRunner extends JobRunner {
-	private static String[] defaultShellPaths = new String[] {"/bin/bash", "/usr/bin/bash", "/usr/local/bin/bash", "/bin/sh"};
-	
-	public static String findDefaultShell() {
-		for (String path: defaultShellPaths) {
-			if (new File(path).exists()) {
-				return path;
-			}
-		}
-		return null;
-	}
-
-	public String bin = findDefaultShell();
 	protected Log log = LogFactory.getLog(ShellScriptRunner.class);
 
 	private List<JobDef> jobs = new ArrayList<JobDef>();
+	private String shellPath = defaultShell;
 	
 	@Override
 	public boolean submit(JobDef jobdef) {
@@ -46,7 +34,7 @@ public class ShellScriptRunner extends JobRunner {
 		for (JobDef job: jobs) {
 			if (!job.getBody().equals("")) {
 				if (!header) {
-					out += "#!"+bin+"\n";
+					out += "#!"+shellPath+"\n";
 					header = true;
 				}
 				out += job.getJobId()+"() {\n";
@@ -66,7 +54,7 @@ public class ShellScriptRunner extends JobRunner {
 	@Override
 	protected void setConfig(String k, String val) {
 		if (k.equals("cgpipe.runner.shell.bin")) {
-			bin = val;
+			shellPath = val;
 		}
 	}
 

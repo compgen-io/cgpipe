@@ -36,6 +36,8 @@ public class CGPipe {
 	public static final File CGPIPE_HOME = new File(System.getenv("CGPIPE_HOME") != null ? System.getenv("CGPIPE_HOME") : System.getProperty("user.home"));
 	public static final File RCFILE = new File(CGPIPE_HOME,".cgpiperc");
 
+//	public static final Map<String, VarValue> globalConfig = new HashMap<String, VarValue>(); 
+	
 	public static void main(String[] args) {
 		String fname = null;
 		String logFilename = null;
@@ -201,6 +203,9 @@ public class CGPipe {
 					System.exit(1);
 				}
 			}
+
+			// Set the global config values
+//			globalConfig.putAll(root.cloneValues());
 			
 			// Parse the AST and run it
 			Parser.exec(fname, root);

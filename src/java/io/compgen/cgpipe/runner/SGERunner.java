@@ -20,7 +20,7 @@ public class SGERunner extends JobRunner {
 	private boolean hvmemIsTotal = true;
 	private String account=null;
 	private String parallelEnv = "shm";
-	private String shell = ShellScriptRunner.findDefaultShell();
+	private String shell = ShellScriptRunner.defaultShell;
 	
 	private int dryRunJobCount = 0;
 
@@ -303,7 +303,7 @@ public class SGERunner extends JobRunner {
 		              is to specify it as the amount of memory per-processor
 		              (only used when procs > 1)
 		
-		shell       - a shell to use for the script (default(s): /bin/bash, /usr/bin/bash, /usr/local/bin/bash, /bin/sh)
+		shell       - a shell to use for the script (default(s): /defaultShell/bash, /usr/defaultShell/bash, /usr/local/defaultShell/bash, /defaultShell/sh)
 
 	 */
 	@Override

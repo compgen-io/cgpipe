@@ -68,7 +68,7 @@ public class BuildTarget {
 
 		TemplateParser.parseTemplate(lines, pre, post, jobRoot);
 
-		return new JobDef(jobRoot.getBody(), jobRoot.cloneValues("job."), outputs, inputs);
+		return new JobDef(jobRoot.getBody(), jobRoot.cloneValues(), outputs, inputs);
 	}
 
 	public boolean isSkippable() {
