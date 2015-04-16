@@ -14,7 +14,6 @@ import io.compgen.sjq.server.SJQServerException;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
