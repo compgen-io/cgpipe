@@ -31,13 +31,19 @@ public class BuildTargetTemplate {
 
 		for (String out: outputs) {
 			if (out != null && !out.equals("")) {
-				this.outputs.add(Eval.evalString(out, context, tokens.getLine()));
+				// The outputs might be a list, so we need to eval and split...
+				for (String s: Eval.evalString(out, context, tokens.getLine()).split(" ")) {
+					this.outputs.add(s);
+				}
 			}
 		}
 
 		for (String in: inputs) {
 			if (in != null && !in.equals("")) {
-				this.inputs.add(Eval.evalString(in, context, tokens.getLine()));
+				// The inputs might be a list, so we need to eval and split...
+				for (String s: Eval.evalString(in, context, tokens.getLine()).split(" ")) {
+					this.inputs.add(s);
+				}
 			}
 		}
 		

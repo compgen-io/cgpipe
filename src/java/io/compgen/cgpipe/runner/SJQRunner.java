@@ -35,6 +35,8 @@ public class SJQRunner extends JobRunner {
 	private int port = 0;
 	
 	private List<String> submittedJobs = new ArrayList<String>();
+
+	private int dryRunJobCount;
 	
 	public void connect() throws IOException, CommandArgumentException, SJQServerException {
 		// protect this connection with a random 50 char string.
@@ -94,6 +96,14 @@ public class SJQRunner extends JobRunner {
 	
 	@Override
 	public boolean submit(JobDef jobdef) throws RunnerException {
+		if (dryrun) {
+			dryRunJobCount++;
+			String jobId = "dryrun." + dryRunJobCount;
+			jobdef.setJobId(jobId);
+			submittedJobs.add(jobId);
+			return true;
+		}
+
 		if (client == null) {
 			try {
 				connect();

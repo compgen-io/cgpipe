@@ -203,29 +203,35 @@ public abstract class JobRunner {
 
 	private long markSkippable(BuildTarget target, RootContext context, String outputName) throws RunnerException {
 		long lastModified = 0;
+		String lastModifiedDep = "";
 		for (String dep: target.getDepends().keySet()) {
 			long depLastMod = markSkippable(target.getDepends().get(dep), context, dep);
 			if (depLastMod == -1) {
 				lastModified = -1;
 			} else if (depLastMod > lastModified) {
 				lastModified = depLastMod;
+				lastModifiedDep = dep;
 			}
 		}
 		
 		if (lastModified > -1) {
 			// Check to see if the outputName file exists on disk.
-			// Note: this could also be used to look for remote resources.
+			// Note: this could also be used to look for remote resources (S3, etc), but not implemented
 			File outputFile = new File(outputName);
 			if (outputFile.exists()) {
 				if (outputFile.lastModified() > lastModified) {
 					log.debug("Marking output-target as skippable: "+outputName);
 					target.setSkippable(true);
 					return outputFile.lastModified();
+				} else {
+					log.debug("Marking output-target as not skippable: " + outputName + " is older than " + lastModifiedDep + " (" + outputFile.lastModified() + " vs " + lastModified + ")");
 				}
+			} else {
+				log.debug("Marking output-target as not skippable: " + outputName + " doesn't exist! (" + outputFile.getAbsolutePath()+")");
 			}
+		} else {
+			log.debug("Marking output-target as not skippable: "+outputName + " a dependency will be built");
 		}
-
-		log.debug("Marking output-target as not skippable: "+outputName + ((lastModified > -1) ? " older than dep" : " dep doesn't exist or will be submitted"));
 		target.setSkippable(false);
 		return -1;
 	}
