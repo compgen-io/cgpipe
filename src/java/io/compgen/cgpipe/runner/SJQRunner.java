@@ -147,7 +147,9 @@ public class SJQRunner extends JobRunner {
 	@Override
 	public void innerDone() throws RunnerException {
 		log.info("submitted jobs: "+StringUtils.join(",", submittedJobs));
-		System.out.println(StringUtils.join("\n", submittedJobs));
+		if (submittedJobs.size() > 0) {
+			System.out.println(StringUtils.join("\n", submittedJobs));
+		}
 		try {
 			if (client != null) {
 				client.close();
