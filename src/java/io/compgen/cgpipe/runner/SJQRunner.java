@@ -149,7 +149,9 @@ public class SJQRunner extends JobRunner {
 		log.info("submitted jobs: "+StringUtils.join(",", submittedJobs));
 		System.out.println(StringUtils.join("\n", submittedJobs));
 		try {
-			client.close();
+			if (client != null) {
+				client.close();
+			}
 		} catch (ClientException e) {
 		}
 		if (server != null) {
