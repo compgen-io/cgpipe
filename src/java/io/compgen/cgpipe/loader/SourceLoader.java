@@ -51,9 +51,9 @@ public class SourceLoader {
 
 	public Source loadPipeline(String filename, String hash) throws IOException {
 		if (hash != null) {
-			log.info("Looking for file: "+filename+" hash:"+hash + " loader:"+this);
+			log.info("Looking for file: "+filename+" hash:"+hash);
 		} else {
-			log.info("Looking for file: "+filename + " loader:"+this);
+			log.info("Looking for file: "+filename);
 		}
 		// absolute path loader
 		File file = new File(filename);
@@ -128,7 +128,8 @@ public class SourceLoader {
 		String digestStr = Hex.encodeHexString(digest).toLowerCase();
 		
 		source.setHashDigest(digestStr);
-		
+		log.debug("SHA-1 hash: "+digestStr);
+
 		if (hash != null) {
 			hash = hash.toLowerCase();
 			log.debug("Expected: "+hash+" Got: "+digestStr);
