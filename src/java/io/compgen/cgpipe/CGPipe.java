@@ -271,7 +271,7 @@ public class CGPipe {
 		try {
 			System.out.println(readFile("io/compgen/cgpipe/USAGE.txt"));
 			System.out.println("http://compgen.io/cgpipe");
-			System.out.println(readFile("VERSION"));
+			System.out.println(readFile("io/compgen/cgpipe/VERSION"));
 			System.out.println();
 		} catch (IOException e) {
 		}

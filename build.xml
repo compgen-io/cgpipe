@@ -41,8 +41,8 @@
 	<target name="jar" depends="compile, git.revision">
         <copy file="LICENSE" todir="${build.dir}/classes/"/>
         <copy file="INCLUDES" todir="${build.dir}/classes/"/>
-        <delete file="${build.dir}/classes/VERSION"/>
-        <echo file="${build.dir}/classes/VERSION" message="${ant.project.name}-${version}-${repository.version}"/>
+        <delete file="${build.dir}/classes/io/compgen/cgpipe/VERSION"/>
+        <echo file="${build.dir}/classes/io/compgen/cgpipe/VERSION" message="${ant.project.name}-${version}-${repository.version}"/>
         <copy todir="${build.dir}/classes/">
             <fileset dir="${src.dir}/conf"/>
 		</copy>
@@ -64,6 +64,7 @@
             <zipfileset src="${lib.dir}/compgen-cmdline-0.4.1.jar"/>
             <zipfileset src="${lib.dir}/compgen-common-0.1.jar"/>
 	        <zipfileset src="${lib.dir}/sjq-0.3.jar"/>
+            <zap pattern="*.java"/>
 	    </jarjar>
         <delete file="${dist.dir}/${project.name}"/>
  		<concat destfile="${dist.dir}/${ant.project.name}" binary="true">
