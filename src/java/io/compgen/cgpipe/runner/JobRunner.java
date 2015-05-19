@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 public abstract class JobRunner {
 	abstract public boolean submit(JobDef jobdef) throws RunnerException;
 	abstract public boolean isJobIdValid(String jobId) throws RunnerException;
-	abstract public void innerDone() throws RunnerException;
+	abstract public void runnerDone() throws RunnerException;
 	abstract protected void setConfig(String k, String val);
 
 	public static String defaultShell = null;
@@ -75,7 +75,7 @@ public abstract class JobRunner {
 			obj = new ShellScriptRunner();
 			break;
 		case "sge":
-			obj = new SGERunner();
+			obj = new SGETemplateRunner();
 			break;
 		case "sjq":
 			obj = new SJQRunner();
@@ -331,7 +331,7 @@ public abstract class JobRunner {
 			}
 		}
 		
-		innerDone();
+		runnerDone();
 
 		if (joblog!=null) {
 			joblog.close();

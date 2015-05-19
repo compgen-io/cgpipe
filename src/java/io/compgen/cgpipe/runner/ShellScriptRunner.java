@@ -26,7 +26,7 @@ public class ShellScriptRunner extends JobRunner {
 	}
 
 	@Override
-	public void innerDone() throws RunnerException {
+	public void runnerDone() throws RunnerException {
 		boolean header = false;
 		List<String> funcNames = new ArrayList<String>();
 		

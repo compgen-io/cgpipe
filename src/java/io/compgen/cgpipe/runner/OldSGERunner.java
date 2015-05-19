@@ -13,8 +13,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class SGERunner extends JobRunner {
-	protected Log log = LogFactory.getLog(SGERunner.class);
+public class OldSGERunner extends JobRunner {
+	protected Log log = LogFactory.getLog(OldSGERunner.class);
 
 	private boolean globalHold = false;
 	private boolean hvmemIsTotal = true;
@@ -29,7 +29,7 @@ public class SGERunner extends JobRunner {
 	private JobDependency globalHoldJob = null;
 	
 	@Override
-	public void innerDone() throws RunnerException {
+	public void runnerDone() throws RunnerException {
 		if (jobids.size() > 0) {
 			log.info("submitted jobs: "+StringUtils.join(",", jobids));
 			System.out.println(StringUtils.join("\n", jobids));

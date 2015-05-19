@@ -50,6 +50,10 @@ public class JobDef implements JobDependency {
 		return outputs;
 	}
 
+	public Map<String, VarValue> getSettingsMap() {
+		return Collections.unmodifiableMap(settings);
+	}
+	
 	public boolean hasSetting(String k) {
 		return settings.containsKey(k);
 	}

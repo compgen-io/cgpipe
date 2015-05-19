@@ -112,13 +112,13 @@ public class TemplateParser {
 		}
 	}
 
-	static public String parseTemplateString(String src) throws ASTExecException, ASTParseException {
+	static public String parseTemplateString(String src, RootContext context) throws ASTExecException, ASTParseException {
 		List<NumberedLine> lines = new ArrayList<NumberedLine>();
 		int i=1;
 		for (String line: src.split("\n")) {
 			lines.add(new NumberedLine(line, i++));
 		}
-		return parseTemplate(lines, null, null, null);
+		return parseTemplate(lines, null, null, context);
 	}
 
 	static public String parseTemplate(String filename) throws ASTExecException, ASTParseException {

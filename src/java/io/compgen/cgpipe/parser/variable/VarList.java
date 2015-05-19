@@ -9,7 +9,7 @@ import java.util.List;
 
 public class VarList extends VarValue {
 	List<VarValue> vals = new ArrayList<VarValue>();
-
+	
 	public VarList() {
 		super(null);
 	}
