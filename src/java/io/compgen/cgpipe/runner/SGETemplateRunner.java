@@ -70,13 +70,14 @@ public class SGETemplateRunner extends TemplateRunner {
 				String mem = jobdef.getSetting("job.mem");
 				String units = "";
 				float memVal = 1;
+
 				while (mem.length() > 0) {
 				    try {
-				memVal = Float.parseFloat(mem);
-				break;
+						memVal = Float.parseFloat(mem);
+						break;
 				    } catch (NumberFormatException e) {
-				units = mem.substring(mem.length()-1) + units;
-				mem = mem.substring(0, mem.length()-1);
+						units = mem.substring(mem.length()-1) + units;
+						mem = mem.substring(0, mem.length()-1);
 				    }
 				}
 				

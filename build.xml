@@ -73,6 +73,30 @@
  		</concat>
         <delete file="${dist.dir}/${ant.project.name}.jar.tmp"/>
 		<chmod file="${dist.dir}/${ant.project.name}" perm="755"/>
+
+		<!-- cgsub -->
+      <jarjar jarfile="${dist.dir}/${ant.project.name}.jar.tmp">
+            <manifest>
+                <attribute name="Main-Class" value="io.compgen.cgpipe.CGSub"/>
+            </manifest>
+            <fileset dir="${build.dir}/classes"/>
+            <zipfileset src="${lib.dir}/commons-logging-1.2.jar"/>
+            <zipfileset src="${lib.dir}/commons-codec-1.10.jar"/>
+            <zipfileset src="${lib.dir}/compgen-cmdline-0.4.1.jar"/>
+            <zipfileset src="${lib.dir}/compgen-common-0.1.jar"/>
+            <zipfileset src="${lib.dir}/sjq-0.3.jar"/>
+            <zap pattern="*.java"/>
+        </jarjar>
+        <delete file="${dist.dir}/${project.name}"/>
+        <concat destfile="${dist.dir}/cgsub" binary="true">
+             <fileset file="${src.dir}/scripts/stub.sh" />
+             <fileset file="${dist.dir}/${ant.project.name}.jar.tmp" />
+        </concat>
+        <delete file="${dist.dir}/${ant.project.name}.jar.tmp"/>
+        <chmod file="${dist.dir}/cgsub" perm="755"/>
+
+	
+	
 	</target>
     <target name="docs" description="Store git revision in ${repository.version}" if="git.present">
         <exec executable="./build_docs.sh" failifexecutionfails="false" errorproperty="">
