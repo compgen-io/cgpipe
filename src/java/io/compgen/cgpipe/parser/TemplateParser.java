@@ -48,14 +48,17 @@ public class TemplateParser {
 		String l = line.getLine();
 		String buf = "";
 		while (l.length() > 0) {
-			if (l.startsWith("<%")) {
+			if (!inScript && l.startsWith("\\<%")) {
+				buf += "<%";
+				l = l.substring(3);
+			} else if (!inScript && l.startsWith("<%")) {
 				if (!buf.equals("")) {
 					parseString(buf, line);
 					buf = "";
 				}
 				inScript = true;
 				l = l.substring(2);
-			} else if (l.startsWith("%>")) {
+			} else if (inScript && l.startsWith("%>")) {
 				if (!buf.equals("")) {
 					parseString(buf, line);
 					buf = "";

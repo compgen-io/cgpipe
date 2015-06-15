@@ -87,7 +87,8 @@ if [ "$FAILED" == "" ]; then
   if [ $RETVAL -ne 0 ]; then
     kill_deps
 
-<% if !job.keepfailed
+<% 
+if !job.keepfailed
     for jobout in job._outputs 
         if jobout[0] != "."
 %>
