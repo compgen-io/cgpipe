@@ -147,9 +147,9 @@ public class JobDef implements JobDependency {
 			if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".contains(""+n.charAt(0))) {
 				return n;
 			}
-			return "cgp_"+n;
+			return "cg_"+n;
 		}
-		return "cgpjob";
+		return "cgjob";
 	}
 
 	public void addDependency(JobDependency dep) {

@@ -18,10 +18,12 @@ import io.compgen.cmdline.MainBuilder;
 import io.compgen.cmdline.annotation.Command;
 import io.compgen.cmdline.annotation.Exec;
 import io.compgen.cmdline.annotation.Option;
+import io.compgen.cmdline.annotation.UnknownArgs;
 import io.compgen.cmdline.annotation.UnnamedArg;
 import io.compgen.cmdline.impl.AbstractCommand;
 import io.compgen.common.StringUtils;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,10 +34,12 @@ import java.util.regex.Pattern;
 
 @Command(name="cgsub", desc="Dynamically submit jobs for multiple input files")
 public class CGSub extends AbstractCommand{
+	Map<String, VarValue> confVals = new HashMap<String, VarValue>();
 
 	private List<String> cmds = new ArrayList<String>();
 	private List<String> inputs = null;
 	
+	private String name = null;
 	private int procs = -1;
 	private String mem = null;
 	private String walltime = null;
@@ -47,6 +51,11 @@ public class CGSub extends AbstractCommand{
 	private List<String> dependencies = null;
 	
 	public CGSub() {
+	}
+	
+	@UnknownArgs
+	public void setUnknownArg(String k, String v) {
+		confVals.put(k, VarValue.parseStringRaw(v));
 	}
 	
 	@UnnamedArg(name="commands -- input1 {input2...}")
@@ -85,7 +94,12 @@ public class CGSub extends AbstractCommand{
 
 	@Option(name="wd", desc="Working directory", defaultValue=".", helpValue="dir")
 	public void setWd(String wd) {
-		this.wd = wd;
+		this.wd = new File(wd).getAbsolutePath();
+	}
+
+	@Option(name="name", charName="n", desc="Job name")
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Option(name="stdout", desc="Write stdout to file/dir")
@@ -115,7 +129,6 @@ public class CGSub extends AbstractCommand{
 	public void exec() {
 		SimpleFileLoggerImpl.setSilent(true);
 		JobRunner runner = null;
-		Map<String, VarValue> confVals = new HashMap<String, VarValue>();
 
 		confVals.put("job.procs", new VarInt(procs));
 		confVals.put("job.env", VarBool.TRUE);
@@ -128,15 +141,6 @@ public class CGSub extends AbstractCommand{
 		}
 		if (walltime != null) {
 			confVals.put("job.walltime", new VarString(walltime));
-		}
-		if (wd != null) {
-			confVals.put("job.wd", new VarString(wd));
-		}
-		if (stdout != null) {
-			confVals.put("job.stdout", new VarString(stdout));
-		}
-		if (stderr != null) {
-			confVals.put("job.stderr", new VarString(stderr));
 		}
 		
 		try {
@@ -155,35 +159,43 @@ public class CGSub extends AbstractCommand{
 			}
 
 			root.setOutputStream(null);
-			runner = JobRunner.load(root, dryrun);
+			root.update(confVals);
 
-			// find a build-target, and submit the job(s) to a runner
-		
-			Pattern p = Pattern.compile("^(.*)\\{(\\^.*)?\\}(.*)$");
+			runner = JobRunner.load(root, dryrun);
+			
+			int i = 0;
 			for (String input: inputs) {
+				i++;
 				List<String> inputcmds = new ArrayList<String>();
 				for (String cmd: cmds) {
-					Matcher m = p.matcher(cmd);
-					while (m.matches()) {
-						if (m.group(2) == null) {
-							cmd = m.group(1)+input+m.group(3);						
-						} else {
-							String suf = m.group(2).substring(1);
-							if (input.endsWith(suf)) {
-								cmd = m.group(1)+input.substring(0,  input.length()-suf.length())+m.group(3);						
-							} else {
-								cmd = m.group(1)+input+m.group(3);
-							}
-						}
-						m = p.matcher(cmd);
-					}
-					inputcmds.add(cmd);
+					inputcmds.add(convertStringForInput(cmd, input));
 				}
+
+				if (wd != null) {
+					confVals.put("job.wd", new VarString(convertStringForInput(wd, input)));
+				}
+				if (stdout != null) {
+					confVals.put("job.stdout", new VarString(convertStringForInput(stdout, input)));
+				}
+				if (stderr != null) {
+					confVals.put("job.stderr", new VarString(convertStringForInput(stderr, input)));
+				}
+
 				JobDef jobdef = new JobDef(StringUtils.join(" ", inputcmds), confVals);
 				if (dependencies != null) {
 					for (String dep: dependencies) {
 						jobdef.addDependency(new ExistingJob(dep));
 					}
+				}
+				if (name != null) {
+					String n = convertStringForInput(name, input);
+					if (n.equals(name)) {
+						jobdef.setName(n+"."+i);
+					} else {
+						jobdef.setName(n);
+					}
+				} else {
+					jobdef.setName("cgsub."+i);
 				}
 				runner.submit(jobdef);
 			}
@@ -203,9 +215,28 @@ public class CGSub extends AbstractCommand{
 			System.exit(1);
 		}
 	}
+
+	protected String convertStringForInput(String str, String input) {
+		Pattern p = Pattern.compile("^(.*)\\{(\\^.*)?\\}(.*)$");
+		Matcher m = p.matcher(str);
+		while (m.matches()) {
+			if (m.group(2) == null) {
+				str = m.group(1)+input+m.group(3);						
+			} else {
+				String suf = m.group(2).substring(1);
+				if (input.endsWith(suf)) {
+					str = m.group(1)+input.substring(0,  input.length()-suf.length())+m.group(3);						
+				} else {
+					str = m.group(1)+input+m.group(3);
+				}
+			}
+			m = p.matcher(str);
+		}
+		
+		return str;
+	}
 	
 	public static void main(String[] args) throws Exception {
 		new MainBuilder().runClass(CGSub.class, args);
 	}
-
 }

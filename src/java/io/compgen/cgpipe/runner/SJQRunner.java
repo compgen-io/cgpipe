@@ -68,7 +68,11 @@ public class SJQRunner extends JobRunner {
 			server.setJobLogFile(jobLogFile.getAbsolutePath());
 			server.start();
 		} else {
-			passwd = StringUtils.strip(StringUtils.readFile(passwdFile)); 
+			try {
+				passwd = StringUtils.strip(StringUtils.readFile(passwdFile));
+			} catch (IOException e) {
+				passwd = "";
+			}
 		}
 		
 		try {
