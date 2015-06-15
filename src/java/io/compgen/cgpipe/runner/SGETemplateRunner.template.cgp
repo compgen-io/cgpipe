@@ -45,7 +45,9 @@
 #$ -e ${job.stderr}
 <% endif %>
 <% for custom in job.custom %>
+<% if custom %>
 #$ ${custom}
+<% endif %>
 <% done %>
 #$ -notify
 FAILED=""

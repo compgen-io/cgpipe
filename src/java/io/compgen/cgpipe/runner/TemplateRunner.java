@@ -84,6 +84,11 @@ public abstract class TemplateRunner extends JobRunner {
 			} catch (IOException e) {
 			}
 		}
+		
+		if (!cxt.contains("job.name")) {
+			cxt.set("job.name", new VarString(jobdef.getName()));
+		}
+		
 	}
 	
 	public void init() {}

@@ -187,6 +187,7 @@ public class CGSub extends AbstractCommand{
 						jobdef.addDependency(new ExistingJob(dep));
 					}
 				}
+				
 				if (name != null) {
 					String n = convertStringForInput(name, input);
 					if (n.equals(name)) {
@@ -195,6 +196,7 @@ public class CGSub extends AbstractCommand{
 						jobdef.setName(n);
 					}
 				} else {
+					System.err.println("name => "+name);
 					jobdef.setName("cgsub."+i);
 				}
 				runner.submit(jobdef);
