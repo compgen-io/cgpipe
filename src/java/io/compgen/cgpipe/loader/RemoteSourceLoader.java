@@ -1,11 +1,12 @@
 package io.compgen.cgpipe.loader;
 
+import io.compgen.common.codex.Base64;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -62,7 +63,8 @@ public class RemoteSourceLoader extends SourceLoader {
 
 	        	connection = (HttpURLConnection) url.openConnection();
 	            connection.setUseCaches(false);
-		        String encoding = new String(Base64.encodeBase64((((username!=null) ? username : "" )+":"+((password!=null) ? password : "" )).getBytes()));
+	            String userpass = ((username!=null) ? username : "" )+":"+((password!=null) ? password : "" );
+		        String encoding = Base64.encodeBase64((userpass.getBytes()));
 		        connection.setRequestProperty  ("Authorization", "Basic " + encoding);
 		        is = (InputStream)connection.getInputStream();
 	        } else {

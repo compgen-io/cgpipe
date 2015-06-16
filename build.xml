@@ -30,6 +30,8 @@
             includeantruntime="false"
             classpathref="classpath"
             debuglevel="lines,vars,source"
+            target="1.7"
+            source="1.7"
             >
             <compilerclasspath>
                 <fileset file="${blib.dir}/error_prone_ant-2.0.2-SNAPSHOT.jar"/>
@@ -64,7 +66,6 @@
             </manifest>
 	        <fileset dir="${build.dir}/classes"/>
             <zipfileset src="${lib.dir}/commons-logging-1.2.jar"/>
-            <zipfileset src="${lib.dir}/commons-codec-1.10.jar"/>
             <zipfileset src="${lib.dir}/compgen-cmdline-0.4.1.jar"/>
             <zipfileset src="${lib.dir}/compgen-common-0.1.jar"/>
 	        <zipfileset src="${lib.dir}/sjq-0.3.jar"/>
@@ -85,7 +86,6 @@
             </manifest>
             <fileset dir="${build.dir}/classes"/>
             <zipfileset src="${lib.dir}/commons-logging-1.2.jar"/>
-            <zipfileset src="${lib.dir}/commons-codec-1.10.jar"/>
             <zipfileset src="${lib.dir}/compgen-cmdline-0.4.1.jar"/>
             <zipfileset src="${lib.dir}/compgen-common-0.1.jar"/>
             <zipfileset src="${lib.dir}/sjq-0.3.jar"/>

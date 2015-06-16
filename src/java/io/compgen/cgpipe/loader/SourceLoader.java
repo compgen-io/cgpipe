@@ -3,6 +3,7 @@ package io.compgen.cgpipe.loader;
 import io.compgen.cgpipe.CGPipe;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.common.StringUtils;
+import io.compgen.common.codex.Hex;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,7 +17,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -125,7 +125,7 @@ public class SourceLoader {
 		source.finalize();
 		
 		byte[] digest = md.digest();
-		String digestStr = Hex.encodeHexString(digest).toLowerCase();
+		String digestStr = Hex.toHexString(digest).toLowerCase();
 		
 		source.setHashDigest(digestStr);
 		log.debug("SHA-1 hash: "+digestStr);
