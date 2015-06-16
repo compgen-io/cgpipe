@@ -3,7 +3,7 @@ package io.compgen.cgpipe.loader;
 import io.compgen.cgpipe.CGPipe;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.common.StringUtils;
-import io.compgen.common.codex.Hex;
+import io.compgen.common.codec.Hex;
 
 import java.io.BufferedReader;
 import java.io.File;

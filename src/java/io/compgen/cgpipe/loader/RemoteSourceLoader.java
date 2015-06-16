@@ -1,6 +1,6 @@
 package io.compgen.cgpipe.loader;
 
-import io.compgen.common.codex.Base64;
+import io.compgen.common.codec.Base64;
 
 import java.io.IOException;
 import java.io.InputStream;
