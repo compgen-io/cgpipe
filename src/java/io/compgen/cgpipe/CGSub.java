@@ -162,26 +162,19 @@ public class CGSub extends AbstractCommand{
 			root.update(confVals);
 
 			runner = JobRunner.load(root, dryrun);
-			
-			int i = 0;
-			for (String input: inputs) {
-				i++;
-				List<String> inputcmds = new ArrayList<String>();
-				for (String cmd: cmds) {
-					inputcmds.add(convertStringForInput(cmd, input));
-				}
 
+			if (inputs == null) {
 				if (wd != null) {
-					confVals.put("job.wd", new VarString(convertStringForInput(wd, input)));
+					confVals.put("job.wd", new VarString(wd));
 				}
 				if (stdout != null) {
-					confVals.put("job.stdout", new VarString(convertStringForInput(stdout, input)));
+					confVals.put("job.stdout", new VarString(stdout));
 				}
 				if (stderr != null) {
-					confVals.put("job.stderr", new VarString(convertStringForInput(stderr, input)));
+					confVals.put("job.stderr", new VarString(stderr));
 				}
 
-				JobDef jobdef = new JobDef(StringUtils.join(" ", inputcmds), confVals);
+				JobDef jobdef = new JobDef(StringUtils.join(" ", cmds), confVals);
 				if (dependencies != null) {
 					for (String dep: dependencies) {
 						jobdef.addDependency(new ExistingJob(dep));
@@ -189,17 +182,49 @@ public class CGSub extends AbstractCommand{
 				}
 				
 				if (name != null) {
-					String n = convertStringForInput(name, input);
-					if (n.equals(name)) {
-						jobdef.setName(n+"."+i);
-					} else {
-						jobdef.setName(n);
-					}
+					jobdef.setName(name);
 				} else {
-					System.err.println("name => "+name);
-					jobdef.setName("cgsub."+i);
+					jobdef.setName("cgsub");
 				}
 				runner.submit(jobdef);
+			} else {			
+				int i = 0;
+				for (String input: inputs) {
+					i++;
+					List<String> inputcmds = new ArrayList<String>();
+					for (String cmd: cmds) {
+						inputcmds.add(convertStringForInput(cmd, input));
+					}
+	
+					if (wd != null) {
+						confVals.put("job.wd", new VarString(convertStringForInput(wd, input)));
+					}
+					if (stdout != null) {
+						confVals.put("job.stdout", new VarString(convertStringForInput(stdout, input)));
+					}
+					if (stderr != null) {
+						confVals.put("job.stderr", new VarString(convertStringForInput(stderr, input)));
+					}
+	
+					JobDef jobdef = new JobDef(StringUtils.join(" ", inputcmds), confVals);
+					if (dependencies != null) {
+						for (String dep: dependencies) {
+							jobdef.addDependency(new ExistingJob(dep));
+						}
+					}
+					
+					if (name != null) {
+						String n = convertStringForInput(name, input);
+						if (n.equals(name)) {
+							jobdef.setName(n+"."+i);
+						} else {
+							jobdef.setName(n);
+						}
+					} else {
+						jobdef.setName("cgsub."+i);
+					}
+					runner.submit(jobdef);
+				}
 			}
 			runner.done();
 
