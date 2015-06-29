@@ -206,7 +206,7 @@ public class CGSub extends AbstractCommand{
 						confVals.put("job.stderr", new VarString(convertStringForInput(stderr, input)));
 					}
 	
-					JobDef jobdef = new JobDef(StringUtils.join(" ", inputcmds), confVals);
+					JobDef jobdef = new JobDef(StringUtils.join(" ", inputcmds)+"\n", confVals);
 					if (dependencies != null) {
 						for (String dep: dependencies) {
 							jobdef.addDependency(new ExistingJob(dep));
