@@ -7,6 +7,7 @@ import io.compgen.cgpipe.parser.Eval;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.statement.Statement;
 import io.compgen.cgpipe.parser.tokens.TokenList;
+import io.compgen.cgpipe.parser.variable.VarNull;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.common.StringUtils;
 
@@ -73,14 +74,16 @@ public class IteratingNode extends ASTNode {
 		}
 		
 		VarValue iterVal = Eval.evalTokenExpression(iterTokens, context);
-		for (VarValue val: iterVal.iterate()) {
-			ExecContext nested = new ExecContext(context);
-			nested.set(varName, val);
-			
-			ASTNode currentNode = headNode;
-
-			while (currentNode != null) {
-				currentNode = currentNode.exec(nested);
+		if (iterVal != VarNull.NULL) {
+			for (VarValue val: iterVal.iterate()) {
+				ExecContext nested = new ExecContext(context);
+				nested.set(varName, val);
+				
+				ASTNode currentNode = headNode;
+	
+				while (currentNode != null) {
+					currentNode = currentNode.exec(nested);
+				}
 			}
 		}
 
