@@ -48,9 +48,12 @@ public class TemplateParser {
 		String l = line.getLine();
 		String buf = "";
 		while (l.length() > 0) {
-			if (!inScript && l.startsWith("\\<%")) {
-				buf += "<%";
-				l = l.substring(3);
+			if (!inScript && l.startsWith("\\\\<%")) {
+				buf += "\\";
+				l = l.substring(2);
+			} else if (!inScript && l.startsWith("\\<%")) {
+					buf += "<%";
+					l = l.substring(3);
 			} else if (!inScript && l.startsWith("<%")) {
 				if (!buf.equals("")) {
 					parseString(buf, line);
@@ -89,8 +92,12 @@ public class TemplateParser {
 		if (!processedPre && pre != null) {
 			processedPre = true;
 			curNode = curNode.parseLine(new NumberedLine("if !job.nopre"));
+			int indent = -1;
 			for (NumberedLine line: pre) {
-				parseLine(line);
+				if (indent == -1) {
+					indent = line.calcLinePrefixLength();
+				}
+				parseLine(line.stripPrefix(indent));
 			}
 			curNode = curNode.parseLine(new NumberedLine("endif"));
 		}
@@ -99,8 +106,12 @@ public class TemplateParser {
 	private void processPost() throws ASTParseException {
 		if (curNode != headNode && post != null) {
 			curNode = curNode.parseLine(new NumberedLine("if !job.nopost"));
+			int indent = -1;
 			for (NumberedLine line: post) {
-				parseLine(line);
+				if (indent == -1) {
+					indent = line.calcLinePrefixLength();
+				}
+				parseLine(line.stripPrefix(indent));
 			}
 			curNode = curNode.parseLine(new NumberedLine("endif"));
 		}
@@ -171,8 +182,13 @@ public class TemplateParser {
 
 	static public String parseTemplate(List<NumberedLine> lines, List<NumberedLine> pre, List<NumberedLine> post, RootContext rootContext) throws ASTExecException, ASTParseException {
 		TemplateParser parser = new TemplateParser(pre, post);
+		int indent = -1;
 		for (NumberedLine line: lines) {
-			parser.parseLine(line);
+			if (indent == -1) {
+				indent = line.calcLinePrefixLength();
+			}
+			
+			parser.parseLine(line.stripPrefix(indent));
 		}
 		
 		parser.processPost();
