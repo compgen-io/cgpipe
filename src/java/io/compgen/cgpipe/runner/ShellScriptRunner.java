@@ -38,6 +38,7 @@ public class ShellScriptRunner extends JobRunner {
 					header = true;
 				}
 				out += job.getJobId()+"() {\n";
+				out += "JOB_ID=\""+job.getJobId()+"\"\n";
 				out += job.getBody();
 				out += "\n}\n\n";
 				funcNames.add(job.getJobId());
