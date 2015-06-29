@@ -50,10 +50,36 @@ public class NumberedLine {
 		return source+"["+linenum+"] "+line;
 	}
 
-	public NumberedLine stripPrefix() {
-		return new NumberedLine(line.replaceFirst(" *#\\$", ""), this);
+	public NumberedLine stripPrefix(int maxlen) {
+		int indent = 0;
+		String l = line;
+		while (indent < maxlen && (l.charAt(0) == ' ' || l.charAt(0) == '\t')) {
+			if (l.charAt(0) == ' ') {
+				indent += 1;
+			} else if (l.charAt(0) == '\t') {
+				indent += 4;
+			}
+			l = l.substring(1);
+		}
+		
+		return new NumberedLine(l, this);
 	}
 	
+	public int calcLinePrefixLength() {
+		int indent = 0;
+		String l = line;
+		while (l.charAt(0) == ' ' || l.charAt(0) == '\t') {
+			if (l.charAt(0) == ' ') {
+				indent += 1;
+			} else if (l.charAt(0) == '\t') {
+				indent += 4;
+			}
+			l = l.substring(1);
+		}
+		
+		return indent;
+	}
+
 	public String getLine() {
 		return line;
 	}
