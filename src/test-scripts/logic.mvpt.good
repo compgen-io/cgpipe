@@ -4,3 +4,10 @@ foo
 foo
 hello
 hello
+notfoo
+notfoo
+notfoo or notbar
+notfoo notbar
+notfoo notbaz
+notbaz notfoo
+baz or quux

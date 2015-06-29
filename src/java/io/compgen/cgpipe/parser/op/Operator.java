@@ -13,6 +13,7 @@ public interface Operator {
 	public int getPriority();
 
 	public static final Operator RANGE = new Range(); // ..
+	public static final Operator NOT = new Not(); // !
 	public static final Operator EQ = new Eq(); // ==
 	public static final Operator NOT_EQ = new NotEq(); // !=
 	public static final Operator COND_ASSIGN = new CondAssign(); // ?=
@@ -25,7 +26,6 @@ public interface Operator {
 	public static final Operator OR = new Or(); // ||
 	public static final Operator POW = new Pow(); // **
 	public static final Operator ASSIGN = new Assign(); // =
-	public static final Operator NOT = new Not(); // !
 	public static final Operator ADD = new Add(); // +
 	public static final Operator SUB = new Sub(); // -
 	public static final Operator MUL = new Mul(); // *
@@ -37,6 +37,7 @@ public interface Operator {
 	
 	public static final Operator[] operators = {
 		RANGE,
+		NOT,
 		EQ,
 		NOT_EQ,
 		COND_ASSIGN,
@@ -49,7 +50,6 @@ public interface Operator {
 		OR,
 		POW,
 		ASSIGN,
-		NOT,
 		ADD,
 		SUB,
 		MUL,

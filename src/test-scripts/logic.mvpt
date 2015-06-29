@@ -37,3 +37,49 @@ if foo == "bar" && bar == 2
 else
     print "nope"
 endif
+
+foo = false
+bar = false
+quux = true
+
+if foo
+    print "foo"
+else
+    print "notfoo"
+endif
+
+if !foo
+    print "notfoo"
+else
+    print "foo"
+endif 
+
+if foo && bar
+    print "foo and bar"
+else
+    print "notfoo or notbar"
+endif
+
+if !foo && !bar
+    print "notfoo notbar"
+else
+    print "foo or bar"
+endif
+
+if !foo && !baz
+    print "notfoo notbaz"
+else
+    print "foo or baz"
+endif
+
+if !baz && !foo
+    print "notbaz notfoo"
+else
+    print "foo or baz"
+endif
+
+if !baz && !quux
+    print "notbaz notquux"
+else
+    print "baz or quux"
+endif
