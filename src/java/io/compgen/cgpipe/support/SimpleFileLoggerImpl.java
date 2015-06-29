@@ -48,7 +48,7 @@ public class SimpleFileLoggerImpl implements Log, Serializable {
 			SimpleFileLoggerImpl.out  = System.err;
 		} else {
 			File logFile = new File(logFilename);
-			if (!logFile.getParentFile().exists()) {
+			if (logFile.getParentFile() != null && !logFile.getParentFile().exists()) {
 				logFile.getParentFile().mkdirs();
 			}
 			
