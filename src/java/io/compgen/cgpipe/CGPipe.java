@@ -75,21 +75,42 @@ public class CGPipe {
 			}
 			
 			if (arg.equals("-h")) {
+				if (k != null) {
+					confVals.put(k, VarBool.TRUE);
+				}
 				showHelp = true;
 			} else if (arg.equals("-license")) {
 				license();
 				System.exit(1);
 			} else if (arg.equals("-s")) {
+				if (k != null) {
+					confVals.put(k, VarBool.TRUE);
+				}
 				silent = true;
 			} else if (arg.equals("-nolog")) {
+				if (k != null) {
+					confVals.put(k, VarBool.TRUE);
+				}
 				silenceStdErr = true;
 			} else if (arg.equals("-v")) {
+				if (k != null) {
+					confVals.put(k, VarBool.TRUE);
+				}
 				verbosity++;
 			} else if (arg.equals("-vv")) {
+				if (k != null) {
+					confVals.put(k, VarBool.TRUE);
+				}
 				verbosity += 2;
 			} else if (arg.equals("-vvv")) {
+				if (k != null) {
+					confVals.put(k, VarBool.TRUE);
+				}
 				verbosity += 3;
 			} else if (arg.equals("-dr")) {
+				if (k != null) {
+					confVals.put(k, VarBool.TRUE);
+				}
 				dryrun = true;
 			} else if (arg.startsWith("--")) {
 				if (k != null) {
@@ -119,6 +140,9 @@ public class CGPipe {
 			} else if (arg.charAt(0) != '-'){
 				targets.add(arg);
 			}
+		}
+		if (k != null) {
+			confVals.put(k, VarBool.TRUE);
 		}
 		
 		if (fname == null) {
