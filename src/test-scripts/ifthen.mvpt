@@ -70,7 +70,6 @@ endif
  
 
 foo = 0
-
 if 1 == 2
     if 2 != 3
         foo = 1

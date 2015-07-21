@@ -3,7 +3,10 @@ package io.compgen.cgpipe.parser.context;
 import io.compgen.cgpipe.parser.target.BuildTarget;
 import io.compgen.cgpipe.parser.target.BuildTargetTemplate;
 import io.compgen.cgpipe.parser.target.FileExistsBuildTarget;
+import io.compgen.cgpipe.parser.variable.VarNull;
+import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.common.StringUtils;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -17,7 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-public class RootContext extends ExecContext{
+public class RootContext extends ExecContext {
 	
 	private List<BuildTargetTemplate> targets = new ArrayList<BuildTargetTemplate>();
 	private final List<String> outputs;
@@ -144,5 +147,58 @@ public class RootContext extends ExecContext{
 		} else {
 			addBodyLine(s);
 		}
+	}
+
+	@Override
+	public boolean contains(String name) {
+		if (name.equals("$>") || name.equals("$<")) {
+			return true;
+		}
+		
+		if (name.startsWith("$>")) {
+			int num = Integer.parseInt(name.substring(2));
+			if (outputs.size()>=num) {
+				return true;
+			}
+			return false;
+		}
+		
+		if (name.startsWith("$<")) {
+			int num = Integer.parseInt(name.substring(2));
+			if (inputs.size()>=num) {
+				return true;
+			}
+			return false;
+		}
+		
+		return super.contains(name);
+	}
+	
+	@Override
+	public VarValue get(String name) {
+		if (name.equals("$>")) {
+			return new VarString(StringUtils.join(" ", outputs));
+		}
+		if (name.equals("$<")) {
+			return new VarString(StringUtils.join(" ", inputs));
+		} 
+		
+		if (name.startsWith("$>")) {
+			int num = Integer.parseInt(name.substring(2));
+			if (outputs.size()>=num) {
+				return new VarString(outputs.get(num-1));
+			}
+			return VarNull.NULL;
+		}
+		
+		if (name.startsWith("$<")) {
+			int num = Integer.parseInt(name.substring(2));
+			if (inputs.size()>=num) {
+				return new VarString(inputs.get(num-1));
+			}
+			return VarNull.NULL;
+		}
+		
+		return super.get(name);
 	}
 }	

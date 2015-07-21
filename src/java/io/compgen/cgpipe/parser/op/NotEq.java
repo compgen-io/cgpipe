@@ -27,7 +27,7 @@ public class NotEq extends BasicOp {
 
 	@Override
 	public int getPriority() {
-		return 100;
+		return 151;
 	}
 
 }

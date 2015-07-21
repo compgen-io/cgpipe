@@ -12,6 +12,7 @@ import io.compgen.common.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class Tokenizer {
 
@@ -64,6 +65,7 @@ public class Tokenizer {
 			if (!foundColon) {
 				tokens = markParens(tokens);
 				tokens = markStatements(tokens);
+				tokens = markInputOutputVars(tokens);
 				tokens = markOperators(tokens);
 //				System.err.println("markOperators       : "+StringUtils.join(";", tokens));
 		
@@ -79,6 +81,29 @@ public class Tokenizer {
 			e.setErrorLine(line);
 			throw e;
 		}
+	}
+	
+	private static Pattern inputVars = Pattern.compile("\\$<[0-9]*");
+	private static Pattern outputVars = Pattern.compile("\\$>[0-9]*");
+	
+	private static List<Token> markInputOutputVars(List<Token> tokens) {
+		List<Token> out = new ArrayList<Token>();
+
+		for (Token tok: tokens) {
+			if (!tok.isRaw()) {
+				out.add(tok);
+			} else {
+				if (inputVars.matcher(tok.getStr()).matches()) {
+					out.add(Token.var(tok.getStr()));
+				} else if (outputVars.matcher(tok.getStr()).matches()) {
+					out.add(Token.var(tok.getStr()));
+				} else {
+					out.add(tok);
+				}
+			}
+		}
+		
+		return out;
 	}
 	public static List<Token> markSplitLine(List<Token> tokens) throws ASTParseException {
 		if (tokens.size() == 0) {

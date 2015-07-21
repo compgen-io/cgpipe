@@ -74,7 +74,7 @@ public class CGPipe {
 				continue;
 			}
 			
-			if (arg.equals("-h")) {
+			if (arg.equals("-h") || arg.equals("-help")) {
 				if (k != null) {
 					confVals.put(k, VarBool.TRUE);
 				}

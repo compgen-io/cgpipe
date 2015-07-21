@@ -37,9 +37,9 @@ public interface Operator {
 	
 	public static final Operator[] operators = {
 		RANGE,
-		NOT,
-		EQ,
 		NOT_EQ,
+		EQ,
+		NOT,
 		COND_ASSIGN,
 		ADD_ASSIGN,
 		GTE,

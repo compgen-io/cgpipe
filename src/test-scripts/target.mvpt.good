@@ -1,5 +1,6 @@
 #!/bin/bash
 func_1() {
+JOB_ID="func_1"
 baz
 test3
 three.foo
@@ -13,6 +14,7 @@ touch three
 #}
 
 func_2() {
+JOB_ID="func_2"
 bar
 test2
 touch two
@@ -20,8 +22,14 @@ touch two
 }
 
 func_3() {
+JOB_ID="func_3"
 foo
 test1
+one
+one
+two three.foo
+two
+three.foo
 touch one
 
 }

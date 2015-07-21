@@ -1,18 +1,22 @@
 func_1() {
+JOB_ID="func_1"
 echo "setup"
 }
 
 func_2() {
+JOB_ID="func_2"
+echo "bar"
+}
+
+func_3() {
+JOB_ID="func_3"
 echo "pre"
 echo "foo"
 echo "post"
 }
 
-func_3() {
-echo "bar"
-}
-
 func_4() {
+JOB_ID="func_4"
 echo "teardown"
 }
 
