@@ -58,12 +58,14 @@ public class CGSub extends AbstractCommand{
 		confVals.put(k, VarValue.parseStringRaw(v));
 	}
 	
-	@UnnamedArg(name="commands -- input1 {input2...}")
+	@UnnamedArg(name="commands -- input1 {input2...} (-- can be escaped in command as \\--)")
 	public void setArguments(List<String> args) {
 		for (String arg: args) {
 			if (inputs == null) {
 				if (arg.equals("--")) {
 					inputs = new ArrayList<String>();
+				} else if (arg.equals("\\--")) {
+					cmds.add("--");
 				} else {
 					cmds.add(arg);
 				}
