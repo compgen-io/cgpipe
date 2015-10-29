@@ -1,7 +1,7 @@
 
 # Language syntax
 
-The CGPipe language is a very simple syntax that is similar to most languages. A pipeline file is first parsed
+The CGPipe language is a very simple syntax that is similar to most other languages.
 
 The source repository contains a set of test scripts that have examples of all statements and operations available. These test scripts are the definitive source for the language syntax. These are the test scripts that are run to verify each build of CGPipe. In any case where this documentation conflicts with the test scripts, the test scripts are correct.
 

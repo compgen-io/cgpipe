@@ -37,6 +37,6 @@ In this, it is very similar to the `qmake` program that is available for SGE/OGE
 
 * Pipelines can display help text. If the first lines are comments, then they will be displayed when help text is requested (excluding #! first lines). The first blank or non-commented line marks the end of the help text.
 
-## Execution hosts
+## Executing pipelines
 
 It is expected that jobs will be executed on a computation cluster that is managed by a dedicated job scheduler. This way individual tasks can be efficiently executed in a parallel manner. CGPipe will take care of establishing any inter-task dependencies to make sure that things execute in the proper order. Pipelines can also be run on a single host by using either the embedded Simple Job Queue (SJQ) scheduler or by exporting the pipeline as a bash script. The embedded SJQ scheduler is well suited for single-host systems where there is no existing job scheduler. If SJQ is set as your "job runner", then SJQ will start automatically, execute one or more pipelines, and efficiently manage CPU/memory restrictions.

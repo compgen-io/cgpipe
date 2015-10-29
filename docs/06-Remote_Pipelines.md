@@ -1,9 +1,9 @@
 
 # Remote pipelines
 
-Pipeline files don't have to reside on the local filesystem in order to be used. Remote pipelines can be used anywhere that a local filename could be used. Remote pipelines can either be explict HTTP or HTTPS URLs or use "named remote". Named remotes are remote web sites that can be accessed using a shortcut naming scheme to make it easier to use interactively.
+Pipeline files don't have to be on the local filesystem in order to be run. Remote pipelines can be used anywhere that a local pathname could be used. Remote pipelines can either be given as explicit HTTP or HTTPS URLs or use "named remote". Named remotes are remote web sites that can be accessed using a shortcut naming scheme to make it easier to use interactively.
 
-*Note: If you will be using the same pipeline from multiple hosts, it is advisable to store the pipelines on a common web server and setup a named remote.
+*Note: If you will be using the same pipeline from multiple hosts, it is advisable to store the pipelines on a common web server and setup a named remote.*
 
 ## Available compgen.io pipelines
 
@@ -21,10 +21,9 @@ You can verify any local or remote pipelines by including the expected SHA-1 has
 
 From within the pipeline:
 
-    include remote/filename#expected-sha1-hash
+    `include remote/filename#expected-sha1-hash`
 
 or using the cgpipe executable syntax:
 
-    cgpipe -f localfile#sha1-hash
-
+    `cgpipe -f "localfile#sha1-hash"` (Note the quotes - otherwise the `#` would be interpreted as a comment)
 
