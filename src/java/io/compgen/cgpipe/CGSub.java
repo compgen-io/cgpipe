@@ -302,17 +302,28 @@ public class CGSub extends AbstractCommand{
 	}
 
 	protected String convertStringForInput(String str, String input) {
-		Pattern p = Pattern.compile("^(.*)\\{(\\^.*)?\\}(.*)$");
+		Pattern p = Pattern.compile("^(.*)\\{([\\^@].*)?\\}(.*)$");
 		Matcher m = p.matcher(str);
 		while (m.matches()) {
-			if (m.group(2) == null) {
-				str = m.group(1)+input+m.group(3);						
+			String basename = new File(input).getName();
+			if (m.group(2) == null || m.group(2).charAt(0) == '^') {
+				str = m.group(1)+input+m.group(3);					
+			} else if (m.group(2).charAt(0) == '@') {
+				str = m.group(1)+basename+m.group(3);					
 			} else {
 				String suf = m.group(2).substring(1);
-				if (input.endsWith(suf)) {
-					str = m.group(1)+input.substring(0,  input.length()-suf.length())+m.group(3);						
+				if (m.group(2).charAt(0) == '^') {
+					if (input.endsWith(suf)) {
+						str = m.group(1)+input.substring(0,  input.length()-suf.length())+m.group(3);						
+					} else {
+						str = m.group(1)+input+m.group(3);
+					}
 				} else {
-					str = m.group(1)+input+m.group(3);
+					if (basename.endsWith(suf)) {
+						str = m.group(1)+basename.substring(0,  basename.length()-suf.length())+m.group(3);						
+					} else {
+						str = m.group(1)+basename+m.group(3);
+					}
 				}
 			}
 			m = p.matcher(str);
