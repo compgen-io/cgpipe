@@ -34,7 +34,8 @@ import org.apache.commons.logging.LogFactory;
 
 public class CGPipe {
 	public static final File CGPIPE_HOME = new File(System.getenv("CGPIPE_HOME") != null ? System.getenv("CGPIPE_HOME") : System.getProperty("user.home"));
-	public static final File RCFILE = new File(CGPIPE_HOME,".cgpiperc");
+	public static final File USER_INIT = new File(CGPIPE_HOME,".cgpipe_init");
+	public static final File GLOBAL_INIT = new File("/etc/cgpipe_init");
 
 //	public static final Map<String, VarValue> globalConfig = new HashMap<String, VarValue>(); 
 	
@@ -191,10 +192,16 @@ public class CGPipe {
 				Parser.exec("io/compgen/cgpipe/cgpiperc", is,  root);
 			}
 			
+			// Parse /etc global RC file
+			if (GLOBAL_INIT.exists()) {
+				log.debug("parsing: "+GLOBAL_INIT.getAbsolutePath());
+				Parser.exec(GLOBAL_INIT.getAbsolutePath(), root);
+			}
+
 			// Parse RC file
-			if (RCFILE.exists()) {
-				log.debug("parsing: "+RCFILE.getAbsolutePath());
-				Parser.exec(RCFILE.getAbsolutePath(), root);
+			if (USER_INIT.exists()) {
+				log.debug("parsing: "+USER_INIT.getAbsolutePath());
+				Parser.exec(USER_INIT.getAbsolutePath(), root);
 			}
 
 			// Set cmd-line arguments

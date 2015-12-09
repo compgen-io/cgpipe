@@ -14,6 +14,7 @@ import io.compgen.cgpipe.runner.ExistingJob;
 import io.compgen.cgpipe.runner.JobDef;
 import io.compgen.cgpipe.runner.JobRunner;
 import io.compgen.cgpipe.support.SimpleFileLoggerImpl;
+import io.compgen.cgpipe.support.SimpleFileLoggerImpl.Level;
 import io.compgen.cmdline.MainBuilder;
 import io.compgen.cmdline.annotation.Command;
 import io.compgen.cmdline.annotation.Exec;
@@ -24,6 +25,7 @@ import io.compgen.cmdline.impl.AbstractCommand;
 import io.compgen.common.StringUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 @Command(name="cgsub", desc="Dynamically submit jobs for multiple input files")
 public class CGSub extends AbstractCommand{
@@ -49,6 +54,9 @@ public class CGSub extends AbstractCommand{
 	private String stderr = null;
 	private boolean dryrun = false;
 	private List<String> dependencies = null;
+	private String logFilename = null;
+	int verbosity = 0;
+
 	
 	public CGSub() {
 	}
@@ -82,6 +90,11 @@ public class CGSub extends AbstractCommand{
 	@Option(name="mem", charName="m", desc="Memory per job")
 	public void setMem(String mem) {
 		this.mem=mem;
+	}
+	
+	@Option(name="log", charName="l", desc="Log output to this file")
+	public void setLogFilename(String logFilename) {
+		this.logFilename=logFilename;
 	}
 	
 	@Option(name="walltime", charName="t", desc="Walltime per job", defaultValue="2:00:00")
@@ -127,9 +140,42 @@ public class CGSub extends AbstractCommand{
 		}
 	}
 
+	@Option(charName="v", desc="Verbose output")
+	public void setVerbosity() {
+		verbosity++;
+	}
+
 	@Exec
 	public void exec() {
-		SimpleFileLoggerImpl.setSilent(true);
+		Log log = null;
+		if (logFilename != null) {
+			try {
+				switch (verbosity) {
+				case 0:
+					SimpleFileLoggerImpl.setLevel(Level.INFO);
+					break;
+				case 1:
+					SimpleFileLoggerImpl.setLevel(Level.DEBUG);
+					break;
+				case 2:
+					SimpleFileLoggerImpl.setLevel(Level.TRACE);
+					break;
+				case 3:
+				default:
+					SimpleFileLoggerImpl.setLevel(Level.ALL);
+					break;
+				}
+				SimpleFileLoggerImpl.setFilename(logFilename);
+				log = LogFactory.getLog(CGPipe.class);
+				confVals.put("cgpipe.log", new VarString(logFilename));
+			} catch (FileNotFoundException e) {
+				System.err.println("CGSUB ERROR " + e.getMessage());
+				e.printStackTrace();
+				System.exit(1);
+			}
+		} else {
+			SimpleFileLoggerImpl.setSilent(true);
+		}
 		JobRunner runner = null;
 
 		confVals.put("job.procs", new VarInt(procs));
@@ -155,9 +201,14 @@ public class CGSub extends AbstractCommand{
 				Parser.exec("io/compgen/cgpipe/cgpiperc", is,  root);
 			}
 			
+			// Parse /etc global RC file
+			if (CGPipe.GLOBAL_INIT.exists()) {
+				Parser.exec(CGPipe.GLOBAL_INIT.getAbsolutePath(), root);
+			}
+
 			// Parse RC file
-			if (CGPipe.RCFILE.exists()) {
-				Parser.exec(CGPipe.RCFILE.getAbsolutePath(), root);
+			if (CGPipe.USER_INIT.exists()) {
+				Parser.exec(CGPipe.USER_INIT.getAbsolutePath(), root);
 			}
 
 			root.setOutputStream(null);
@@ -239,7 +290,12 @@ public class CGSub extends AbstractCommand{
 				System.exit(((ExitException) e).getReturnCode());
 			}
 			
-			System.out.println("CGSUB ERROR " + e.getMessage());
+			if (log != null) {
+				log.error(e);
+				SimpleFileLoggerImpl.close();
+			}
+			
+			System.err.println("CGSUB ERROR " + e.getMessage());
 			e.printStackTrace();
 			System.exit(1);
 		}

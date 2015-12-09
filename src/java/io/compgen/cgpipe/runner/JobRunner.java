@@ -77,6 +77,9 @@ public abstract class JobRunner {
 		case "sge":
 			obj = new SGETemplateRunner();
 			break;
+		case "slurm":
+			obj = new SLURMTemplateRunner();
+			break;
 		case "sjq":
 			obj = new SJQRunner();
 			break;

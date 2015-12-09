@@ -20,13 +20,13 @@ public class SGETemplateRunner extends TemplateRunner {
 	}
 
 	@Override
-	public String[] getReleaseCommand() {
-		return new String[] {"qrls"};
+	public String[] getReleaseCommand(String jobId) {
+		return new String[] {"qrls", jobId};
 	}
 
 	@Override
-	public String[] getDelCommand() {
-		return new String[] {"qdel"};
+	public String[] getDelCommand(String jobId) {
+		return new String[] {"qdel", jobId};
 	}
 
 	@Override

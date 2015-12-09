@@ -1,0 +1,52 @@
+#!${job.shell}
+#SBATCH -Q
+#SBATCH -J ${job.name}
+<% if job.hold %>
+#SBATCH -H
+<% endif %>
+<% if job.env %>
+#SBATCH --export=ALL
+<% endif %>
+<% if job.walltime %>
+#SBATCH -t ${job.walltime}
+<% endif %>
+<% if job.procs > 1 && job.sge.parallelenv %>
+#SBATCH -c ${job.procs}
+#SBATCH -n 1
+<% endif %>
+<% if job.mem %>
+#SBATCH --mem=${job.mem}
+<% endif %>
+<% if job.slurm.depids %>
+#SBATCH -d afterok:${job.slurm.depids}
+<% endif %>
+<% if job.qos %>
+#SBATCH --qos=${job.qos}
+<% endif %>
+<% if job.queue %>
+#SBATCH -P ${job.queue}
+<% endif %>
+<% if job.mail %>
+#SBATCH --mail-user=${job.mail}
+<% endif %>
+<% if job.wd %>
+#SBATCH -D ${job.wd}
+<% endif %>
+<% if job.account %>
+#SBATCH -A ${job.account}
+<% endif %>
+<% if job.stdout %>
+#SBATCH -o ${job.stdout}
+<% endif %>
+<% if job.stderr %>
+#SBATCH -e ${job.stderr}
+<% endif %>
+<% for custom in job.custom %>
+<% if custom %>
+#SBATCH ${custom}
+<% endif %>
+<% done %>
+
+set -o pipefail
+
+${job._body}

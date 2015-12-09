@@ -35,8 +35,8 @@ public abstract class TemplateRunner extends JobRunner {
 
 	public abstract String getConfigPrefix();
 	public abstract String[] getSubCommand();
-	public abstract String[] getReleaseCommand();
-	public abstract String[] getDelCommand();
+	public abstract String[] getReleaseCommand(String jobId);
+	public abstract String[] getDelCommand(String jobId);
 
 	protected String buildGlobalHoldScript() {
 		return null;
@@ -186,7 +186,7 @@ public abstract class TemplateRunner extends JobRunner {
 			if (!dryrun && globalHoldJob != null) {
 				try {
 					
-					String[] cmd = buildCommandString(getReleaseCommand(),globalHoldJob.getJobId()); 
+					String[] cmd = getReleaseCommand(globalHoldJob.getJobId()); 
 					int retcode = Runtime.getRuntime().exec(cmd).waitFor();
 					if (retcode != 0) {
 						throw new RunnerException("Unable to release global hold");
@@ -197,23 +197,12 @@ public abstract class TemplateRunner extends JobRunner {
 			}
 		}
 	}
-
-	private String[] buildCommandString(String[] cmd, String...args) {
-		String[] out = new String[cmd.length + args.length];
-		for (int i=0; i<cmd.length;i++) {
-			out[i] = cmd[i];
-		}
-		for (int i=0; i<args.length;i++) {
-			out[cmd.length + i] = args[i];
-		}
-		return out;
-	}
 	
 	@Override
 	public void abort() {
 		for (String jobid: jobids) {
 			try {
-				Runtime.getRuntime().exec(buildCommandString(getDelCommand(), jobid)).waitFor();
+				Runtime.getRuntime().exec(getDelCommand(jobid)).waitFor();
 			} catch (InterruptedException | IOException e) {
 			}
 		}

@@ -53,6 +53,7 @@
             <fileset file="${src.dir}/java/io/compgen/cgpipe/cgpiperc"/>
         </copy>
         <copy todir="${build.dir}/classes/io/compgen/cgpipe/runner/" file="${src.dir}/java/io/compgen/cgpipe/runner/SGETemplateRunner.template.cgp"/>
+        <copy todir="${build.dir}/classes/io/compgen/cgpipe/runner/" file="${src.dir}/java/io/compgen/cgpipe/runner/SLURMTemplateRunner.template.cgp"/>
 
 		<mkdir dir="${dist.dir}"/>
 	    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="${blib.dir}/jarjar-1.4.jar"/>
@@ -60,6 +61,7 @@
             <fileset dir="${build.dir}/classes"/>
             <fileset dir="${src.dir}/java" includes="**/*.java"/>
         </jar>
+        <!-- cgpipe -->
 	    <jarjar jarfile="${dist.dir}/${ant.project.name}.jar.tmp">
             <manifest>
                 <attribute name="Main-Class" value="io.compgen.cgpipe.CGPipe"/>
