@@ -306,9 +306,9 @@ public class CGSub extends AbstractCommand{
 		Matcher m = p.matcher(str);
 		while (m.matches()) {
 			String basename = new File(input).getName();
-			if (m.group(2) == null || m.group(2).charAt(0) == '^') {
+			if (m.group(2) == null || m.group(2).equals("^")) {
 				str = m.group(1)+input+m.group(3);					
-			} else if (m.group(2).charAt(0) == '@') {
+			} else if (m.group(2).equals("@")) {
 				str = m.group(1)+basename+m.group(3);					
 			} else {
 				String suf = m.group(2).substring(1);
@@ -318,7 +318,7 @@ public class CGSub extends AbstractCommand{
 					} else {
 						str = m.group(1)+input+m.group(3);
 					}
-				} else {
+				} else if (m.group(2).charAt(0) == '@') {
 					if (basename.endsWith(suf)) {
 						str = m.group(1)+basename.substring(0,  basename.length()-suf.length())+m.group(3);						
 					} else {
