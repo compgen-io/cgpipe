@@ -37,7 +37,38 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-@Command(name="cgsub", desc="Dynamically submit jobs for multiple input files")
+@Command(name="cgsub", desc="Dynamically submit jobs for multiple input files", doc=""
+		+ "cgsub will submit N number of jobs, based on the number of given input files. For\n"
+		+ "each input file, a separate script is built from the command string and submitted\n"
+		+ "using the cgpipe default job runner (bash, SGE, SLURM, etc...).\n"
+		+ "\n"
+		+ "The command string is separated from the input files using the delimiter \"--\".\n"
+		+ "\n"
+		+ "In the command string, you can include the input filename using \"{}\" as a\n"
+		+ "placeholder. You can also adapt the filename to remove a suffix using the \n"
+		+ "{^suffix.to.remove} syntax. If you want to use only the basename or the file\n"
+		+ "instead of the full pathname, you can use {@} or {@suffix.to.remove}. Filename\n"
+		+ "subtitution can also be used for --stdout, --stderr, and --wd cgsub options.\n"
+		+ "\n"
+		+ "    Notes:\n"
+		+ "        \"--\" can be escaped in the command string as \"\\--\".\n"
+		+ "\n"
+		+ "        Pipe and redirection characters can also be used in the command string, but\n"
+		+ "        they should be escaped with a backslash (eg. | => \\|).\n"
+		+ "\n"
+		+ "        Typical cgpipe mechanisms can be used for configuration or job-specific\n"
+		+ "        settings.\n"
+		+ "\n"
+		+ "    Example:\n"
+		+ "        cgsub gunzip -c {} \\| md5sum \\> {@.gz}.md5 -- sub/*.gz\n"
+		+ "\n"
+		+ "        This will calculate the MD5 sum of the uncompressed contents for all \"*.gz\"\n"
+		+ "        files in the directory \"sub/\" and write the output to basename.md5. For\n"
+		+ "        example, if there was a file called \"sub/foo.gz\", the command that would be\n"
+		+ "        submitted is:\n"
+		+ "\n"
+		+ "        gunzip -c sub/foo.gz | md5sum > foo.md5"
+		)
 public class CGSub extends AbstractCommand{
 	Map<String, VarValue> confVals = new HashMap<String, VarValue>();
 
@@ -47,6 +78,7 @@ public class CGSub extends AbstractCommand{
 	private String name = null;
 	private int procs = -1;
 	private String mem = null;
+	private String mail = null;
 	private String walltime = null;
 	private String stackMem = null;
 	private String wd = null;
@@ -66,7 +98,7 @@ public class CGSub extends AbstractCommand{
 		confVals.put(k, VarValue.parseStringRaw(v));
 	}
 	
-	@UnnamedArg(name="commands -- input1 {input2...} (-- can be escaped in command as \\--)")
+	@UnnamedArg(name="commands -- input1 [input2...]")
 	public void setArguments(List<String> args) {
 		for (String arg: args) {
 			if (inputs == null) {
@@ -92,12 +124,17 @@ public class CGSub extends AbstractCommand{
 		this.mem=mem;
 	}
 	
+	@Option(name="mail", charName="M", desc="Send email here after job completion (or error)")
+	public void setMail(String mail) {
+		this.mail=mail;
+	}
+	
 	@Option(name="log", charName="l", desc="Log output to this file")
 	public void setLogFilename(String logFilename) {
 		this.logFilename=logFilename;
 	}
 	
-	@Option(name="walltime", charName="t", desc="Walltime per job", defaultValue="2:00:00")
+	@Option(name="walltime", charName="t", desc="Walltime per job")
 	public void setWalltime(String walltime) {
 		this.walltime = walltime;
 	}
@@ -183,6 +220,9 @@ public class CGSub extends AbstractCommand{
 		
 		if (mem != null) {
 			confVals.put("job.mem", new VarString(mem));
+		}
+		if (mail != null) {
+			confVals.put("job.mail", new VarString(mail));
 		}
 		if (stackMem != null) {
 			confVals.put("job.stack", new VarString(stackMem));
