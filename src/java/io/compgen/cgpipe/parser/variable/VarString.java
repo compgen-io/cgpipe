@@ -25,4 +25,12 @@ public class VarString extends VarValue {
 		}
 		return true;
 	}
+	
+	public int sizeInner() throws VarTypeException {
+		return ((String) obj).length();
+	}
+
+	public VarValue sliceInner(int start, int end) {
+		return new VarString(((String) obj).substring(start,  end));
+	}
 }
