@@ -218,16 +218,16 @@ public class CGSub extends AbstractCommand{
 
 			if (inputs == null) {
 				if (wd != null) {
-					confVals.put("job.wd", new VarString(wd));
+					root.set("job.wd", new VarString(wd));
 				}
 				if (stdout != null) {
-					confVals.put("job.stdout", new VarString(stdout));
+					root.set("job.stdout", new VarString(stdout));
 				}
 				if (stderr != null) {
-					confVals.put("job.stderr", new VarString(stderr));
+					root.set("job.stderr", new VarString(stderr));
 				}
-
-				JobDef jobdef = new JobDef(StringUtils.join(" ", cmds), confVals);
+					
+				JobDef jobdef = new JobDef(StringUtils.join(" ", cmds), root.cloneValues("job."));
 				if (dependencies != null) {
 					for (String dep: dependencies) {
 						jobdef.addDependency(new ExistingJob(dep));
@@ -250,16 +250,16 @@ public class CGSub extends AbstractCommand{
 					}
 	
 					if (wd != null) {
-						confVals.put("job.wd", new VarString(convertStringForInput(wd, input)));
+						root.set("job.wd", new VarString(convertStringForInput(wd, input)));
 					}
 					if (stdout != null) {
-						confVals.put("job.stdout", new VarString(convertStringForInput(stdout, input)));
+						root.set("job.stdout", new VarString(convertStringForInput(stdout, input)));
 					}
 					if (stderr != null) {
-						confVals.put("job.stderr", new VarString(convertStringForInput(stderr, input)));
+						root.set("job.stderr", new VarString(convertStringForInput(stderr, input)));
 					}
 	
-					JobDef jobdef = new JobDef(StringUtils.join(" ", inputcmds)+"\n", confVals);
+					JobDef jobdef = new JobDef(StringUtils.join(" ", inputcmds)+"\n", root.cloneValues("job."));
 					if (dependencies != null) {
 						for (String dep: dependencies) {
 							jobdef.addDependency(new ExistingJob(dep));
