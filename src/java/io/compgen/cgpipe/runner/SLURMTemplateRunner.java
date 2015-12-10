@@ -58,6 +58,34 @@ public class SLURMTemplateRunner extends TemplateRunner {
 		    cxt.set("job.slurm.depids", new VarString(StringUtils.join(":", depids).replaceAll("::", ":")));
 		}
 
+		// convert 4G to 4000; SLURM uses mem definitions in terms of megabytes.
+		String mem = jobdef.getSetting("job.mem");
+		
+		String units = "";
+		float memVal = -1;
+		
+		if (mem != null) {
+			while (mem.length() > 0) {
+			    try {
+					memVal = Float.parseFloat(mem);
+					break;
+			    } catch (NumberFormatException e) {
+					units = mem.substring(mem.length()-1) + units;
+					mem = mem.substring(0, mem.length()-1);
+			    }
+			}
+	
+			if (memVal > 0) {
+				mem = Float.toString(memVal);
+				if (units.equalsIgnoreCase("G") || units.equalsIgnoreCase("GB")) {
+					mem = ""+Float.valueOf(memVal * 1000).intValue();
+				}
+			}
+	
+			cxt.set("job.mem", new VarString(mem));
+		}
+		
+		
 		super.updateTemplateContext(cxt, jobdef);
 	}
 	
