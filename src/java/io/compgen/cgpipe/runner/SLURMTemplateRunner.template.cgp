@@ -27,6 +27,7 @@
 #SBATCH -P ${job.queue}
 <% endif %>
 <% if job.mail %>
+#SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=${job.mail}
 <% endif %>
 <% if job.wd %>
