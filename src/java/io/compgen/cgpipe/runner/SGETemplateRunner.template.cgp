@@ -30,7 +30,9 @@
 #$ -q ${job.queue}
 <% endif %>
 <% if job.mail %>
-#$ -m ${job.mail}
+<% job.mailtype ?= "ae" %>
+#$ -M ${job.mail}
+#$ -m ${job.mailtype}
 <% endif %>
 <% if job.wd %>
 #$ -wd ${job.wd}
