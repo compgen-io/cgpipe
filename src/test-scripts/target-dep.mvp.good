@@ -9,4 +9,6 @@ touch test/run/output3
 }
 
 func_1
-func_2
+if [ $? == 0 ]; then
+    func_2
+fi

@@ -46,15 +46,13 @@ public class ShellScriptRunner extends JobRunner {
 		}
 		out += "\n";
 		
-		out += "set -o pipefail\n";
-		
 		for (int i=0; i<funcNames.size(); i++) {
 			if (i == 0) {
 				out += funcNames.get(i)+"\n";
 			} else {
-				out += "if [ $? == 0 ]; then";
+				out += "if [ $? == 0 ]; then\n";
 				out += "  " + funcNames.get(i)+"\n";
-				out += "fi";
+				out += "fi\n";
 			}
 		}
 		System.out.println(out);

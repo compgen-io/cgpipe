@@ -19,7 +19,12 @@ echo "$<1 = foo"
 echo "$<2 = bar"
 }
 func_1
+if [ $? == 0 ]; then
 func_2
+fi
+if [ $? == 0 ]; then
 func_3
+fi
+if [ $? == 0 ]; then
 func_4
-
+fi
