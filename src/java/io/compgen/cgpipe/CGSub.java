@@ -48,7 +48,7 @@ import org.apache.commons.logging.LogFactory;
 		+ "placeholder. You can also adapt the filename to remove a suffix using the \n"
 		+ "{^suffix.to.remove} syntax. If you want to use only the basename or the file\n"
 		+ "instead of the full pathname, you can use {@} or {@suffix.to.remove}. Filename\n"
-		+ "subtitution can also be used for --stdout, --stderr, and --wd cgsub options.\n"
+		+ "subtitution can also be used for --name, --stdout, --stderr, and --wd cgsub options.\n"
 		+ "\n"
 		+ "    Notes:\n"
 		+ "        \"--\" can be escaped in the command string as \"\\--\".\n"
@@ -81,6 +81,7 @@ public class CGSub extends AbstractCommand{
 	private String mail = null;
 	private String walltime = null;
 	private String stackMem = null;
+	private String queue = null;
 	private String wd = null;
 	private String stdout = null;
 	private String stderr = null;
@@ -115,6 +116,10 @@ public class CGSub extends AbstractCommand{
 		}
 	}
 	
+	@Option(name="queue", charName="q", desc="Queue for jobs (partition)")
+	public void setQueue(String queue) {
+		this.queue = queue;
+	}
 	@Option(name="procs", charName="p", desc="Processors per job", defaultValue="1")
 	public void setProcs(int procs) {
 		this.procs = procs;
@@ -229,6 +234,9 @@ public class CGSub extends AbstractCommand{
 		}
 		if (walltime != null) {
 			confVals.put("job.walltime", new VarString(walltime));
+		}
+		if (queue != null) {
+			confVals.put("job.queue", new VarString(queue));
 		}
 		
 		try {

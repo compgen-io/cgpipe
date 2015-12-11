@@ -24,7 +24,7 @@
 #SBATCH --qos=${job.qos}
 <% endif %>
 <% if job.queue %>
-#SBATCH -P ${job.queue}
+#SBATCH -p ${job.queue}
 <% endif %>
 <% if job.mail %>
 <% job.mailtype ?= "END,FAIL" %>
