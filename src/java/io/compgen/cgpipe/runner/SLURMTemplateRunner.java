@@ -6,6 +6,7 @@ import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.common.StringUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,10 +31,20 @@ public class SLURMTemplateRunner extends TemplateRunner {
 	@Override
 	public boolean isJobIdValid(String jobId) throws RunnerException {
 		try {
-			Process proc = Runtime.getRuntime().exec(new String[] {"scontrol", "show", "job", jobId});
+			Process proc = Runtime.getRuntime().exec(new String[] {"scontrol", "-o", "show", "job", jobId});
 			int retcode = proc.waitFor();
-			if (retcode == 0) {	
-				return true;
+			if (retcode == 0) {
+				InputStream is = proc.getInputStream();
+				String stdout = StringUtils.readInputStream(is);
+				String[] ar = stdout.split(" ");
+				for (String el: ar) {
+					String[] kv = el.split("=");
+					if (kv.length == 2 && kv[0].equals("JobState")) {
+						if (kv[1].equals("PENDING") || kv[1].equals("RUNNING")) {
+							return true;
+						}
+					}
+				}
 			}
 		} catch (IOException | InterruptedException e) {
 		}
