@@ -37,14 +37,25 @@ public class SLURMTemplateRunner extends TemplateRunner {
 				InputStream is = proc.getInputStream();
 				String stdout = StringUtils.readInputStream(is);
 				String[] ar = stdout.split(" ");
+				
+				boolean validState = false;
+				boolean validDep = true;
+				
 				for (String el: ar) {
 					String[] kv = el.split("=");
 					if (kv.length == 2 && kv[0].equals("JobState")) {
 						if (kv[1].equals("PENDING") || kv[1].equals("RUNNING")) {
-							return true;
+							validState = true;
+						}
+					} else if (kv.length == 2 && kv[0].equals("Reason")) {
+						if (kv[1].equals("DependencyNeverSatisfied")) {
+							validDep = false;
 						}
 					}
 				}
+				
+				return validState && validDep;
+				
 			}
 		} catch (IOException | InterruptedException e) {
 		}

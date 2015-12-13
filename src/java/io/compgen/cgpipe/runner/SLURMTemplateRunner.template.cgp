@@ -50,5 +50,6 @@
 <% done %>
 
 set -o pipefail
+JOB_ID=$SLURM_JOB_ID
 
 ${job._body}
