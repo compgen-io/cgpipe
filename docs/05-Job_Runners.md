@@ -36,7 +36,8 @@ works, you can set any of the variables below at the script or job level.
     job.qos        | QoS setting                   |      |  X  |   X   |     |
     job.wd         | Working directory             |      |  X  |   X   |  X  |
     job.account    | Billing account               |      |  X  |   X   |     |
-    job.mail       | Mail job status               |      | [1] |  [2]  |     |
+    job.mail       | Mail job status               |      |  X  |   X   |     |
+    job.mailtype   | When to send mail             |      | [1] |  [2]  |     |
     job.stdout     | Capture stdout to file        |      |  X  |   X   |  X  |
     job.stderr     | Capture stderr to file        |      |  X  |   X   |  X  |
     job.keepfailed | Keep outputs from failed jobs |  X   |  X  |   X   |     |
@@ -52,8 +53,8 @@ works, you can set any of the variables below at the script or job level.
     * - Memory should be specified as the total amount required for the job, if
         required, CGPipe will re-calculate the per-processor required memory.
     
-    1, 2 - job.mail has slightly different meanings for SGE and SLURM. For
-           each, it corresponds to the `-m` setting.
+    1, 2 - job.mailtype has slightly different meanings for SGE and SLURM. The
+           possible values are different for each scheduler.
 
     3 - the shell for the bash runner can be set using the global shell config
 
