@@ -204,6 +204,9 @@ public class CGPipe {
 				Parser.exec(USER_INIT.getAbsolutePath(), root);
 			}
 
+			// Load settings from environment variables.
+			root.loadEnvironment();
+			
 			// Set cmd-line arguments
 			if (silent) {
 				root.setOutputStream(null);

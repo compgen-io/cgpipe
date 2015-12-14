@@ -141,6 +141,21 @@ public class SourceLoader {
 		return source;
 	}
 
+	public Source loadPipelineDirect(String[] lines) {
+		log.info("Directly evaluating: "+StringUtils.join(";",lines));
+		Source source = new Source("", this);
+		
+		int linenum = 0;
+
+		for (String line: lines) {
+			source.addLine(StringUtils.rstrip(line), ++linenum);
+		}
+
+		source.finalize();
+		return source;
+	}
+
+	
 	public static void updateRemoteHandlers(Map<String, String> remoteConfig) throws ASTParseException {
 		log.debug("updating remote handlers:"+StringUtils.join(", ", remoteConfig.keySet()));
 		defaultPipelineLoader.innerUpdateRemoteHandlers(remoteConfig);

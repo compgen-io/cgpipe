@@ -259,6 +259,9 @@ public class CGSub extends AbstractCommand{
 				Parser.exec(CGPipe.USER_INIT.getAbsolutePath(), root);
 			}
 
+			// Load settings from environment variables.
+			root.loadEnvironment();
+			
 			root.setOutputStream(null);
 			root.update(confVals);
 

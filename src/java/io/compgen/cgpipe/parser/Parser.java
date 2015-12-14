@@ -114,6 +114,13 @@ public class Parser {
 		return parser;
 	}
 
+	static public Parser parseASTEval(String[] lines) throws ASTParseException {
+		Source source = SourceLoader.getDefaultLoader().loadPipelineDirect(lines);
+		Parser parser = new Parser();
+		parser.load(source);
+		return parser;
+	}
+
 	public static void exec(String filename, ExecContext context) throws ASTParseException, ASTExecException {
 		Parser parser = parseAST(filename);
 //		parser.headNode.dump();
@@ -122,6 +129,19 @@ public class Parser {
 
 	public static void exec(String name, InputStream is, ExecContext context) throws ASTParseException, ASTExecException {
 		Parser parser = parseAST(name, is);
+//		parser.headNode.dump();
+		parser.exec(context);
+	}
+
+	public static void eval(String[] lines, ExecContext context) throws ASTParseException, ASTExecException {
+		Parser parser = parseASTEval(lines);
+//		parser.headNode.dump();
+		parser.exec(context);
+	}
+
+	public static void eval(String command, ExecContext context) throws ASTParseException, ASTExecException {
+		String[] lines = new String[]{command};
+		Parser parser = parseASTEval(lines);
 //		parser.headNode.dump();
 		parser.exec(context);
 	}

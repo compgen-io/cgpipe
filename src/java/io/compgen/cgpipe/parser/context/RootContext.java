@@ -1,5 +1,8 @@
 package io.compgen.cgpipe.parser.context;
 
+import io.compgen.cgpipe.exceptions.ASTExecException;
+import io.compgen.cgpipe.exceptions.ASTParseException;
+import io.compgen.cgpipe.parser.Parser;
 import io.compgen.cgpipe.parser.target.BuildTarget;
 import io.compgen.cgpipe.parser.target.BuildTargetTemplate;
 import io.compgen.cgpipe.parser.target.FileExistsBuildTarget;
@@ -200,5 +203,14 @@ public class RootContext extends ExecContext {
 		}
 		
 		return super.get(name);
+	}
+
+	public void loadEnvironment() throws ASTParseException, ASTExecException {
+        Map<String, String> env = System.getenv();
+		for (String k: env.keySet()) {
+			if (k.equals("CGPIPE_ENV")) {
+				Parser.eval(env.get(k).split(";"), this);
+			}
+		}
 	}
 }	
