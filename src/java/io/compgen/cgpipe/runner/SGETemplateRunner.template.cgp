@@ -77,12 +77,7 @@ trap notify_kill SIGUSR2
     
 set -o pipefail
 
-func () {
 ${job._body}
-return $?
-}
-
-func
 RETVAL=$?
 
 if [ "$FAILED" == "" ]; then
