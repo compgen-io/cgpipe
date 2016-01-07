@@ -14,7 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class Tokenizer {
+	private static Log log = LogFactory.getLog(Tokenizer.class);
 
 	public static TokenList tokenize(NumberedLine line) throws ASTParseException {
 		try {
@@ -75,6 +79,8 @@ public class Tokenizer {
 				tokens = correctNegativeNum(tokens);
 //				System.err.println("correctNegativeNum  : "+StringUtils.join(";", tokens));
 			}
+			log.trace("Tokenized line: "+StringUtils.join(";", tokens));
+
 			return new TokenList(tokens, line);
 			
 		} catch(ASTParseException e) {
