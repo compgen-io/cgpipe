@@ -13,7 +13,6 @@ import io.compgen.cgpipe.parser.tokens.TokenList;
 import io.compgen.cgpipe.parser.tokens.Tokenizer;
 import io.compgen.cgpipe.parser.variable.VarInt;
 import io.compgen.cgpipe.parser.variable.VarList;
-import io.compgen.cgpipe.parser.variable.VarNull;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.common.Pair;

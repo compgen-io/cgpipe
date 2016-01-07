@@ -31,7 +31,6 @@ public interface Operator {
 	public static final Operator MUL = new Mul(); // *
 	public static final Operator DIV = new Div(); // /
 	public static final Operator REM = new Rem(); // %
-	public static final Operator SPLIT = new Split(); // ~/
 
 	// TODO: add a list ctor operator? [] (also ',')
 	// TODO: add a shell operator? $()
@@ -43,7 +42,6 @@ public interface Operator {
 		NOT,
 		COND_ASSIGN,
 		ADD_ASSIGN,
-		SPLIT,
 		GTE,
 		LTE,
 		GT,
