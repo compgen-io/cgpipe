@@ -14,5 +14,6 @@ public enum TokenType {
 	SHELL, 
 	SLICE_OPEN, 
 	SLICE_CLOSE, 
-	SPLIT_LINE
+	SPLIT_LINE, 
+	DOT
 }

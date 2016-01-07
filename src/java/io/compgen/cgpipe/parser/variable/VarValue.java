@@ -1,5 +1,7 @@
 package io.compgen.cgpipe.parser.variable;
 
+import io.compgen.cgpipe.exceptions.MethodCallException;
+import io.compgen.cgpipe.exceptions.MethodNotFoundException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
 
 import java.util.ArrayList;
@@ -25,9 +27,16 @@ public abstract class VarValue {
 	}
 	
 	public String toString() {
-		return obj.toString();
+		if (obj != null) {
+			return obj.toString();
+		}
+		return super.toString();
 	}
 	
+	public VarValue call(String method, VarValue[] args) throws MethodNotFoundException, MethodCallException {
+		throw new MethodNotFoundException("Method not found: "+method+" obj="+this);
+	}
+
 	public VarValue eq(VarValue val) throws VarTypeException {
 		return obj.equals(val.obj) ? VarBool.TRUE: VarBool.FALSE;
 	}

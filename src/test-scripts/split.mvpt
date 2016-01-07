@@ -1,0 +1,10 @@
+l = "foo bar baz"
+print l.length()
+spl = l.split(" ")
+
+print spl[2]
+print spl[1]
+print spl[0]
+
+print spl.length()
+print "foobarbaz".split(" ").length()

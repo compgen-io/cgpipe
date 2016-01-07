@@ -1,5 +1,7 @@
 package io.compgen.cgpipe.parser.variable;
 
+import io.compgen.cgpipe.exceptions.MethodCallException;
+import io.compgen.cgpipe.exceptions.MethodNotFoundException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
 
 public class VarString extends VarValue {
@@ -33,4 +35,32 @@ public class VarString extends VarValue {
 	public VarValue sliceInner(int start, int end) {
 		return new VarString(((String) obj).substring(start,  end));
 	}
+
+	public VarValue call(String method, VarValue[] args) throws MethodNotFoundException, MethodCallException {
+		if (method.equals("split")) {
+			if (args.length != 1) {
+				throw new MethodCallException("Bad or missing argument! split(delim)");
+			}
+
+			String[] spl = ((String)obj).split(args[0].toString());
+
+			VarList l = new VarList();
+			for (String s:spl) {
+				try {
+					l.add(new VarString(s));
+				} catch (VarTypeException e) {
+					throw new MethodCallException(e);
+				}
+			}
+			return l;
+		} else if (method.equals("length")) {
+			if (args.length != 0) {
+				throw new MethodCallException("Bad or missing argument! length()");
+			}
+			return new VarInt(((String)obj).length());
+		}
+		throw new MethodNotFoundException("Method not found: "+method+" obj="+this);
+	}
+
+
 }

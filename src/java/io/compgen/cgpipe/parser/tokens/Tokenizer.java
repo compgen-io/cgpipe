@@ -67,6 +67,7 @@ public class Tokenizer {
 			}
 			
 			if (!foundColon) {
+//				tokens = markDots(tokens);
 				tokens = markParens(tokens);
 				tokens = markStatements(tokens);
 				tokens = markInputOutputVars(tokens);
@@ -302,6 +303,35 @@ public class Tokenizer {
 					buf += tok.getStr().charAt(i);
 					i += 1;
 				}
+			}
+			if (!buf.equals("")) {
+				out.add(Token.raw(buf));
+			}
+		}
+		
+		return out;
+	}
+	public static List<Token> markDots(List<Token> tokens) throws ASTParseException {
+		List<Token> out = new ArrayList<Token>();
+
+		for (Token tok: tokens) {
+			if (!tok.isRaw()) {
+				out.add(tok);
+				continue;
+			}
+			String buf = "";
+			int i=0;
+			while (i<tok.getStr().length()) {
+				if (tok.getStr().substring(i,i+1).equals(".")) {
+					if (!buf.equals("")) {
+						out.add(Token.raw(buf));
+					}
+					out.add(Token.dot());
+					buf = "";
+				} else {
+					buf += tok.getStr().charAt(i);
+				}
+				i += 1;
 			}
 			if (!buf.equals("")) {
 				out.add(Token.raw(buf));

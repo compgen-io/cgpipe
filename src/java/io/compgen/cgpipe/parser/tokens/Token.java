@@ -28,6 +28,10 @@ public class Token {
 //		return new Token(TokenClass.QUOTED_STRING, str, null, null, null);
 //	}
 
+	static public Token dot() {
+		return new Token(TokenType.DOT, "." , null, null, null);
+	}
+
 	static public Token var(String str) {
 		return new Token(TokenType.VARIABLE, str, null, null, null);
 	}

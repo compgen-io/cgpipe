@@ -1,5 +1,7 @@
 package io.compgen.cgpipe.parser.variable;
 
+import io.compgen.cgpipe.exceptions.MethodCallException;
+import io.compgen.cgpipe.exceptions.MethodNotFoundException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
 import io.compgen.common.StringUtils;
 
@@ -8,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class VarList extends VarValue {
-	List<VarValue> vals = new ArrayList<VarValue>();
+	protected List<VarValue> vals = new ArrayList<VarValue>();
 	
 	public VarList() {
 		super(null);
@@ -51,4 +53,16 @@ public class VarList extends VarValue {
 		}
 		return new VarList(this.vals.subList(start,  end));
 	}
+	
+
+	public VarValue call(String method, VarValue[] args) throws MethodNotFoundException, MethodCallException {
+		if (method.equals("length")) {
+			if (args.length != 0) {
+				throw new MethodCallException("Bad or missing argument! length()");
+			}
+			return new VarInt(((List<VarValue>)vals).size());
+		}
+		throw new MethodNotFoundException("Method not found: "+method+" obj="+this);
+	}
+
 }

@@ -2,6 +2,8 @@ package io.compgen.cgpipe.parser;
 
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
+import io.compgen.cgpipe.exceptions.MethodCallException;
+import io.compgen.cgpipe.exceptions.MethodNotFoundException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
 import io.compgen.cgpipe.loader.NumberedLine;
 import io.compgen.cgpipe.parser.context.ExecContext;
@@ -11,6 +13,7 @@ import io.compgen.cgpipe.parser.tokens.TokenList;
 import io.compgen.cgpipe.parser.tokens.Tokenizer;
 import io.compgen.cgpipe.parser.variable.VarInt;
 import io.compgen.cgpipe.parser.variable.VarList;
+import io.compgen.cgpipe.parser.variable.VarNull;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.common.Pair;
@@ -32,7 +35,7 @@ public class Eval {
 	private static Log log = LogFactory.getLog(Eval.class);
 
 	public static VarValue evalTokenExpression(TokenList tokens, ExecContext context) throws ASTExecException {
-//		System.err.println("TOKENS: " + tokens);
+		log.trace("TOKENS: " + tokens);
 		if (tokens.size() == 0) {
 			return null;
 		}
@@ -44,7 +47,6 @@ public class Eval {
 				return tokens.get(0).getValue();
 			}
 			if (tokens.get(0).isVariable()) {
-				
 				if (tokens.get(0).getStr().equals("cgpipe.current.filename")) {
 					return new VarString(tokens.getLine().getPipeline().getName());
 				} else if (tokens.get(0).getStr().equals("cgpipe.current.hash")) {
@@ -124,7 +126,7 @@ public class Eval {
 			}
 		}
 		
-		
+		// process logic with paren grouping
 		List<Token> inner = new ArrayList<Token>();
 		List<Token> left = new ArrayList<Token>();
 		List<Token> right = new ArrayList<Token>();
@@ -160,10 +162,77 @@ public class Eval {
 		}
 		
 		if (found) {
-			VarValue innerVal = evalTokenExpression(new TokenList(inner, tokens.getLine()), context);
-			left.add(Token.value(innerVal));
-			left.addAll(right);
-			return evalTokenExpression(new TokenList(left, tokens.getLine()), context);
+
+			if (left.size() > 0 && left.get(left.size()-1).isVariable()) {
+				// this is a method call
+
+				List<VarValue> args = new ArrayList<VarValue>();
+				int indentLevel = 0;
+				List<Token> buf = new ArrayList<Token>();
+				for (Token t:inner) {
+					if (t.isParenOpen()) {
+						indentLevel++;
+						buf.add(t);
+					} else if (t.isParenClose()) {
+						indentLevel--;
+						buf.add(t);
+					} else if (t.isComma() && indentLevel == 0) {
+						if (buf.size() > 0) {
+							args.add(evalTokenExpression(new TokenList(buf, tokens.getLine()), context));
+						}
+						buf.clear();
+					} else {
+						buf.add(t);
+					}
+				}
+				if (buf.size() > 0) {
+					args.add(evalTokenExpression(new TokenList(buf, tokens.getLine()), context));
+				}
+
+				VarValue[] argv = args.toArray(new VarValue[args.size()]);
+				Token methodToken = left.remove(left.size()-1);
+				VarValue obj;
+				String method;
+				
+				if (methodToken.getStr().charAt(0) == '.') {
+					// this is a method on an existing value... calc that first.
+					Token t = left.remove(left.size()-1);
+					if (!t.isValue()) {
+						throw new ASTExecException("Error trying to call method: "+methodToken);
+					}
+					
+					obj = t.getValue();
+					method = methodToken.getStr().substring(1);
+					
+				} else {
+					// this is a method on a variable... 
+					String[] tmp = StringUtils.reverse(methodToken.getStr()).split("\\.");
+					method = StringUtils.reverse(tmp[0]);
+					String var = StringUtils.reverse(tmp[1]);
+	
+					obj = context.get(var);
+				}
+				
+				log.trace("obj: " + obj + "/"+obj.getClass().getName());
+				log.trace("method: " + method);
+				log.trace("argv: [" + StringUtils.join(",",argv) +"]");
+
+				try {
+					VarValue ret = obj.call(method, argv);
+					left.add(Token.value(ret));
+					left.addAll(right);
+					return evalTokenExpression(new TokenList(left, tokens.getLine()), context);
+				} catch (MethodNotFoundException | MethodCallException e) {
+					log.error(e);
+					throw new ASTExecException(e);
+				}
+				
+			} else {
+				VarValue innerVal = evalTokenExpression(new TokenList(inner, tokens.getLine()), context);
+				left.add(Token.value(innerVal));
+				left.addAll(right);
+				return evalTokenExpression(new TokenList(left, tokens.getLine()), context);
+			}
 		}
 
 		left.clear();
