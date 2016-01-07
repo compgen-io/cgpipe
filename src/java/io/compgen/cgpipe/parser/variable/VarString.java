@@ -58,6 +58,14 @@ public class VarString extends VarValue {
 				throw new MethodCallException("Bad or missing argument! length()");
 			}
 			return new VarInt(((String)obj).length());
+		} else if (method.equals("contains")) {
+			if (args.length != 1) {
+				throw new MethodCallException("Bad or missing argument! contains(qstr)");
+			}
+			if (((String)obj).contains(args[0].toString())) {
+				return VarBool.TRUE;
+			}
+			return VarBool.FALSE;
 		}
 		throw new MethodNotFoundException("Method not found: "+method+" obj="+this);
 	}

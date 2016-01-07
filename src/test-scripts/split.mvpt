@@ -8,3 +8,16 @@ print spl[0]
 
 print spl.length()
 print "foobarbaz".split(" ").length()
+
+if "foobarbaz".contains("bar")
+    print "has bar"
+else
+    print "missing bar"
+endif
+
+if "foobarbaz".contains("BAR")
+    print "has BAR"
+else
+    print "missing BAR"
+endif
+
