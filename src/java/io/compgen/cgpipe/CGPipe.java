@@ -119,6 +119,9 @@ public class CGPipe {
 				}
 				k = arg.substring(2);
 			} else if (k != null) {
+				if (k.contains("-")) {
+					k = k.replaceAll("-", "_");
+				}
 				if (confVals.containsKey(k)) {
 					try {
 						VarValue val = confVals.get(k);
