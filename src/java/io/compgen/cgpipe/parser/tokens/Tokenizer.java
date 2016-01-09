@@ -77,8 +77,9 @@ public class Tokenizer {
 				tokens = parseValues(tokens);
 //				System.err.println("parseValues         : "+StringUtils.join(";", tokens));
 		
+//				System.err.println("pre-correctNegativeNum  : "+StringUtils.join(";", tokens));
 				tokens = correctNegativeNum(tokens);
-//				System.err.println("correctNegativeNum  : "+StringUtils.join(";", tokens));
+//				System.err.println("post-correctNegativeNum : "+StringUtils.join(";", tokens));
 			}
 			log.trace("Tokenized line: "+StringUtils.join(";", tokens));
 
@@ -190,7 +191,7 @@ public class Tokenizer {
 			boolean updated = false;
 			if (tok.isValue() && tok.getValue().isNumber()) {
 				if (oneback != null && oneback.isOperator() && oneback.getOp().equals(Operator.SUB)) {
-					if (twoback == null || (!twoback.isValue() && !twoback.isVariable())) {
+					if (twoback == null || (!twoback.isValue() && !twoback.isVariable() &&!twoback.isParenClose() &&!twoback.isSliceClose())) {
 						if (tok.getValue().getClass().equals(VarInt.class)) {
 							Long num = (Long) tok.getValue().getObject();
 							out.remove(out.size()-1);

@@ -21,3 +21,4 @@ else
     print "missing BAR"
 endif
 
+print "foo bar baz".split(" ").length()-1
