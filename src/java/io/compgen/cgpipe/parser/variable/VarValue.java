@@ -34,6 +34,9 @@ public abstract class VarValue {
 	}
 	
 	public VarValue call(String method, VarValue[] args) throws MethodNotFoundException, MethodCallException {
+		if (method.equals("type")) {
+			return new VarString(this.getClass().getSimpleName());
+		}
 		throw new MethodNotFoundException("Method not found: "+method+" obj="+this);
 	}
 

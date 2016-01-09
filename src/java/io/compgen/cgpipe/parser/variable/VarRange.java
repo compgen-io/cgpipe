@@ -6,7 +6,6 @@ import io.compgen.cgpipe.exceptions.VarTypeException;
 import io.compgen.common.StringUtils;
 
 import java.util.Iterator;
-import java.util.List;
 
 public class VarRange extends VarValue {
 	final private long start;
@@ -69,12 +68,16 @@ public class VarRange extends VarValue {
 			}};
 	}
 	public VarValue call(String method, VarValue[] args) throws MethodNotFoundException, MethodCallException {
-		if (method.equals("length")) {
-			if (args.length != 0) {
-				throw new MethodCallException("Bad or missing argument! length()");
+		try {
+			return super.call(method, args);
+		} catch (MethodNotFoundException e1) {
+			if (method.equals("length")) {
+				if (args.length != 0) {
+					throw new MethodCallException("Bad or missing argument! length()");
+				}
+				return new VarInt(end-start+1);
 			}
-			return new VarInt(end-start);
+			throw new MethodNotFoundException("Method not found: "+method+" obj="+this);
 		}
-		throw new MethodNotFoundException("Method not found: "+method+" obj="+this);
 	}
 }

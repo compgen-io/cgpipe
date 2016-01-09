@@ -1,10 +1,10 @@
 package io.compgen.cgpipe.parser.variable;
 
-import java.io.File;
-
 import io.compgen.cgpipe.exceptions.MethodCallException;
 import io.compgen.cgpipe.exceptions.MethodNotFoundException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
+
+import java.io.File;
 
 public class VarString extends VarValue {
 	public VarString(String val) {
@@ -39,50 +39,91 @@ public class VarString extends VarValue {
 	}
 
 	public VarValue call(String method, VarValue[] args) throws MethodNotFoundException, MethodCallException {
-		if (method.equals("split")) {
-			if (args.length != 1) {
-				throw new MethodCallException("Bad or missing argument! split(delim)");
-			}
-
-			String[] spl = ((String)obj).split(args[0].toString());
-
-			VarList l = new VarList();
-			for (String s:spl) {
-				try {
-					l.add(new VarString(s));
-				} catch (VarTypeException e) {
-					throw new MethodCallException(e);
+		try {
+			return super.call(method, args);
+		} catch (MethodNotFoundException e1) {
+			if (method.equals("split")) {
+				if (args.length != 1 && args.length!=0) {
+					throw new MethodCallException("Bad or missing argument! split(delim)");
 				}
+	
+				String[] spl;
+				if (args.length == 1) {
+					spl = ((String)obj).split(args[0].toString());
+				} else {
+					spl = ((String)obj).split("");
+				}
+	
+				VarList l = new VarList();
+				for (String s:spl) {
+					try {
+						l.add(new VarString(s));
+					} catch (VarTypeException e) {
+						throw new MethodCallException(e);
+					}
+				}
+				return l;
+			} else if (method.equals("sub")) {
+				if (args.length != 2) {
+					throw new MethodCallException("Bad or missing argument! sub(bait,replace)");
+				}
+				return new VarString(((String)obj).replaceAll(args[0].toString(), args[1].toString()));
+			} else if (method.equals("length")) {
+				if (args.length != 0) {
+					throw new MethodCallException("Bad or missing argument! length()");
+				}
+				return new VarInt(((String)obj).length());
+			} else if (method.equals("basename")) {
+				if (args.length != 0) {
+					throw new MethodCallException("Bad or missing argument! basename()");
+				}
+				
+				File f = new File((String) obj);
+				return new VarString(f.getName());
+			} else if (method.equals("contains")) {
+				if (args.length != 1) {
+					throw new MethodCallException("Bad or missing argument! contains(qstr)");
+				}
+				if (((String)obj).contains(args[0].toString())) {
+					return VarBool.TRUE;
+				}
+				return VarBool.FALSE;
 			}
-			return l;
-		} else if (method.equals("sub")) {
-			if (args.length != 2) {
-				throw new MethodCallException("Bad or missing argument! sub(bait,replace)");
-			}
-			return new VarString(((String)obj).replaceAll(args[0].toString(), args[1].toString()));
-		} else if (method.equals("length")) {
-			if (args.length != 0) {
-				throw new MethodCallException("Bad or missing argument! length()");
-			}
-			return new VarInt(((String)obj).length());
-		} else if (method.equals("basename")) {
-			if (args.length != 0) {
-				throw new MethodCallException("Bad or missing argument! basename()");
-			}
-			
-			File f = new File((String) obj);
-			return new VarString(f.getName());
-		} else if (method.equals("contains")) {
-			if (args.length != 1) {
-				throw new MethodCallException("Bad or missing argument! contains(qstr)");
-			}
-			if (((String)obj).contains(args[0].toString())) {
-				return VarBool.TRUE;
-			}
-			return VarBool.FALSE;
+			throw new MethodNotFoundException("Method not found: "+method+" obj="+this);
 		}
-		throw new MethodNotFoundException("Method not found: "+method+" obj="+this);
 	}
 
-
+//	public Iterable<VarValue> iterate() {
+//		
+//		return new Iterable<VarValue>(){
+//
+//			@Override
+//			public Iterator<VarValue> iterator() {
+//				return new Iterator<VarValue>(){
+//					
+//					int i = 0;
+//					VarValue next = new VarString(""+((String)obj).charAt(i));
+//					@Override
+//					public boolean hasNext() {
+//						return next != null;
+//					}
+//
+//					@Override
+//					public VarValue next() {
+//						VarValue ret = next;
+//						i++;
+//						if (i < ((String)obj).length()) {
+//							next = new VarString(""+((String)obj).charAt(i));
+//						} else {
+//							next = null;
+//						}
+//						return ret;
+//					}
+//
+//					@Override
+//					public void remove() {
+//					}};
+//			}};
+//	}
+//
 }

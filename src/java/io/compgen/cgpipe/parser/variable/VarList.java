@@ -16,16 +16,18 @@ public class VarList extends VarValue {
 		super(null);
 	}
 	
-	public VarList(VarValue[] vals) {
+	public VarList(VarValue[] vals) throws VarTypeException {
 		super(null);
 		for (VarValue val: vals) {
-			this.vals.add(val);
+			add(val);
 		}
 	}
 
-	public VarList(List<VarValue> vals) {
+	public VarList(List<VarValue> vals) throws VarTypeException {
 		super(null);
-		this.vals.addAll(vals);
+		for (VarValue val: vals) {
+			add(val);
+		}
 	}
 
 	public String toString() {
@@ -47,7 +49,7 @@ public class VarList extends VarValue {
 		return vals.size();
 	}
 	
-	public VarValue sliceInner(int start, int end) {
+	public VarValue sliceInner(int start, int end) throws VarTypeException {
 		if (end-start == 1) {
 			return vals.get(start);
 		}
@@ -56,13 +58,17 @@ public class VarList extends VarValue {
 	
 
 	public VarValue call(String method, VarValue[] args) throws MethodNotFoundException, MethodCallException {
-		if (method.equals("length")) {
-			if (args.length != 0) {
-				throw new MethodCallException("Bad or missing argument! length()");
+		try {
+			return super.call(method, args);
+		} catch (MethodNotFoundException e1) {
+			if (method.equals("length")) {
+				if (args.length != 0) {
+					throw new MethodCallException("Bad or missing argument! length()");
+				}
+				return new VarInt(((List<VarValue>)vals).size());
 			}
-			return new VarInt(((List<VarValue>)vals).size());
+			throw new MethodNotFoundException("Method not found: "+method+" obj="+this);
 		}
-		throw new MethodNotFoundException("Method not found: "+method+" obj="+this);
 	}
 
 }
