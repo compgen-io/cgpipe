@@ -12,7 +12,7 @@ public class TokenList implements Iterable<Token> {
 	final private NumberedLine line;
 	
 	public TokenList(List<Token> tokens, NumberedLine line) {
-		this.tokens = tokens;
+		this.tokens = new ArrayList<Token>(tokens);
 		this.line = line;
 	}
 	

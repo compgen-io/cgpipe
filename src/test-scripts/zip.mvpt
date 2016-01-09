@@ -1,0 +1,9 @@
+for ch in "foobar".split()
+    print ch
+done
+
+
+for one, two in "foo".split(), "bar".split()
+    print "${one}${two}"
+done
+

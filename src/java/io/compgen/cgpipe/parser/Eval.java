@@ -76,7 +76,11 @@ public class Eval {
 				elements.add(evalTokenExpression(new TokenList(inner, tokens.getLine()), context));
 			}
 			
-			return new VarList(elements);
+			try {
+				return new VarList(elements);
+			} catch (VarTypeException e) {
+				throw new ASTExecException(e);
+			}
 		}
 
 		if ((tokens.get(0).isVariable() || tokens.get(0).isValue()) && tokens.get(1).isSliceOpen()) {
@@ -120,7 +124,7 @@ public class Eval {
 				}
 				outer.add(0, Token.value(val));
 				return evalTokenExpression(new TokenList(outer, tokens.getLine()), context);
-			} catch (VarTypeException e) {
+			} catch (Exception e) {
 				throw new ASTExecException(e);
 			}
 		}

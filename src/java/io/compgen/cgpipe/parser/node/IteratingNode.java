@@ -6,30 +6,81 @@ import io.compgen.cgpipe.loader.NumberedLine;
 import io.compgen.cgpipe.parser.Eval;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.statement.Statement;
+import io.compgen.cgpipe.parser.tokens.Token;
 import io.compgen.cgpipe.parser.tokens.TokenList;
 import io.compgen.cgpipe.parser.variable.VarNull;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.common.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 
 public class IteratingNode extends ASTNode {
 	private ASTNode headNode = new NoOpNode(this);
 	private ASTNode curNext = headNode;
 	
-	private final String varName;
-	private final TokenList iterTokens;
+	private final String[] varName;
+	private final TokenList[] iterTokens;
 	
 	public IteratingNode(ASTNode parent, TokenList tokens) throws ASTParseException {
 		super(parent, tokens);
 //		System.err.println("ITER: " + tokens);
-		if (!tokens.get(0).isVariable()) {
+		
+		int preCount = 0;
+		int postCount = 0;
+		boolean pre = true;
+		for (int i=0; i<tokens.size(); i++) {
+			if (pre) {
+				if (tokens.get(i).isStatement() && tokens.get(i).getStatement() == Statement.IN) {
+					pre = false;
+				} else if (tokens.get(i).isComma()) {
+					preCount++;
+				}
+			} else {
+				if (tokens.get(i).isComma()) {
+					postCount++;
+				}
+			}
+		}
+		
+		if (preCount != postCount || pre) {
 			throw new ASTParseException("Invalid for-loop syntax!", tokens);
 		}
-		if (!tokens.get(1).isStatement() && tokens.get(1).getStatement() != Statement.IN) {
-			throw new ASTParseException("Invalid for-loop syntax!", tokens);
+
+		
+		varName = new String[preCount+1];
+		iterTokens = new TokenList[postCount+1];
+
+		pre=true;
+		int preIdx = 0;
+		int postIdx = 0;
+		List<Token> buf = new ArrayList<Token>();
+		for (int i=0; i<tokens.size(); i++) {
+			if (pre) {
+				if (tokens.get(i).isStatement() && tokens.get(i).getStatement() == Statement.IN) {
+					pre = false;
+				} else if (tokens.get(i).isComma()) {
+					//skip
+				} else if (tokens.get(i).isVariable()) {
+					varName[preIdx++] = tokens.get(i).getStr();
+				} else {
+					throw new ASTParseException("Invalid for-loop syntax!", tokens);
+				}
+			} else {
+				if (tokens.get(i).isComma()) {
+					iterTokens[postIdx++] = new TokenList(buf, tokens.getLine());
+					buf.clear();
+				} else {
+					buf.add(tokens.get(i));
+				}
+			}
 		}
-		varName = tokens.get(0).getStr();
-		iterTokens = tokens.subList(2);
+		
+		if (buf.size()>0) {
+			iterTokens[postIdx++] = new TokenList(buf, tokens.getLine());
+		}
 	}
 	
 	@Override
@@ -73,21 +124,37 @@ public class IteratingNode extends ASTNode {
 			throw new ASTExecException("Missing done for for-loop", tokens);
 		}
 		
-		VarValue iterVal = Eval.evalTokenExpression(iterTokens, context);
-		if (iterVal != VarNull.NULL) {
-			for (VarValue val: iterVal.iterate()) {
-				ExecContext nested = new ExecContext(context);
-				nested.set(varName, val);
-				
-				ASTNode currentNode = headNode;
-	
-				while (currentNode != null) {
-					currentNode = currentNode.exec(nested);
+		List<Iterator<VarValue>> iterVals = new ArrayList<Iterator<VarValue>>();
+		
+		for (int i=0; i<iterTokens.length; i++) {
+			VarValue val = Eval.evalTokenExpression(iterTokens[i], context);
+			if (val == VarNull.NULL) {
+				return next;
+			}
+			iterVals.add(val.iterate().iterator());
+		}
+		
+		while (true) {
+			VarValue[] vals = new VarValue[iterVals.size()];
+			for (int i=0; i<vals.length; i++) {
+				if (!iterVals.get(i).hasNext()) {
+					return next;
 				}
+				vals[i] = iterVals.get(i).next();
+			}
+
+			ExecContext nested = new ExecContext(context);
+
+			for (int i=0; i<varName.length;i++) {
+				nested.set(varName[i], vals[i]);
+			}
+
+			ASTNode currentNode = headNode;
+			
+			while (currentNode != null) {
+				currentNode = currentNode.exec(nested);
 			}
 		}
-
-		return next;
 	}
 
 	public void done() {
