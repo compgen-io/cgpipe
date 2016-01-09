@@ -1,5 +1,7 @@
 package io.compgen.cgpipe.parser.variable;
 
+import java.io.File;
+
 import io.compgen.cgpipe.exceptions.MethodCallException;
 import io.compgen.cgpipe.exceptions.MethodNotFoundException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
@@ -53,11 +55,23 @@ public class VarString extends VarValue {
 				}
 			}
 			return l;
+		} else if (method.equals("sub")) {
+			if (args.length != 2) {
+				throw new MethodCallException("Bad or missing argument! sub(bait,replace)");
+			}
+			return new VarString(((String)obj).replaceAll(args[0].toString(), args[1].toString()));
 		} else if (method.equals("length")) {
 			if (args.length != 0) {
 				throw new MethodCallException("Bad or missing argument! length()");
 			}
 			return new VarInt(((String)obj).length());
+		} else if (method.equals("basename")) {
+			if (args.length != 0) {
+				throw new MethodCallException("Bad or missing argument! basename()");
+			}
+			
+			File f = new File((String) obj);
+			return new VarString(f.getName());
 		} else if (method.equals("contains")) {
 			if (args.length != 1) {
 				throw new MethodCallException("Bad or missing argument! contains(qstr)");
