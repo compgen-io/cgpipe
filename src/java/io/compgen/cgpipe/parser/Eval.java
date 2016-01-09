@@ -15,6 +15,7 @@ import io.compgen.cgpipe.parser.variable.VarInt;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.common.ListBuilder;
 import io.compgen.common.Pair;
 import io.compgen.common.StringUtils;
 
@@ -199,12 +200,58 @@ public class Eval {
 				
 				if (methodToken.getStr().charAt(0) == '.') {
 					// this is a method on an existing value... calc that first.
-					Token t = left.remove(left.size()-1);
-					if (!t.isValue()) {
+//					System.err.println("left tokens: " + StringUtils.join(",",left));
+//					System.err.println("method     : " + methodToken.getStr());
+
+					if (left.get(left.size()-1).isValue()) {
+						Token t = left.remove(left.size()-1);
+						obj = t.getValue();
+					} else if (left.get(left.size()-1).isParenClose()) {
+						List<Token> methodBuf = new ArrayList<Token>();
+						int level = 1;
+						Token t = left.remove(left.size()-1);
+						methodBuf.add(0, t);
+						while (level > 0) {
+							if (t.isParenClose()) {
+								level++;
+							} else if (t.isParenOpen()) {
+								level--;
+							}
+							methodBuf.add(0, t);
+						}
+						t = left.remove(left.size()-1);
+						methodBuf.add(0, t);
+						
+						obj = evalTokenExpression(new TokenList(methodBuf, tokens.getLine()), context);
+					} else if (left.get(left.size()-1).isSliceClose()) {
+						List<Token> methodBuf = new ArrayList<Token>();
+						int level = 1;
+						Token t = left.remove(left.size()-1);
+						methodBuf.add(0, t);
+						while (level > 0) {
+							if (t.isSliceClose()) {
+								level++;
+							} else if (t.isSliceOpen()) {
+								level--;
+							}
+							methodBuf.add(0, t);
+						}
+						t = left.remove(left.size()-1);
+						methodBuf.add(0, t);
+						
+						obj = evalTokenExpression(new TokenList(methodBuf, tokens.getLine()), context);
+					} else {
 						throw new ASTExecException("Error trying to call method: "+methodToken);
 					}
 					
-					obj = t.getValue();
+					//					Token t = left.remove(left.size()-1);
+//					if (!t.isValue()) {
+//					}
+					
+					log.trace("left: " + StringUtils.join(",",left));
+//					left.add(Token.value(obj));
+					
+//					obj = t.getValue();
 					method = methodToken.getStr().substring(1);
 					
 				} else {
@@ -219,11 +266,13 @@ public class Eval {
 				log.trace("obj: " + obj + "/"+obj.getClass().getName());
 				log.trace("method: " + method);
 				log.trace("argv: [" + StringUtils.join(",",argv) +"]");
+				log.trace("left: " + StringUtils.join(",",left));
 
 				try {
 					VarValue ret = obj.call(method, argv);
 					left.add(Token.value(ret));
 					left.addAll(right);
+					log.trace("left: " + StringUtils.join(",",left));
 					return evalTokenExpression(new TokenList(left, tokens.getLine()), context);
 				} catch (MethodNotFoundException | MethodCallException e) {
 					log.error(e);
