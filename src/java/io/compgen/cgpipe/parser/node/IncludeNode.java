@@ -8,22 +8,19 @@ import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.tokens.TokenList;
 
 public class IncludeNode extends ASTNode {
-	private Parser nestedAST = null;
 	public IncludeNode(ASTNode parent, TokenList tokens) {
 		super(parent, tokens);
 	}
 
 	@Override
 	public ASTNode exec(ExecContext context) throws ASTExecException {
-		String filename = Eval.evalTokenExpression(tokens, context).toString();
-		
 		try {
-			nestedAST = Parser.parseAST(filename, tokens.getLine().getPipeline().getLoader());
+			String filename = Eval.evalTokenExpression(tokens, context).toString();
+			Parser nestedAST = Parser.parseAST(filename, tokens.getLine().getPipeline().getLoader());
 			nestedAST.exec(context);
 		} catch (ASTParseException e) {
 			throw new ASTExecException(e);
 		}
-
 		return next;
 	}
 
