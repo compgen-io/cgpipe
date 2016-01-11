@@ -66,7 +66,7 @@ public class RootContext extends ExecContext {
 	public BuildTarget build() {
 		return build(null);
 	}
-	
+
 	public BuildTarget build(String output) {
 		if (output != null) {
 			log.debug("Looking for build-target: " + output);
@@ -213,4 +213,33 @@ public class RootContext extends ExecContext {
 			}
 		}
 	}
+
+	public void dump() {
+		super.dump();
+		
+		System.err.println("[BUILD TARGETS] - " + this);
+		for (BuildTargetTemplate tgt: targets) {
+			System.err.println("  => " + tgt.getFirstOutput());
+		}
+	}
+
+	public List<BuildTargetTemplate> getImportableTargets() {
+		List<BuildTargetTemplate> importableTargets = new ArrayList<BuildTargetTemplate>();
+		for (BuildTargetTemplate tgt: targets) {
+			if (tgt.isImportable()) {
+				importableTargets.add(tgt);
+			}
+		}
+		return importableTargets;
+	}
+
+	public BuildTarget findImportTarget(String str) {
+		for (BuildTargetTemplate tgt: targets) {
+			if (tgt.isImportable() && tgt.getImportName().equals(str)) {
+				return tgt.importTarget();
+			}
+		}
+		return null;
+	}
+	
 }	

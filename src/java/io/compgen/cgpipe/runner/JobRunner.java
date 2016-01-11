@@ -171,7 +171,7 @@ public abstract class JobRunner {
 			BuildTarget setupTgt = context.build("__setup__");
 			if (setupTgt != null) {
 				try {
-					JobDef setup = setupTgt.eval(null,  null);
+					JobDef setup = setupTgt.eval(null,  null, null);
 					if (setup.getSettingBool("job.shexec", false)) {
 						if (!dryrun) {
 							shexec(setup);
@@ -187,7 +187,7 @@ public abstract class JobRunner {
 			BuildTarget tdTgt = context.build("__teardown__");
 			if (tdTgt!=null) {
 				try {
-					teardown = tdTgt.eval(null,  null);
+					teardown = tdTgt.eval(null,  null, null);
 				} catch (ASTParseException | ASTExecException e) {
 					throw new RunnerException(e);
 				}
@@ -261,7 +261,7 @@ public abstract class JobRunner {
 		List<JobDependency> deps = new ArrayList<JobDependency>();
 		
 		try {
-			JobDef job = target.eval(prelines, postlines);
+			JobDef job = target.eval(prelines, postlines, context);
 			
 			boolean blankRoot = false;
 			if (isRoot) {

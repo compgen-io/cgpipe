@@ -47,7 +47,8 @@ public class BuildTargetTemplate {
 			}
 		}
 		
-		if (this.outputs.size() == 0) {
+		if (this.outputs.size() == 0 && this.inputs.size() != 1) {
+			// a target with no outputs and one input is an importable snippet.
 			throw new ASTExecException("No outputs specified for build-target!");
 		}
 	}
@@ -120,4 +121,17 @@ public class BuildTargetTemplate {
 		return outputs.get(0);
 	}
 
+	public boolean isImportable() {
+		return (outputs.size() == 0 &&  inputs.size() == 1);
+	}
+	
+	public String getImportName() {
+		return inputs.get(0);
+	}
+
+	public BuildTarget importTarget() {
+		BuildTarget tgt = new BuildTarget(null, null, capturedContext, lines);
+		return tgt;
+	}
+	
 }

@@ -62,10 +62,16 @@ public class BuildTarget {
 		this.deps.putAll(deps);
 	}
 
-	public JobDef eval(List<NumberedLine> pre, List<NumberedLine> post) throws ASTParseException, ASTExecException {
+	public JobDef eval(List<NumberedLine> pre, List<NumberedLine> post, RootContext globalRoot) throws ASTParseException, ASTExecException {
 		RootContext jobRoot = new RootContext(capturedContext, outputs, inputs);
 		jobRoot.set("job.custom", new VarList());
 
+		if (globalRoot != null) {
+			for (BuildTargetTemplate btg: globalRoot.getImportableTargets()) {
+				jobRoot.addTarget(btg);
+			}
+		}
+		
 		TemplateParser.parseTemplate(lines, pre, post, jobRoot);
 
 		return new JobDef(jobRoot.getBody(), jobRoot.cloneValues(), outputs, inputs);
