@@ -68,7 +68,7 @@ public class BuildTarget {
 
 		if (globalRoot != null) {
 			for (BuildTargetTemplate btg: globalRoot.getImportableTargets()) {
-				jobRoot.addTarget(btg);
+				jobRoot.addImportTarget(btg);
 			}
 		}
 		

@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 public class RootContext extends ExecContext {
 	
 	private List<BuildTargetTemplate> targets = new ArrayList<BuildTargetTemplate>();
+	private List<BuildTargetTemplate> importTargets = new ArrayList<BuildTargetTemplate>();
 	private final List<String> outputs;
 	private final List<String> inputs;
 	private String body = "";
@@ -57,6 +58,11 @@ public class RootContext extends ExecContext {
 	public void addTarget(BuildTargetTemplate targetDef) {
 		log.trace("Adding build-target: " + targetDef);
 		this.targets.add(targetDef);
+	}
+	
+	public void addImportTarget(BuildTargetTemplate targetDef) {
+		log.trace("Adding import-build-target: " + targetDef);
+		this.importTargets.add(targetDef);
 	}
 	
 	public RootContext getRoot() {
@@ -221,6 +227,10 @@ public class RootContext extends ExecContext {
 		for (BuildTargetTemplate tgt: targets) {
 			System.err.println("  => " + tgt.getFirstOutput());
 		}
+		System.err.println("[IMPORT TARGETS] - " + this);
+		for (BuildTargetTemplate tgt: importTargets) {
+			System.err.println("  => " + tgt.getFirstOutput());
+		}
 	}
 
 	public List<BuildTargetTemplate> getImportableTargets() {
@@ -234,7 +244,7 @@ public class RootContext extends ExecContext {
 	}
 
 	public BuildTarget findImportTarget(String str) {
-		for (BuildTargetTemplate tgt: targets) {
+		for (BuildTargetTemplate tgt: importTargets) {
 			if (tgt.isImportable() && tgt.getImportName().equals(str)) {
 				return tgt.importTarget();
 			}
