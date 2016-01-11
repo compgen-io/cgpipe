@@ -154,6 +154,11 @@ public class IteratingNode extends ASTNode {
 			while (currentNode != null) {
 				currentNode = currentNode.exec(nested);
 			}
+
+			for (int i=0; i<varName.length;i++) {
+				nested.remove(varName[i]);
+			}
+
 		}
 	}
 
