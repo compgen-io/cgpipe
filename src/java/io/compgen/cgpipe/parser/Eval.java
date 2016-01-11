@@ -331,17 +331,17 @@ public class Eval {
 	
 	public static String evalString(String str, ExecContext context, NumberedLine line) throws ASTExecException {
 		String tmp = "";
-		log .trace("eval string (pre) : "+str);
+//		log .trace("eval string (pre) : "+str);
 		tmp = evalStringVar(str, context, line);
-		log .trace("eval string (var) : "+str+" => "+tmp);
+//		log .trace("eval string (var) : "+str+" => "+tmp);
 		tmp = evalStringList(tmp, context, line);
-		log .trace("eval string (list) : "+str+" => "+tmp);
+//		log .trace("eval string (list) : "+str+" => "+tmp);
 		tmp = evalStringShell(tmp, context, line);
-		log .trace("eval string (shell) : "+str+" => "+tmp);
+//		log .trace("eval string (shell) : "+str+" => "+tmp);
 		tmp = evalStringInputs(tmp, context, line);
-		log .trace("eval string (inputs) : "+str+" => "+tmp);
+//		log .trace("eval string (inputs) : "+str+" => "+tmp);
 		tmp = evalStringOutputs(tmp, context, line);
-		log .trace("eval string (post): "+str+" => "+tmp);
+//		log .trace("eval string (post): "+str+" => "+tmp);
 		return tmp;
 	}
 
