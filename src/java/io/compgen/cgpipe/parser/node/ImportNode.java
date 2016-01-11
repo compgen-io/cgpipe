@@ -8,8 +8,19 @@ import io.compgen.cgpipe.parser.target.BuildTarget;
 import io.compgen.cgpipe.parser.tokens.TokenList;
 
 public class ImportNode extends ASTNode {
-	public ImportNode(ASTNode parent, TokenList tokens) {
+	public ImportNode(ASTNode parent, TokenList tokens) throws ASTParseException {
 		super(parent, tokens);
+		ASTNode p = parent;
+		boolean intarget = false;
+		while (p != null && !intarget) {
+			if (p.getClass().equals(JobNoOpNode.class)) {
+				intarget = true;
+			}
+			p = p.parent;
+		}
+		if (!intarget) {
+			throw new ASTParseException("You can only call 'import' w/in a build-target!");
+		}
 	}
 
 	@Override
