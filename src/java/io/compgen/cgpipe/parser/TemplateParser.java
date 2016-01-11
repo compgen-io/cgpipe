@@ -130,7 +130,9 @@ public class TemplateParser {
 		List<NumberedLine> lines = new ArrayList<NumberedLine>();
 		int i=1;
 		for (String line: src.split("\n")) {
-			lines.add(new NumberedLine(line, i++));
+			if (line.trim().length() > 0) {
+				lines.add(new NumberedLine(line, i++));
+			}
 		}
 		return parseTemplate(lines, null, null, context);
 	}
