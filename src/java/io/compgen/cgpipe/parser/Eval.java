@@ -15,7 +15,6 @@ import io.compgen.cgpipe.parser.variable.VarInt;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.common.ListBuilder;
 import io.compgen.common.Pair;
 import io.compgen.common.StringUtils;
 
@@ -332,12 +331,17 @@ public class Eval {
 	
 	public static String evalString(String str, ExecContext context, NumberedLine line) throws ASTExecException {
 		String tmp = "";
+		log .trace("eval string (pre) : "+str);
 		tmp = evalStringVar(str, context, line);
+		log .trace("eval string (var) : "+str+" => "+tmp);
 		tmp = evalStringList(tmp, context, line);
+		log .trace("eval string (list) : "+str+" => "+tmp);
 		tmp = evalStringShell(tmp, context, line);
+		log .trace("eval string (shell) : "+str+" => "+tmp);
 		tmp = evalStringInputs(tmp, context, line);
+		log .trace("eval string (inputs) : "+str+" => "+tmp);
 		tmp = evalStringOutputs(tmp, context, line);
-		log .trace("eval string: "+str+" => "+tmp);
+		log .trace("eval string (post): "+str+" => "+tmp);
 		return tmp;
 	}
 
@@ -346,9 +350,48 @@ public class Eval {
 		String buf = "";
 		
 		boolean ineval = false;
+		boolean inDoubleEval = false;
 		
 		for (int i=0; i<str.length(); i++) {
-			if (ineval) {
+			if (inDoubleEval) {
+				if (i < str.length()-1 && str.charAt(i) == '}' && str.charAt(i+1) == '}') {
+					if (buf.endsWith("\\")) {
+						buf = buf.substring(0, buf.length()-1) + "}}";
+						i++;
+					} else {
+						inDoubleEval = false;
+						boolean optional = false;
+						if (buf.endsWith("\\?")) {
+							buf = buf.substring(0, buf.length()-2) + "?";
+						} else if (buf.endsWith("?")) {
+							optional = true;
+							buf = buf.substring(0, buf.length()-1);
+						}
+						try {
+	 						TokenList tl = Tokenizer.tokenize(new NumberedLine(buf, line));
+							VarValue val = Eval.evalTokenExpression(tl, context);
+							for (String s: val.toString().split("\n")) {
+								out += evalString(s, context, line) + "\n";
+							}
+
+						} catch (ASTExecException e) {
+							if (!optional) {
+								throw e;
+							}
+						} catch (ASTParseException e) {
+							if (!optional) {
+								throw new ASTExecException(e, line);
+							}
+						}
+						
+						buf = "";
+						i++;
+
+					}
+				} else {
+					buf += str.charAt(i);
+				}
+			} else if (ineval) {
 				if (str.charAt(i) == '}') {
 					if (buf.endsWith("\\")) {
 						buf = buf.substring(0, buf.length()-1) + "}";
@@ -381,6 +424,13 @@ public class Eval {
 				} else {
 					buf += str.charAt(i);
 				}
+			} else if (i < str.length()-3 && str.substring(i, i+3).equals("${{")) {
+				if (i==0 || str.charAt(i-1) != '\\') {
+					inDoubleEval = true;
+				} else {
+					out = out.substring(0, out.length()-1) + "${{";
+				}
+				i+=2;
 			} else if (i < str.length()-2 && str.substring(i, i+2).equals("${")) {
 				if (i==0 || str.charAt(i-1) != '\\') {
 					ineval = true;
@@ -394,7 +444,7 @@ public class Eval {
 		}
 		
 		if (!buf.equals("")) {
-			throw new ASTExecException("Missing closing '}' in string", line);
+			throw new ASTExecException("Missing closing '}' in string ("+buf+")", line);
 		}
 		
 		return out;

@@ -114,6 +114,14 @@ public class Parser {
 		return parser;
 	}
 
+	static public Parser parseASTEval(String lines, SourceLoader loader) throws ASTParseException {
+		Source source = loader.loadPipelineDirect(lines.split("\n"));
+		
+		Parser parser = new Parser();
+		parser.load(source);
+		return parser;
+	}
+
 	static public Parser parseASTEval(String[] lines) throws ASTParseException {
 		Source source = SourceLoader.getDefaultLoader().loadPipelineDirect(lines);
 		Parser parser = new Parser();

@@ -22,7 +22,8 @@ public class Tokenizer {
 
 	public static TokenList tokenize(NumberedLine line) throws ASTParseException {
 		try {
-			List<Token> tokens = extractQuotedStrings(line.getLine(), '"', '#');
+//			System.err.println(line);
+			List<Token> tokens = extractQuotedStrings(line.getLine());
 //			System.err.println("extractQuotedStrings: "+StringUtils.join(";", tokens));
 			
 			tokens = markSplitLine(tokens);
@@ -407,11 +408,16 @@ public class Tokenizer {
 		return out;
 	}
 
-	public static List<Token> extractQuotedStrings(String line, char quoteChar, char commentChar) throws ASTParseException {
+	public static List<Token> extractQuotedStrings(String line) throws ASTParseException {
+		char quoteChar = '"';
+		char commentChar='#';
+		String tripleQuote = "\"\"\"";
+		
 		String buf = "";
 		List<Token> tokens = new ArrayList<Token>();
 		boolean inquote = false;
 		boolean inshell = false;
+		boolean intriple = false;
 		boolean lastSlash = false;
 		for (int i=0; i<line.length(); i++) {
 			if (buf.endsWith("\\")) {
@@ -422,8 +428,16 @@ public class Tokenizer {
 				}
 			}
 			lastSlash = false;
-			
-			if (inquote) {
+			if (intriple) {
+				if (line.substring(i,  i+3).equals(tripleQuote)) {
+					tokens.add(Token.string(buf));
+					intriple = false;
+					buf = "";
+					i += 2;
+				} else {
+					buf += line.charAt(i);
+				}
+			} else if (inquote) {
 				if (line.charAt(i) == quoteChar) { // && !buf.endsWith("\\")) {
 					tokens.add(Token.string(buf));
 					inquote = false;
@@ -440,7 +454,14 @@ public class Tokenizer {
 					buf += line.charAt(i);
 				}
 			}  else {
-				if (i < line.length()-2 && line.substring(i, i+2).equals("$(")) { // && !buf.endsWith("\\")) {
+				if (i < line.length()-3 && line.substring(i,  i+3).equals(tripleQuote)) {
+					if (!buf.equals("")) {
+						tokens.add(Token.raw(buf));
+					}
+					buf = "";
+					intriple = true;
+					i += 2;
+				} else if (i < line.length()-2 && line.substring(i, i+2).equals("$(")) { // && !buf.endsWith("\\")) {
 					if (!buf.equals("")) {
 						tokens.add(Token.raw(buf));
 					}

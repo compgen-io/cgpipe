@@ -117,8 +117,24 @@ public class SourceLoader {
 		String line;
 		int linenum = 0;
 
+		boolean inTripleQuote = false;
+		String buf = "";
 		while ((line = reader.readLine()) != null) {
-			source.addLine(StringUtils.rstrip(line), ++linenum);
+			String l = StringUtils.rstrip(line);
+			linenum++;
+			if (inTripleQuote) {
+				buf += "\n" + l;
+				if (l.contains("\"\"\"")) {
+					source.addLine(buf, linenum);
+					buf = "";
+					inTripleQuote = false;
+				}
+			} else if (l.contains("\"\"\"")) {
+				buf = l;
+				inTripleQuote = true;
+			} else {
+				source.addLine(l, linenum);
+			}
 		}
 
 		reader.close();
