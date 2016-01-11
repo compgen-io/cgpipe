@@ -10,7 +10,10 @@
 <% if job.walltime %>
 #SBATCH -t ${job.walltime}
 <% endif %>
-<% if job.procs > 1 %>
+<% 
+job.procs ?= 1
+if job.procs > 1 
+%>
 #SBATCH -c ${job.procs}
 #SBATCH -n 1
 <% endif %>

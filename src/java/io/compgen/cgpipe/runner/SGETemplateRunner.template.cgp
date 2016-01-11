@@ -11,7 +11,9 @@
 <% if job.walltime %>
 #$ -l h_rt=${job.walltime}
 <% endif %>
-<% if job.procs > 1 && job.sge.parallelenv %>
+<% 
+job.procs ?= 1
+if job.procs > 1 && job.sge.parallelenv %>
 #$ -pe ${job.sge.parallelenv} ${job.procs}
 <% endif %>
 <% if job.stack %>
