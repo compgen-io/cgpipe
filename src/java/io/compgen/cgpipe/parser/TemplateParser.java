@@ -28,6 +28,7 @@ public class TemplateParser {
 	
 	private boolean processedPre = false;
 	private boolean inScript = false;
+	private boolean firstScript = true;
 	
 	private TemplateParser(List<NumberedLine> pre, List<NumberedLine> post) {
 		this.pre = pre;
@@ -39,7 +40,6 @@ public class TemplateParser {
 	}
 
 	private void addBodyLine(String body, NumberedLine line) throws ASTParseException {
-		processPre();
 		curNode = curNode.parseBody(body, line);
 	}
 
@@ -66,6 +66,7 @@ public class TemplateParser {
 					parseString(buf, line);
 					buf = "";
 				}
+				firstScript = false;
 				inScript = false;
 				l = l.substring(2);
 			} else {
@@ -79,6 +80,9 @@ public class TemplateParser {
 	}
 	
 	private void parseString(String s, NumberedLine line) throws ASTParseException {
+		if (!firstScript) {
+			processPre();
+		}
 		if (inScript) {
 			addScriptLine(new NumberedLine(s, line));
 		} else {
@@ -91,6 +95,8 @@ public class TemplateParser {
 	private void processPre() throws ASTParseException {
 		if (!processedPre && pre != null) {
 			processedPre = true;
+			boolean curInScript = inScript;
+			inScript = false;
 			curNode = curNode.parseLine(new NumberedLine("if !job.nopre"));
 			int indent = -1;
 			for (NumberedLine line: pre) {
@@ -100,6 +106,7 @@ public class TemplateParser {
 				parseLine(line.stripPrefix(indent));
 			}
 			curNode = curNode.parseLine(new NumberedLine("endif"));
+			inScript = curInScript;
 		}
 	}
 
