@@ -19,7 +19,7 @@ public class TargetNode extends ASTNode {
 	private List<NumberedLine> lines = new ArrayList<NumberedLine>();
 	private List<String> outputs = new ArrayList<String>();
 	private List<String> inputs = null;
-	
+	private boolean importable = false;
  
 	public TargetNode(ASTNode parent, TokenList tokens) throws ASTParseException {
 		super(parent, tokens);
@@ -37,19 +37,19 @@ public class TargetNode extends ASTNode {
 		for (Token tok: tokens) {
 			if (tok.isColon()) { 
 				if (inputs != null) {
-					throw new ASTParseException("Too many colons!", tokens.getLine());
+					if (!importable) {
+						importable = true;
+					} else {
+						throw new ASTParseException("Too many colons!", tokens.getLine());
+					}
 				}
-				
 				inputs = new ArrayList<String>();
-				
 			} else if (inputs != null) {
 				inputs.add(tok.getStr());
 			} else {
 				outputs.add(tok.getStr());
 			}
 		}
-		
-
 	}
 	
 	@Override
@@ -66,7 +66,7 @@ public class TargetNode extends ASTNode {
 	
 	@Override
 	public ASTNode exec(ExecContext context) throws ASTExecException {
-		context.getRoot().addTarget(new BuildTargetTemplate(outputs, inputs, context, lines, tokens));
+		context.getRoot().addTarget(new BuildTargetTemplate(outputs, inputs, context, lines, tokens, importable));
 		return next;
 	}
 

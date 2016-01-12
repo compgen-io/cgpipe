@@ -20,10 +20,11 @@ public class BuildTargetTemplate {
 	final private List<String> inputs = new ArrayList<String>();
 	final private List<NumberedLine> lines;
 	final private Map<String, VarValue> capturedContext;
+	final private boolean importable;
 	
 	private Map<String, BuildTarget> cache = new HashMap<String, BuildTarget>();
 	
-	public BuildTargetTemplate(List<String> outputs, List<String> inputs, ExecContext context, List<NumberedLine> lines, TokenList tokens) throws ASTExecException {
+	public BuildTargetTemplate(List<String> outputs, List<String> inputs, ExecContext context, List<NumberedLine> lines, TokenList tokens, boolean importable) throws ASTExecException {
 		// these are copied verbatim.
 		this.capturedContext = context.cloneValues();
 		// these will be eval'd only when needed (they might need to be executed)
@@ -47,10 +48,11 @@ public class BuildTargetTemplate {
 			}
 		}
 		
-		if (this.outputs.size() == 0 && this.inputs.size() != 1) {
-			// a target with no outputs and one input is an importable snippet.
+		if (this.outputs.size() == 0) {
 			throw new ASTExecException("No outputs specified for build-target!");
 		}
+		
+		this.importable = importable;
 	}
 	
 	public String toString() {
@@ -122,11 +124,11 @@ public class BuildTargetTemplate {
 	}
 
 	public boolean isImportable() {
-		return (outputs.size() == 0 &&  inputs.size() == 1);
+		return importable;
 	}
 	
 	public String getImportName() {
-		return inputs.get(0);
+		return outputs.get(0);
 	}
 
 	public BuildTarget importTarget() {
