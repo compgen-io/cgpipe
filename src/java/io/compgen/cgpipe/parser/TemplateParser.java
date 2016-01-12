@@ -80,7 +80,7 @@ public class TemplateParser {
 	}
 	
 	private void parseString(String s, NumberedLine line) throws ASTParseException {
-		if (!firstScript) {
+		if (!firstScript || !inScript) {
 			processPre();
 		}
 		if (inScript) {
