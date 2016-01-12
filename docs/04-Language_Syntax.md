@@ -321,14 +321,14 @@ the variable `job.nopre` and `job.nopost`.
 
 
 ## Including other files
-Other Pileline files can be imported into the currently running Pipeline by
+Other Pipeline files can be imported into the currently running Pipeline by
 using the `include filename` statement. In this case, the directory of the
-current Pileline file will be searched for 'filename'. If it isn't found, 
+current Pipeline file will be searched for 'filename'. If it isn't found, 
 then the current working directory will be searched. If it still isn't found,
 then an ParseError will be thrown.
 
 ## Logging
-You can define a log file to use within the Pileline file. You can do this
+You can define a log file to use within the Pipeline file. You can do this
 with the `log filename` directive. If an existing log file is active, then
 it will be closed and the new log file used. By default all output from the
 Pipeline will be written to the last log file specified.
@@ -393,3 +393,38 @@ output files to perform a fresh set of calculations. For example:
         <% job.shexec = true %>
         rm *.bam
 
+# Experimental cgpipe features
+
+The following features are experimental. Syntax for the below may change in 
+future versions of cgpipe.
+
+## Target snippets imports
+Sometimes you might have more than one target definition that has the same (or
+similar) recipe body. In this case, you might want to have only one copy of
+the recipe, and import that copy into each separate build-target script.
+
+You can do this with an "importable" target definition. This is simply a way
+to include a common snippet into a target script that isn't `__pre__` or
+`__post__`. Importable target definitions are targets that have only one
+output (the name), followed by two colons. That snippet can then be imported
+into the body of a target definition using the `import` statement. 
+
+(Note: the `import` statement only works within the context of a build-target.
+If you need something like import in a Pipeline, try the `include` statement.)
+
+Here's an example:
+
+    common::
+        echo "this is the common snippet"
+        
+    out.txt: input.txt
+        <% import common %>
+
+## Multi-line strings
+You can have strings that span more than one line if you quote them with three
+double quotes. Here is an example:
+
+    str = """this
+    is a very
+    long
+    string""" 
