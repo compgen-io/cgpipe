@@ -84,12 +84,12 @@ public class SLURMTemplateRunner extends TemplateRunner {
 		String mem = jobdef.getSetting("job.mem");
 		
 		String units = "";
-		float memVal = -1;
+		double memVal = -1;
 		
 		if (mem != null) {
 			while (mem.length() > 0) {
 			    try {
-					memVal = Float.parseFloat(mem);
+					memVal = Double.parseDouble(mem);
 					break;
 			    } catch (NumberFormatException e) {
 					units = mem.substring(mem.length()-1) + units;
@@ -98,9 +98,10 @@ public class SLURMTemplateRunner extends TemplateRunner {
 			}
 	
 			if (memVal > 0) {
-				mem = Float.toString(memVal);
 				if (units.equalsIgnoreCase("G") || units.equalsIgnoreCase("GB")) {
-					mem = "" + Math.ceil(Float.valueOf(memVal * 1000));
+					mem = "" + (int) Math.ceil(Double.valueOf(memVal * 1000));
+				} else {
+					mem = "" + (int) Math.ceil(memVal);
 				}
 			}
 	
