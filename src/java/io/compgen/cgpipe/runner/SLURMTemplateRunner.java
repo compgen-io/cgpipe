@@ -100,7 +100,7 @@ public class SLURMTemplateRunner extends TemplateRunner {
 			if (memVal > 0) {
 				mem = Float.toString(memVal);
 				if (units.equalsIgnoreCase("G") || units.equalsIgnoreCase("GB")) {
-					mem = ""+Float.valueOf(memVal * 1000).intValue();
+					mem = "" + Math.ceil(Float.valueOf(memVal * 1000));
 				}
 			}
 	
