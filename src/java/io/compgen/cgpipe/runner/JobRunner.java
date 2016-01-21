@@ -288,7 +288,6 @@ public abstract class JobRunner {
 					throw new RunnerException("Error submitting job: "+job);
 				}
 	
-				logJob(job);
 			} else {
 				log.debug("Skipping empty target: "+target);
 				job.setJobId("");
@@ -355,7 +354,7 @@ public abstract class JobRunner {
 			log.debug("input: "+inp);
 		}
 		for (String s: job.getBody().split("\n")) {
-			log.info("src: "+StringUtils.strip(s));
+			log.debug("src: "+StringUtils.strip(s));
 		}
 
 		if (joblog != null && job.getJobId() != null && !job.getJobId().equals("")) {

@@ -117,6 +117,8 @@ public abstract class TemplateRunner extends JobRunner {
 			log.debug(jobid + " " + line);
 		}
 	
+		logJob(jobdef);
+		
 		return true;
 	}
 
