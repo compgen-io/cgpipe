@@ -148,6 +148,8 @@ public class CGPipe {
 		if (k != null) {
 			confVals.put(k, VarBool.TRUE);
 		}
+
+		confVals.put("cgpipe.loglevel", new VarInt(verbosity));
 		
 		if (fname == null) {
 			usage();

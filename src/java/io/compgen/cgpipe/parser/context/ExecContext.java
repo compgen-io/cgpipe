@@ -1,8 +1,10 @@
 package io.compgen.cgpipe.parser.context;
 
+import io.compgen.cgpipe.exceptions.VarTypeException;
 import io.compgen.cgpipe.parser.variable.VarNull;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.cgpipe.support.SimpleFileLoggerImpl;
+import io.compgen.cgpipe.support.SimpleFileLoggerImpl.Level;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
@@ -70,6 +72,29 @@ public class ExecContext {
 				SimpleFileLoggerImpl.setFilename(val.toString());
 			} catch (FileNotFoundException e) {
 				log .error(e);
+			}
+		}
+		
+		if (name.equals("cgpipe.loglevel")) {
+			try {
+				int verbosity = val.toInt();
+				switch (verbosity) {
+				case 0:
+					SimpleFileLoggerImpl.setLevel(Level.INFO);
+					break;
+				case 1:
+					SimpleFileLoggerImpl.setLevel(Level.DEBUG);
+					break;
+				case 2:
+					SimpleFileLoggerImpl.setLevel(Level.TRACE);
+					break;
+				case 3:
+				default:
+					SimpleFileLoggerImpl.setLevel(Level.ALL);
+					break;
+				}
+			} catch (VarTypeException e) {
+				SimpleFileLoggerImpl.setLevel(Level.FATAL);
 			}
 		}
 	}
