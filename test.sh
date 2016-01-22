@@ -42,6 +42,11 @@ else
         echo ""
         echo "[GOT]"
         cat .testout1
+        if [ "$TEST" != "$GOOD" ]; then
+            echo ""
+            echo "[DIFF]"
+            diff -y .testout1 .testout2
+        fi
         rm .testout1 .testout2
     fi
     rm .testout

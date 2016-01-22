@@ -20,13 +20,7 @@ JOB_ID="func_4"
 echo "teardown"
 }
 
-func_1
-if [ $? == 0 ]; then
-func_2
-fi
-if [ $? == 0 ]; then
-func_3
-fi
-if [ $? == 0 ]; then
-func_4
-fi
+func_1 || exit $?
+func_2 || exit $?
+func_3 || exit $?
+func_4 || exit $?

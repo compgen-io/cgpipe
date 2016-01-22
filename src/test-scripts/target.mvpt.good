@@ -34,13 +34,7 @@ touch one
 
 }
 
-func_1
-if [ $? == 0 ]; then
-func_2
-fi
-if [ $? == 0 ]; then
-func_3
-fi
-#func_4
-
+func_1 || exit $?
+func_2 || exit $?
+func_3 || exit $?
 

@@ -47,7 +47,7 @@ public class ShellScriptRunner extends JobRunner {
 		out += "\n";
 		
 		for (int i=0; i<funcNames.size(); i++) {
-			out += funcNames.get(i)+" || exit $?; \n";
+			out += funcNames.get(i)+" || exit $?\n";
 		}
 		System.out.println(out);
 	}

@@ -37,7 +37,5 @@ func_2() {
 JOB_ID="func_2"
 touch output3
 }
-func_1
-if [ $? == 0 ]; then
-func_2
-fi
+func_1 || exit $?
+func_2 || exit $?
