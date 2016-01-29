@@ -68,8 +68,8 @@ public class SLURMTemplateRunner extends TemplateRunner {
 		}
 
 		// set the dep list
+	    List<String> depids = new ArrayList<String>();
 		if (jobdef.getDependencies().size() > 0) {
-		    List<String> depids = new ArrayList<String>();
 		    
 		    for (JobDependency dep: jobdef.getDependencies()) {
 				if (!dep.getJobId().equals("")) {
@@ -77,8 +77,16 @@ public class SLURMTemplateRunner extends TemplateRunner {
 				}
 		    }
 		    
-		    cxt.set("job.slurm.depids", new VarString(StringUtils.join(":", depids).replaceAll("::", ":")));
 		}
+	    if (jobdef.hasSetting("job.depends")) {
+	    	for (String depid: jobdef.getSetting("job.depends").split(":")) {
+	    		depids.add(depid);
+	    	}
+	    }
+	    
+	    if (depids.size() > 0) {
+	    	cxt.set("job.slurm.depids", new VarString(StringUtils.join(":", depids).replaceAll("::", ":")));
+	    }
 
 		// convert 4G to 4000; SLURM uses mem definitions in terms of megabytes.
 		String mem = jobdef.getSetting("job.mem");

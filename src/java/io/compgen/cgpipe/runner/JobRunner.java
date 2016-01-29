@@ -155,8 +155,8 @@ public abstract class JobRunner {
 		}
 	}
 
-	private List<NumberedLine> getLinesForTarget(String name, RootContext context) {
-		BuildTarget tgt = context.build(name);
+	private List<NumberedLine> getLinesForTarget(String name, RootContext context, boolean allowMissing) {
+		BuildTarget tgt = context.build(name, allowMissing);
 		List<NumberedLine> lines = null;
 		
 		if (tgt != null) {
@@ -168,7 +168,7 @@ public abstract class JobRunner {
 	private void setup(RootContext context) throws RunnerException {
 		if (!setupRun) {
 			setupRun = true;
-			BuildTarget setupTgt = context.build("__setup__");
+			BuildTarget setupTgt = context.build("__setup__", true);
 			if (setupTgt != null) {
 				try {
 					JobDef setup = setupTgt.eval(null,  null, null);
@@ -184,7 +184,7 @@ public abstract class JobRunner {
 				}
 			}
 
-			BuildTarget tdTgt = context.build("__teardown__");
+			BuildTarget tdTgt = context.build("__teardown__", true);
 			if (tdTgt!=null) {
 				try {
 					teardown = tdTgt.eval(null,  null, null);
@@ -193,8 +193,8 @@ public abstract class JobRunner {
 				}
 			}
 
-			prelines = getLinesForTarget("__pre__", context);
-			postlines = getLinesForTarget("__post__", context);
+			prelines = getLinesForTarget("__pre__", context, true);
+			postlines = getLinesForTarget("__post__", context, true);
 		}
 	}
 	

@@ -70,10 +70,13 @@ public class RootContext extends ExecContext {
 	}
 
 	public BuildTarget build() {
-		return build(null);
+		return build(null, false);
 	}
 
 	public BuildTarget build(String output) {
+		return build(output, false);
+	}
+	public BuildTarget build(String output, boolean allowMissing) {
 		if (output != null) {
 			log.debug("Looking for build-target: " + output);
 		}
@@ -102,7 +105,7 @@ public class RootContext extends ExecContext {
 					break;
 				}
 				log.debug("Looking for required input: "+ input + " (from "+output+")");
-				BuildTarget dep = build(input);
+				BuildTarget dep = build(input, allowMissing);
 				if (dep == null) {
 					foundAllInputs = false;
 					break;
@@ -124,6 +127,11 @@ public class RootContext extends ExecContext {
 			// otherwise, if the file exists on disk, we don't necessarily 
 			// need to rebuild it. 
 			log.debug("File exists on disk: " + output);
+			return new FileExistsBuildTarget(output);
+		}
+		
+		if (!allowMissing && this.contains("cgpipe.ignore_missing_inputs")) {
+			log.debug("Ignoring missing dependency: " + output);
 			return new FileExistsBuildTarget(output);
 		}
 		
