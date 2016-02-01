@@ -80,7 +80,9 @@ public class SLURMTemplateRunner extends TemplateRunner {
 		}
 	    if (jobdef.hasSetting("job.depends")) {
 	    	for (String depid: jobdef.getSetting("job.depends").split(":")) {
-	    		depids.add(depid);
+	    		if (!depid.equals("")) {
+	    			depids.add(depid);
+	    		}
 	    	}
 	    }
 	    

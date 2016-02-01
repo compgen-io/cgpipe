@@ -262,40 +262,43 @@ public abstract class JobRunner {
 		
 		try {
 			JobDef job = target.eval(prelines, postlines, context);
-			
-			boolean blankRoot = false;
-			if (isRoot) {
-				String tmp = job.getBody().replaceAll("[ \\t\\r\\n]", "");
-				if (tmp.equals("")) {
-					blankRoot = true;
-				}
-			}
-
-			for (String out: target.getDepends().keySet()) {
-				JobDependency dep = submitTargets(target.getDepends().get(out), context, out, blankRoot);
-				if (dep != null) {
-					deps.add(dep);
-				}
-			}
-		
-			job.addDependencies(deps);
-			if (!blankRoot) {
-				submit(job);
-			
-				if (job.getJobId() == null) {
-					abort();
-					log.error("Error submitting job: "+ target);
-					throw new RunnerException("Error submitting job: "+job);
+			if (job != null) {
+				boolean blankRoot = false;
+				if (isRoot) {
+					String tmp = job.getBody().replaceAll("[ \\t\\r\\n]", "");
+					if (tmp.equals("")) {
+						blankRoot = true;
+					}
 				}
 	
-			} else {
-				log.debug("Skipping empty target: "+target);
-				job.setJobId("");
-			}
+				for (String out: target.getDepends().keySet()) {
+					JobDependency dep = submitTargets(target.getDepends().get(out), context, out, blankRoot);
+					if (dep != null) {
+						deps.add(dep);
+					}
+				}
 			
-			target.setSubmittedJobDep(job);
-			for (String out: target.getOutputs()) {
-				submittedJobs.put(out, job);
+				job.addDependencies(deps);
+				if (!blankRoot) {
+					submit(job);
+				
+					if (job.getJobId() == null) {
+						abort();
+						log.error("Error submitting job: "+ target);
+						throw new RunnerException("Error submitting job: "+job);
+					}
+		
+				} else {
+					log.debug("Skipping empty target: "+target);
+					job.setJobId("");
+				}
+				
+				target.setSubmittedJobDep(job);
+				for (String out: target.getOutputs()) {
+					submittedJobs.put(out, job);
+				}
+			} else {
+				log.debug("Empty job for target: "+target);
 			}
 			return job;
 		} catch (ASTParseException | ASTExecException e) {

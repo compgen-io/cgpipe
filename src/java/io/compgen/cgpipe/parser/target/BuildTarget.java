@@ -71,7 +71,7 @@ public class BuildTarget {
 				jobRoot.addImportTarget(btg);
 			}
 		}
-		
+
 		TemplateParser.parseTemplate(lines, pre, post, jobRoot);
 
 		return new JobDef(jobRoot.getBody(), jobRoot.cloneValues(), outputs, inputs);
