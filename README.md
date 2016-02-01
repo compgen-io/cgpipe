@@ -1,4 +1,4 @@
-CGPipe - minimum viable pipeline
+cgpipe - minimum viable pipeline
 ====
 
 Make for HPC analysis pipelines
