@@ -199,9 +199,11 @@ public abstract class JobRunner {
 	}
 	
 	public void submitAll(BuildTarget initialTarget, RootContext context) throws RunnerException {
-		setup(context);
-		markSkippable(initialTarget, context, initialTarget.getOutputs().get(0));
-		submitTargets(initialTarget, context, initialTarget.getOutputs().get(0), true);
+		if (initialTarget.getOutputs().size() > 0) {
+			setup(context);
+			markSkippable(initialTarget, context, initialTarget.getOutputs().get(0));
+			submitTargets(initialTarget, context, initialTarget.getOutputs().get(0), true);
+		}
 	}
 
 	private long markSkippable(BuildTarget target, RootContext context, String outputName) throws RunnerException {
