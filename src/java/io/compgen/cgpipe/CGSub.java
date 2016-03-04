@@ -86,6 +86,7 @@ public class CGSub extends AbstractCommand{
 	private String stdout = null;
 	private String stderr = null;
 	private boolean dryrun = false;
+	private int nice = 0;
 	private List<String> dependencies = null;
 	private String logFilename = null;
 	int verbosity = 0;
@@ -132,6 +133,11 @@ public class CGSub extends AbstractCommand{
 	@Option(name="mail", charName="M", desc="Send email here after job completion (or error)")
 	public void setMail(String mail) {
 		this.mail=mail;
+	}
+	
+	@Option(name="nice",desc="Set the \"nice\" level for this job (SLURM only)")
+	public void setNice(int nice) {
+		this.nice=nice;
 	}
 	
 	@Option(name="log", charName="l", desc="Log output to this file")
@@ -237,6 +243,9 @@ public class CGSub extends AbstractCommand{
 		}
 		if (queue != null) {
 			confVals.put("job.queue", new VarString(queue));
+		}
+		if (nice != 0) {
+			confVals.put("job.nice", new VarInt(nice));
 		}
 		
 		try {

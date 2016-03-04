@@ -40,6 +40,9 @@ if job.procs > 1
 <% if job.account %>
 #SBATCH -A ${job.account}
 <% endif %>
+<% if job.nice %>
+#SBATCH --nice=${job.nice}
+<% endif %>
 <% if job.stdout %>
 #SBATCH -o ${job.stdout}
 <% endif %>
