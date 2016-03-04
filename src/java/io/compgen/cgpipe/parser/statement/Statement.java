@@ -22,6 +22,7 @@ public interface Statement {
 	public static final Statement UNSET = new Unset();
 	public static final Statement EXIT = new Exit();
 	public static final Statement LOG = new WriteLog();
+	public static final Statement DUMPVARS = new DumpVars();
 	
 	public static final Statement[] statements = {
 		PRINT,
@@ -37,6 +38,7 @@ public interface Statement {
 		IN,
 		UNSET,
 		EXIT,
-		LOG
+		LOG,
+		DUMPVARS
 	};
 }
