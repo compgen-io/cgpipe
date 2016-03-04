@@ -27,6 +27,9 @@ public class RootContext extends ExecContext {
 	
 	private List<BuildTargetTemplate> targets = new ArrayList<BuildTargetTemplate>();
 	private List<BuildTargetTemplate> importTargets = new ArrayList<BuildTargetTemplate>();
+	
+	private Map<String, BuildTarget> submittedOutputs = new HashMap<String, BuildTarget>();
+	
 	private final List<String> outputs;
 	private final List<String> inputs;
 	private String body = "";
@@ -79,6 +82,10 @@ public class RootContext extends ExecContext {
 	public BuildTarget build(String output, boolean allowMissing) {
 		if (output != null) {
 			log.debug("Looking for build-target: " + output);
+			if (submittedOutputs.containsKey(output)) {
+				log.debug("Found: " + output + " provided by existing target: " + submittedOutputs.get(output) );
+				return submittedOutputs.get(output);
+			}
 		}
 
 		BuildTarget tgt = null;
