@@ -77,6 +77,9 @@ public class CGPipe {
 			
 			if (arg.equals("-h") || arg.equals("-help") || arg.equals("--help")) {
 				if (k != null) {
+					if (k.contains("-")) {
+						k = k.replaceAll("-", "_");
+					}
 					confVals.put(k, VarBool.TRUE);
 				}
 				showHelp = true;
@@ -85,36 +88,57 @@ public class CGPipe {
 				System.exit(1);
 			} else if (arg.equals("-s")) {
 				if (k != null) {
+					if (k.contains("-")) {
+						k = k.replaceAll("-", "_");
+					}
 					confVals.put(k, VarBool.TRUE);
 				}
 				silent = true;
 			} else if (arg.equals("-nolog")) {
 				if (k != null) {
+					if (k.contains("-")) {
+						k = k.replaceAll("-", "_");
+					}
 					confVals.put(k, VarBool.TRUE);
 				}
 				silenceStdErr = true;
 			} else if (arg.equals("-v")) {
 				if (k != null) {
+					if (k.contains("-")) {
+						k = k.replaceAll("-", "_");
+					}
 					confVals.put(k, VarBool.TRUE);
 				}
 				verbosity++;
 			} else if (arg.equals("-vv")) {
 				if (k != null) {
+					if (k.contains("-")) {
+						k = k.replaceAll("-", "_");
+					}
 					confVals.put(k, VarBool.TRUE);
 				}
 				verbosity += 2;
 			} else if (arg.equals("-vvv")) {
 				if (k != null) {
+					if (k.contains("-")) {
+						k = k.replaceAll("-", "_");
+					}
 					confVals.put(k, VarBool.TRUE);
 				}
 				verbosity += 3;
 			} else if (arg.equals("-dr")) {
 				if (k != null) {
+					if (k.contains("-")) {
+						k = k.replaceAll("-", "_");
+					}
 					confVals.put(k, VarBool.TRUE);
 				}
 				dryrun = true;
 			} else if (arg.startsWith("--")) {
 				if (k != null) {
+					if (k.contains("-")) {
+						k = k.replaceAll("-", "_");
+					}
 					confVals.put(k, VarBool.TRUE);
 				}
 				k = arg.substring(2);
@@ -146,6 +170,9 @@ public class CGPipe {
 			}
 		}
 		if (k != null) {
+			if (k.contains("-")) {
+				k = k.replaceAll("-", "_");
+			}
 			confVals.put(k, VarBool.TRUE);
 		}
 
