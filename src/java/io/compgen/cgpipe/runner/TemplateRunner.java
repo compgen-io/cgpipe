@@ -149,6 +149,8 @@ public abstract class TemplateRunner extends JobRunner {
 	private String submitScript(String src) throws RunnerException {
 		if (dryrun) {
 			dryRunJobCount++;
+			System.err.println("[dryrun." + dryRunJobCount+"]");
+			System.err.println(src);
 			return "dryrun." + dryRunJobCount;
 		}
 		

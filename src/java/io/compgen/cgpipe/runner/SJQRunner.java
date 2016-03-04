@@ -105,6 +105,10 @@ public class SJQRunner extends JobRunner {
 			String jobId = "dryrun." + dryRunJobCount;
 			jobdef.setJobId(jobId);
 			submittedJobs.add(jobId);
+
+			System.err.println("[dryrun." + dryRunJobCount+"]");
+			System.err.println("#!"+ShellScriptRunner.defaultShell+"\n"+jobdef.getBody());
+
 			return true;
 		}
 
