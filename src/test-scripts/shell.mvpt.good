@@ -5,3 +5,4 @@ hello world
 11
 ${foo} world
 hello world
+echo $(date)

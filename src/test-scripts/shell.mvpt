@@ -16,3 +16,6 @@ print $(echo "${foo} world")
 
 # this works too...
 #print $(echo "${foo} $USER")
+
+#This shouldn't get called
+print "echo \\$(date)"
