@@ -5,6 +5,7 @@ import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.parser.Parser;
 import io.compgen.cgpipe.parser.target.BuildTarget;
 import io.compgen.cgpipe.parser.target.BuildTargetTemplate;
+import io.compgen.cgpipe.parser.target.ExistingJobBuildTarget;
 import io.compgen.cgpipe.parser.target.FileExistsBuildTarget;
 import io.compgen.cgpipe.parser.variable.VarNull;
 import io.compgen.cgpipe.parser.variable.VarString;
@@ -13,6 +14,7 @@ import io.compgen.common.StringUtils;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -79,15 +81,12 @@ public class RootContext extends ExecContext {
 	public BuildTarget build(String output) {
 		return build(output, false);
 	}
+	
+	public void addPendingJobOutput(String output, String jobId) {
+		submittedOutputs.put(output, new ExistingJobBuildTarget(output, jobId));
+	}
+	
 	public BuildTarget build(String output, boolean allowMissing) {
-		if (output != null) {
-			log.debug("Looking for build-target: " + output);
-			if (submittedOutputs.containsKey(output)) {
-				log.debug("Found: " + output + " provided by existing target: " + submittedOutputs.get(output) );
-				return submittedOutputs.get(output);
-			}
-		}
-
 		BuildTarget tgt = null;
 		
 		for (BuildTargetTemplate tgtdef: targets) {
@@ -137,6 +136,16 @@ public class RootContext extends ExecContext {
 			return new FileExistsBuildTarget(output);
 		}
 		
+		// TODO: Fix this... we aren't able to read a joblog from multiple pipelines... as-is, this check is meaningless
+		if (output != null) {
+			String absOutput = Paths.get(output).toAbsolutePath().toString();
+			log.debug("Looking for build-target: " + output + " ("+absOutput+")");
+			if (submittedOutputs.containsKey(absOutput)) {
+				log.debug("Found: " + absOutput + " provided by existing target: " + submittedOutputs.get(absOutput) );
+				return submittedOutputs.get(absOutput);
+			}
+		}
+
 		if (!allowMissing && this.contains("cgpipe.ignore_missing_inputs")) {
 			log.debug("Ignoring missing dependency: " + output);
 			return new FileExistsBuildTarget(output);

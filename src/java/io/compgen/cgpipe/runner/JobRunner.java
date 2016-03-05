@@ -108,7 +108,10 @@ public abstract class JobRunner {
 					while ((line = reader.readLine()) != null) {
 						String[] cols = line.split("\t");
 						if (cols[1].equals("OUTPUT")) {
-							obj.submittedJobs.put(Paths.get(cols[2]).toAbsolutePath().toString(), new ExistingJob(cols[0]));
+							String absOutput = Paths.get(cols[2]).toAbsolutePath().toString();
+							obj.submittedJobs.put(absOutput, new ExistingJob(cols[0]));
+							cxt.getRoot().addPendingJobOutput(absOutput, cols[0]);
+							log.trace("Existing/pending output: "+ absOutput);
 						}
 					}
 					reader.close();
