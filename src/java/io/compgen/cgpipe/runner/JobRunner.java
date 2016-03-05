@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -107,7 +108,7 @@ public abstract class JobRunner {
 					while ((line = reader.readLine()) != null) {
 						String[] cols = line.split("\t");
 						if (cols[1].equals("OUTPUT")) {
-							obj.submittedJobs.put(cols[2], new ExistingJob(cols[0]));
+							obj.submittedJobs.put(Paths.get(cols[2]).toAbsolutePath().toString(), new ExistingJob(cols[0]));
 						}
 					}
 					reader.close();
@@ -297,7 +298,7 @@ public abstract class JobRunner {
 				
 				target.setSubmittedJobDep(job);
 				for (String out: target.getOutputs()) {
-					submittedJobs.put(out, job);
+					submittedJobs.put(Paths.get(out).toAbsolutePath().toString(), job);
 				}
 			} else {
 				log.debug("Empty job for target: "+target);
@@ -312,16 +313,18 @@ public abstract class JobRunner {
 	private JobDependency findJobProviding(String input) throws RunnerException {
 		log.trace("Looking for output: "+ input);
 
-		if (submittedJobs.containsKey(input)) {
-			log.debug("Found existing job providing: "+ input + " ("+submittedJobs.get(input).getJobId()+")");
-			JobDependency job = submittedJobs.get(input);
+		String absInput = Paths.get(input).toAbsolutePath().toString();
+		
+		if (submittedJobs.containsKey(absInput)) {
+			log.debug("Found existing job providing: "+ absInput + " ("+submittedJobs.get(absInput).getJobId()+")");
+			JobDependency job = submittedJobs.get(absInput);
 			
 			if (isJobIdValid(job.getJobId())) {
 				return job;
 			}
 
 			log.debug("Existing job: "+ job.getJobId()+" is no longer valid... resubmitting");
-			submittedJobs.remove(input);
+			submittedJobs.remove(absInput);
 		}
 		
 		return null;
@@ -362,7 +365,7 @@ public abstract class JobRunner {
 			log.debug("src: "+StringUtils.strip(s));
 		}
 
-		if (joblog != null && job.getJobId() != null && !job.getJobId().equals("")) {
+		if (!dryrun && joblog != null && job.getJobId() != null && !job.getJobId().equals("")) {
 			joblog.println(job.getJobId()+"\t"+"NAME\t"+job.getName());
 			joblog.println(job.getJobId()+"\t"+"SUBMIT\t"+System.currentTimeMillis());
 			joblog.println(job.getJobId()+"\t"+"USER\t"+System.getProperty("user.name"));
