@@ -10,6 +10,7 @@ import io.compgen.cgpipe.parser.target.FileExistsBuildTarget;
 import io.compgen.cgpipe.parser.variable.VarNull;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.cgpipe.runner.JobRunner;
 import io.compgen.common.StringUtils;
 
 import java.io.File;
@@ -30,7 +31,7 @@ public class RootContext extends ExecContext {
 	private List<BuildTargetTemplate> targets = new ArrayList<BuildTargetTemplate>();
 	private List<BuildTargetTemplate> importTargets = new ArrayList<BuildTargetTemplate>();
 	
-	private Map<String, BuildTarget> submittedOutputs = new HashMap<String, BuildTarget>();
+	private Map<String, ExistingJobBuildTarget> submittedOutputs = new HashMap<String, ExistingJobBuildTarget>();
 	
 	private final List<String> outputs;
 	private final List<String> inputs;
@@ -82,8 +83,8 @@ public class RootContext extends ExecContext {
 		return build(output, false);
 	}
 	
-	public void addPendingJobOutput(String output, String jobId) {
-		submittedOutputs.put(output, new ExistingJobBuildTarget(output, jobId));
+	public void addPendingJobOutput(String output, String jobId, JobRunner runner) {
+		submittedOutputs.put(output, new ExistingJobBuildTarget(output, jobId, runner));
 	}
 	
 	public BuildTarget build(String output, boolean allowMissing) {
@@ -136,13 +137,16 @@ public class RootContext extends ExecContext {
 			return new FileExistsBuildTarget(output);
 		}
 		
-		// TODO: Fix this... we aren't able to read a joblog from multiple pipelines... as-is, this check is meaningless
 		if (output != null) {
 			String absOutput = Paths.get(output).toAbsolutePath().toString();
 			log.debug("Looking for build-target: " + output + " ("+absOutput+")");
 			if (submittedOutputs.containsKey(absOutput)) {
-				log.debug("Found: " + absOutput + " provided by existing target: " + submittedOutputs.get(absOutput) );
-				return submittedOutputs.get(absOutput);
+				if (submittedOutputs.get(absOutput).isJobValid()) {
+					log.debug("Found: " + absOutput + " provided by existing/valid job: " + submittedOutputs.get(absOutput).getJobId() );
+					return submittedOutputs.get(absOutput);
+				} else {
+					log.debug("Found: " + absOutput + " provided by existing job: " + submittedOutputs.get(absOutput).getJobId() + ", but it is not a valid job!" );
+				}
 			}
 		}
 

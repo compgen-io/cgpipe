@@ -110,7 +110,7 @@ public abstract class JobRunner {
 						if (cols[1].equals("OUTPUT")) {
 							String absOutput = Paths.get(cols[2]).toAbsolutePath().toString();
 							obj.submittedJobs.put(absOutput, new ExistingJob(cols[0]));
-							cxt.getRoot().addPendingJobOutput(absOutput, cols[0]);
+							cxt.getRoot().addPendingJobOutput(absOutput, cols[0], obj);
 							log.trace("Existing/pending output: "+ absOutput);
 						}
 					}
