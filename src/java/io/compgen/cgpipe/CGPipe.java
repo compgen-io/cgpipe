@@ -285,12 +285,18 @@ public class CGPipe {
 					log.debug("building: "+target);
 
 					BuildTarget initTarget = root.build(target);
-					runner.submitAll(initTarget, root);
+					if (initTarget != null) {
+						runner.submitAll(initTarget, root);
+					} else {
+						System.out.println("CGPIPE ERROR: Unable to find target: " + target);
+					}
 				}
 			} else {
 				BuildTarget initTarget = root.build();
 				if (initTarget != null) {
 					runner.submitAll(initTarget, root);
+				} else {
+					System.out.println("CGPIPE ERROR: Unable to find default target");
 				}
 			}
 			runner.done();
