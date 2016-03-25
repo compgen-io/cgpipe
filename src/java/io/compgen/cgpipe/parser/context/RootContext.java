@@ -62,12 +62,12 @@ public class RootContext extends ExecContext {
 	}
 
 	public void addTarget(BuildTargetTemplate targetDef) {
-		log.trace("Adding build-target: " + targetDef);
+		log.info("Adding build-target: " + targetDef);
 		this.targets.add(targetDef);
 	}
 	
 	public void addImportTarget(BuildTargetTemplate targetDef) {
-		log.trace("Adding import-build-target: " + targetDef);
+		log.info("Adding import-build-target: " + targetDef);
 		this.importTargets.add(targetDef);
 	}
 	
