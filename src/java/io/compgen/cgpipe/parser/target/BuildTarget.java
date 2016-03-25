@@ -80,7 +80,12 @@ public class BuildTarget {
 	}
 
 	public boolean isSkippable(String output) {
-		return skippable.contains(output);
+		for (String out: outputs) {
+			if (!skippable.contains(out)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public void setSkippable(String output) {
