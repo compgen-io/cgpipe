@@ -13,8 +13,10 @@ import io.compgen.common.StringUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class BuildTarget {
 
@@ -22,7 +24,7 @@ public class BuildTarget {
 	private List<String> outputs;
 	private Map<String, VarValue> capturedContext;
 	private List<NumberedLine> lines;
-	private boolean skippable = false;
+	private Set<String> skippable = new HashSet<String>();
 	private JobDependency submittedJobDep=null;
 
 	private Map<String, BuildTarget> deps = new HashMap<String, BuildTarget>();
@@ -77,12 +79,12 @@ public class BuildTarget {
 		return new JobDef(jobRoot.getBody(), jobRoot.cloneValues(), outputs, inputs);
 	}
 
-	public boolean isSkippable() {
-		return skippable;
+	public boolean isSkippable(String output) {
+		return skippable.contains(output);
 	}
 
-	public void setSkippable(boolean skippable) {
-		this.skippable = skippable;
+	public void setSkippable(String output) {
+		this.skippable.add(output);
 	}
 
 	public void setSubmittedJobDep(JobDependency jobDep) {

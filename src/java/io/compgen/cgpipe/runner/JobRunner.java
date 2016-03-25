@@ -203,7 +203,7 @@ public abstract class JobRunner {
 	}
 	
 	public void submitAll(BuildTarget initialTarget, RootContext context) throws RunnerException {
-		if (initialTarget.getOutputs().size() > 0) {
+		if (initialTarget.getOutputs() != null && initialTarget.getOutputs().size() > 0) {
 			setup(context);
 			markSkippable(initialTarget, context, initialTarget.getOutputs().get(0));
 			submitTargets(initialTarget, context, initialTarget.getOutputs().get(0), true);
@@ -230,7 +230,7 @@ public abstract class JobRunner {
 			if (outputFile.exists()) {
 				if (outputFile.lastModified() > lastModified) {
 					log.debug("Marking output-target as skippable: "+outputName);
-					target.setSkippable(true);
+					target.setSkippable(outputName);
 					return outputFile.lastModified();
 				} else {
 					log.debug("Marking output-target as not skippable: " + outputName + " is older than " + lastModifiedDep + " (" + outputFile.lastModified() + " vs " + lastModified + ")");
@@ -241,24 +241,28 @@ public abstract class JobRunner {
 		} else {
 			log.debug("Marking output-target as not skippable: "+outputName + " a dependency will be built");
 		}
-		target.setSkippable(false);
 		return -1;
 	}
 
 	private JobDependency submitTargets(BuildTarget target, RootContext context, String outputName, boolean isRoot) throws RunnerException {
+		log.trace("Submitting target: "+outputName);
+
 		// Can we skip this target (file exists)
-		if (target.isSkippable()) {
+		if (target.isSkippable(outputName)) {
+			log.trace("Skipping target: "+outputName);
 			return null;
 		}
 		
 		// Has it already been submitted in another part of the tree?
 		if (target.getJobDep() != null) {
+			log.trace("Skipping target (already submitted): "+outputName);
 			return target.getJobDep();
 		}
 
 		// Have we already submitted this job in a prior run?
 		JobDependency depJob = findJobProviding(outputName);
 		if (depJob != null) {
+			log.trace("Skipping target (job queued): "+outputName);
 			return depJob;
 		}
 		
@@ -278,9 +282,12 @@ public abstract class JobRunner {
 				}
 	
 				for (String out: target.getDepends().keySet()) {
+					log.info("Submitting dependency: "+out);
 					JobDependency dep = submitTargets(target.getDepends().get(out), context, out, blankRoot);
 					if (dep != null) {
 						deps.add(dep);
+					} else {
+						log.debug("Dependency not found?: "+out);
 					}
 				}
 			
@@ -311,7 +318,7 @@ public abstract class JobRunner {
 			abort();
 			throw new RunnerException(e);
 		}
-	}	
+	}
 
 	private JobDependency findJobProviding(String input) throws RunnerException {
 		log.trace("Looking for output: "+ input);
