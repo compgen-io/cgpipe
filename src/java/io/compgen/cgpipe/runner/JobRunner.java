@@ -223,25 +223,33 @@ public abstract class JobRunner {
 			}
 		}
 		
+		long retval = 0;
 		if (lastModified > -1) {
 			// Check to see if the outputName file exists on disk.
 			// Note: this could also be used to look for remote resources (S3, etc), but not implemented
-			File outputFile = new File(outputName);
-			if (outputFile.exists()) {
-				if (outputFile.lastModified() > lastModified) {
-					log.debug("Marking output-target as skippable: "+outputName);
-					target.setSkippable(outputName);
-					return outputFile.lastModified();
+			for (String allout: target.getOutputs()) {
+				File outputFile = new File(allout);
+				if (outputFile.exists()) {
+					if (outputFile.lastModified() > lastModified) {
+						log.debug("Marking output-target as skippable: "+allout);
+						target.setSkippable(allout);
+						if (retval != -1 && outputFile.lastModified() > retval) {
+							retval = outputFile.lastModified();
+						}
+					} else {
+						log.debug("Marking output-target as not skippable: " + allout + " is older than " + lastModifiedDep + " (" + outputFile.lastModified() + " vs " + lastModified + ")");
+						retval = -1;
+					}
 				} else {
-					log.debug("Marking output-target as not skippable: " + outputName + " is older than " + lastModifiedDep + " (" + outputFile.lastModified() + " vs " + lastModified + ")");
+					log.debug("Marking output-target as not skippable: " + allout + " doesn't exist! (" + outputFile.getAbsolutePath()+")");
+					retval = -1;
 				}
-			} else {
-				log.debug("Marking output-target as not skippable: " + outputName + " doesn't exist! (" + outputFile.getAbsolutePath()+")");
 			}
 		} else {
 			log.debug("Marking output-target as not skippable: "+outputName + " a dependency will be built");
+			retval = -1;
 		}
-		return -1;
+		return retval;
 	}
 
 	private JobDependency submitTargets(BuildTarget target, RootContext context, String outputName, boolean isRoot) throws RunnerException {
