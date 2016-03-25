@@ -256,7 +256,7 @@ public abstract class JobRunner {
 		log.trace("Submitting target: "+outputName);
 
 		// Can we skip this target (file exists)
-		if (target.isSkippable(outputName)) {
+		if (target.isSkippable()) {
 			log.trace("Skipping target: "+outputName);
 			return null;
 		}

@@ -79,7 +79,7 @@ public class BuildTarget {
 		return new JobDef(jobRoot.getBody(), jobRoot.cloneValues(), outputs, inputs);
 	}
 
-	public boolean isSkippable(String output) {
+	public boolean isSkippable() {
 		for (String out: outputs) {
 			if (!skippable.contains(out)) {
 				return false;
