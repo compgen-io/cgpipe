@@ -4,7 +4,6 @@ import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.ExitException;
 import io.compgen.cgpipe.exceptions.RunnerException;
-import io.compgen.cgpipe.parser.Parser;
 import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.variable.VarBool;
 import io.compgen.cgpipe.parser.variable.VarInt;
@@ -26,7 +25,6 @@ import io.compgen.common.StringUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -251,23 +249,8 @@ public class CGSub extends AbstractCommand{
 		try {
 			// Load config values from global config. 
 			RootContext root = new RootContext();
-
-			// Parse the default cgpiperc
-			InputStream is = CGPipe.class.getClassLoader().getResourceAsStream("io/compgen/cgpipe/cgpiperc");
-			if (is != null) {
-				Parser.exec("io/compgen/cgpipe/cgpiperc", is,  root);
-			}
+			CGPipe.loadInitFiles(root);
 			
-			// Parse /etc global RC file
-			if (CGPipe.GLOBAL_INIT.exists()) {
-				Parser.exec(CGPipe.GLOBAL_INIT.getAbsolutePath(), root);
-			}
-
-			// Parse RC file
-			if (CGPipe.USER_INIT.exists()) {
-				Parser.exec(CGPipe.USER_INIT.getAbsolutePath(), root);
-			}
-
 			// Load settings from environment variables.
 			root.loadEnvironment();
 			

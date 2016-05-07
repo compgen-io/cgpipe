@@ -7,6 +7,7 @@ import io.compgen.cgpipe.exceptions.RunnerException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
 import io.compgen.cgpipe.loader.SourceLoader;
 import io.compgen.cgpipe.parser.Parser;
+import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.target.BuildTarget;
 import io.compgen.cgpipe.parser.variable.VarBool;
@@ -24,6 +25,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -216,25 +219,7 @@ public class CGPipe {
 		try {
 			// Load config values from global config. 
 			RootContext root = new RootContext();
-
-			// Parse the default cgpiperc
-			InputStream is = CGPipe.class.getClassLoader().getResourceAsStream("io/compgen/cgpipe/cgpiperc");
-			if (is != null) {
-				log.debug("parsing: io/compgen/cgpipe/cgpiperc");
-				Parser.exec("io/compgen/cgpipe/cgpiperc", is,  root);
-			}
-			
-			// Parse /etc global RC file
-			if (GLOBAL_INIT.exists()) {
-				log.debug("parsing: "+GLOBAL_INIT.getAbsolutePath());
-				Parser.exec(GLOBAL_INIT.getAbsolutePath(), root);
-			}
-
-			// Parse RC file
-			if (USER_INIT.exists()) {
-				log.debug("parsing: "+USER_INIT.getAbsolutePath());
-				Parser.exec(USER_INIT.getAbsolutePath(), root);
-			}
+			loadInitFiles(root);
 
 			// Load settings from environment variables.
 			root.loadEnvironment();
@@ -355,5 +340,34 @@ public class CGPipe {
 			System.out.println(readFile("INCLUDES"));
 		} catch (IOException e) {
 		}
+	}
+
+	public static void loadInitFiles(ExecContext root) throws ASTParseException, ASTExecException {
+		// Parse the default cgpiperc
+		InputStream is = CGPipe.class.getClassLoader().getResourceAsStream("io/compgen/cgpipe/cgpiperc");
+		if (is != null) {
+			Parser.exec("io/compgen/cgpipe/cgpiperc", is,  root);
+		}
+
+		// Parse /etc global RC file
+		if (CGPipe.GLOBAL_INIT.exists()) {
+			Parser.exec(CGPipe.GLOBAL_INIT.getAbsolutePath(), root);
+		}
+
+		// Parse install-level RC file (in same folder as JAR)
+		try {
+			String cwd = URLDecoder.decode(CGPipe.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
+			File cwdFile = new File(new File(cwd).getParent(), ".cgpiperc");
+			if (cwdFile.exists()) {
+				Parser.exec(cwdFile.getAbsolutePath(), root);
+			}
+		} catch (UnsupportedEncodingException e) {
+		}
+
+		// Parse RC file
+		if (CGPipe.USER_INIT.exists()) {
+			Parser.exec(CGPipe.USER_INIT.getAbsolutePath(), root);
+		}
+		
 	}
 }
