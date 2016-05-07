@@ -34,8 +34,8 @@ import org.apache.commons.logging.LogFactory;
 
 public class CGPipe {
 	public static final File CGPIPE_HOME = new File(System.getenv("CGPIPE_HOME") != null ? System.getenv("CGPIPE_HOME") : System.getProperty("user.home"));
-	public static final File USER_INIT = new File(CGPIPE_HOME,".cgpipe_init");
-	public static final File GLOBAL_INIT = new File("/etc/cgpipe_init");
+	public static final File USER_INIT = new File(CGPIPE_HOME,".cgpiperc");
+	public static final File GLOBAL_INIT = new File("/etc/cgpiperc");
 
 //	public static final Map<String, VarValue> globalConfig = new HashMap<String, VarValue>(); 
 	
