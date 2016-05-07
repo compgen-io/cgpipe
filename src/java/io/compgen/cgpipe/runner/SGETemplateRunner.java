@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SGETemplateRunner extends TemplateRunner {
-	private boolean hvmemIsTotal = true;
+	private boolean hvmemIsTotal = false;
 	private String account=null;
 	private String parallelEnv = "shm";
 
@@ -103,7 +103,6 @@ public class SGETemplateRunner extends TemplateRunner {
 			super.setConfig(k, val);
 			break;
 		}
-
 	}
 
 	@Override
