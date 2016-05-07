@@ -280,8 +280,9 @@ public class CGPipe {
 				BuildTarget initTarget = root.build();
 				if (initTarget != null) {
 					runner.submitAll(initTarget, root);
-				} else {
-					System.out.println("CGPIPE ERROR: Unable to find default target");
+					// Leave this commented out - it should be allowed to run cgpipe scripts w/o a target defined (testing)
+//				} else {
+//					System.out.println("CGPIPE ERROR: Unable to find default target");
 				}
 			}
 			runner.done();
