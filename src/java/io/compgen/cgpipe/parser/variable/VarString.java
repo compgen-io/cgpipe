@@ -80,6 +80,28 @@ public class VarString extends VarValue {
 				
 				File f = new File((String) obj);
 				return new VarString(f.getName());
+			} else if (method.equals("exists")) {
+				if (args.length != 0) {
+					throw new MethodCallException("Bad or missing argument! exists()");
+				}
+				
+				File f = new File((String) obj);
+				if (f.exists()) {
+					return VarBool.TRUE;
+				}
+				return VarBool.FALSE;
+			} else if (method.equals("dirname")) {
+				if (args.length != 0) {
+					throw new MethodCallException("Bad or missing argument! dirname()");
+				}
+				
+				File f = new File((String) obj);
+				String dirname = f.getAbsoluteFile().getParent();
+				if (dirname == null) {
+					return new VarString("");
+				} else {
+					return new VarString(dirname);
+				}
 			} else if (method.equals("contains")) {
 				if (args.length != 1) {
 					throw new MethodCallException("Bad or missing argument! contains(qstr)");
