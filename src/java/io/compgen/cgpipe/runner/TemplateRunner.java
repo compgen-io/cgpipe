@@ -9,6 +9,7 @@ import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
+import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.common.StringUtils;
 
 import java.io.File;
@@ -51,13 +52,13 @@ public abstract class TemplateRunner extends JobRunner {
 		return StringUtils.readInputStream(is);
 	}
 	
-	protected void setConfig(String k, String val) {
+	protected void setConfig(String k, VarValue val) {
 		if (k.equals(getConfigPrefix()+".template")) {
-			this.templateFilename = val;
-		} else if (k.equals(getConfigPrefix()+".global_hold") && val.toUpperCase().equals("TRUE")) {
+			this.templateFilename = val.toString();
+		} else if (k.equals(getConfigPrefix()+".global_hold") && val.isTrue()) {
 			this.globalHold = true;
 		} else if (k.equals(getConfigPrefix()+".shell")) {
-			this.shell = val;
+			this.shell = val.toString();
 		}
 	}
 

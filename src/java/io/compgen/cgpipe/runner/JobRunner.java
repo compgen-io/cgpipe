@@ -31,7 +31,7 @@ public abstract class JobRunner {
 	abstract public boolean submit(JobDef jobdef) throws RunnerException;
 	abstract public boolean isJobIdValid(String jobId) throws RunnerException;
 	abstract public void runnerDone() throws RunnerException;
-	abstract protected void setConfig(String k, String val);
+	abstract protected void setConfig(String k, VarValue varValue);
 
 	public static String defaultShell = null;
 	static {
@@ -91,7 +91,7 @@ public abstract class JobRunner {
 		String prefix = "cgpipe.runner."+runner;
 		Map<String, VarValue> cxtvals = cxt.cloneValues(prefix);
 		for (String k: cxtvals.keySet()) {
-			obj.setConfig(k, cxtvals.get(k).toString());
+			obj.setConfig(k, cxtvals.get(k));
 		}
 		
 		obj.dryrun = dryrun;

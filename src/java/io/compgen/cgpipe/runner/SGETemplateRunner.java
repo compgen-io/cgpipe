@@ -3,6 +3,7 @@ package io.compgen.cgpipe.runner;
 import io.compgen.cgpipe.exceptions.RunnerException;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.variable.VarString;
+import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.common.StringUtils;
 
 import java.io.IOException;
@@ -88,16 +89,16 @@ public class SGETemplateRunner extends TemplateRunner {
 	}
 	
 	@Override
-	protected void setConfig(String k, String val) {
+	protected void setConfig(String k, VarValue val) {
 		switch(k) {
 		case "cgpipe.runner.sge.account":
-			this.account = val;
+			this.account = val.toString();
 			break;
 		case "cgpipe.runner.sge.parallelenv":
-			this.parallelEnv = val;
+			this.parallelEnv = val.toString();
 			break;
 		case "cgpipe.runner.sge.hvmem_total":
-			this.hvmemIsTotal = val.toUpperCase().equals("TRUE");
+			this.hvmemIsTotal = val.isTrue();
 			break;
 		default:
 			super.setConfig(k, val);

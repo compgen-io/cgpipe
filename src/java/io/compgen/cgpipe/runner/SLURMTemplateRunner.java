@@ -3,6 +3,7 @@ package io.compgen.cgpipe.runner;
 import io.compgen.cgpipe.exceptions.RunnerException;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.variable.VarString;
+import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.common.StringUtils;
 
 import java.io.IOException;
@@ -123,10 +124,10 @@ public class SLURMTemplateRunner extends TemplateRunner {
 	}
 	
 	@Override
-	protected void setConfig(String k, String val) {
+	protected void setConfig(String k, VarValue val) {
 		switch(k) {
 		case "cgpipe.runner.slurm.account":
-			this.account = val;
+			this.account = val.toString();
 			break;
 		default:
 			super.setConfig(k, val);

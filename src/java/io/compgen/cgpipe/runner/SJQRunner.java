@@ -2,6 +2,8 @@ package io.compgen.cgpipe.runner;
 
 import io.compgen.cgpipe.CGPipe;
 import io.compgen.cgpipe.exceptions.RunnerException;
+import io.compgen.cgpipe.exceptions.VarTypeException;
+import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.cmdline.exceptions.CommandArgumentException;
 import io.compgen.common.IterUtils;
 import io.compgen.common.IterUtils.MapFunc;
@@ -180,21 +182,29 @@ public class SJQRunner extends JobRunner {
 	}
 
 	@Override
-	protected void setConfig(String k, String val) {
+	protected void setConfig(String k, VarValue val) {
 		if (k.equals("cgpipe.runner.sjq.maxmem")) {
-			this.maxMem = val;
+			this.maxMem = val.toString();
 		} else if (k.equals("cgpipe.runner.sjq.tempdir")) {
-			this.tempDir = val;
+			this.tempDir = val.toString();
 		} else if (k.equals("cgpipe.runner.sjq.sockfile")) {
-			this.socketFile = new File(val);
+			this.socketFile = new File(val.toString());
 		} else if (k.equals("cgpipe.runner.sjq.passwdfile")) {
-			this.passwdFile = new File(val);
+			this.passwdFile = new File(val.toString());
 		} else if (k.equals("cgpipe.runner.sjq.joblog")) {
-			this.jobLogFile = new File(val);
+			this.jobLogFile = new File(val.toString());
 		} else if (k.equals("cgpipe.runner.sjq.maxprocs")) {
-			this.maxProcs = Integer.parseInt(val);
+			try {
+				this.maxProcs = val.toInt();
+			} catch (VarTypeException e) {
+				e.printStackTrace();
+			}
 		} else if (k.equals("cgpipe.runner.sjq.port")) {
-			this.port = Integer.parseInt(val);
+			try {
+				this.port = val.toInt();
+			} catch (VarTypeException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

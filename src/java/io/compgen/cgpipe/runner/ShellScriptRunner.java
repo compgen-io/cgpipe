@@ -1,6 +1,7 @@
 package io.compgen.cgpipe.runner;
 
 import io.compgen.cgpipe.exceptions.RunnerException;
+import io.compgen.cgpipe.parser.variable.VarValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,9 +54,9 @@ public class ShellScriptRunner extends JobRunner {
 	}
 
 	@Override
-	protected void setConfig(String k, String val) {
+	protected void setConfig(String k, VarValue val) {
 		if (k.equals("cgpipe.runner.shell.bin")) {
-			shellPath = val;
+			shellPath = val.toString();
 		}
 	}
 
