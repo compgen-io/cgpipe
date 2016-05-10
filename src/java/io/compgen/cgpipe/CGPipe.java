@@ -215,6 +215,10 @@ public class CGPipe {
 			confVals.put("cgpipe.log", new VarString(logFilename));
 		}
 		
+		if (System.getenv("CGPIPE_DRYRUN") != null && !System.getenv("CGPIPE_DRYRUN").equals("")) {
+			dryrun = true;
+		}
+		
 		JobRunner runner = null;
 		try {
 			// Load config values from global config. 

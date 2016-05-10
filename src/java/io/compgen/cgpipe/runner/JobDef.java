@@ -27,6 +27,13 @@ public class JobDef implements JobDependency {
 		this.inputs = Collections.unmodifiableList(new ArrayList<String>(inputs));
 	}
 	
+	public JobDef(String body, Map<String, VarValue> settings, List<String> outputs) {
+		this.body = body;
+		this.settings = settings;
+		this.outputs = Collections.unmodifiableList(new ArrayList<String>(outputs));
+		this.inputs = Collections.unmodifiableList(new ArrayList<String>());
+	}
+	
 	public JobDef(String body, Map<String, VarValue> settings) {
 		this.body = body;
 		this.settings = settings;

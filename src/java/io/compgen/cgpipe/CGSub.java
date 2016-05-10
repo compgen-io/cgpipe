@@ -21,6 +21,7 @@ import io.compgen.cmdline.annotation.Option;
 import io.compgen.cmdline.annotation.UnknownArgs;
 import io.compgen.cmdline.annotation.UnnamedArg;
 import io.compgen.cmdline.impl.AbstractCommand;
+import io.compgen.common.ListBuilder;
 import io.compgen.common.StringUtils;
 
 import java.io.File;
@@ -83,6 +84,8 @@ public class CGSub extends AbstractCommand{
 	private String wd = null;
 	private String stdout = null;
 	private String stderr = null;
+	private String joblog = null;
+	private String jobLogOutputs = null;
 	private boolean dryrun = false;
 	private int nice = 0;
 	private List<String> dependencies = null;
@@ -122,6 +125,14 @@ public class CGSub extends AbstractCommand{
 	@Option(name="procs", charName="p", desc="Processors per job", defaultValue="1")
 	public void setProcs(int procs) {
 		this.procs = procs;
+	}
+	@Option(name="joblog", desc="Write to CGPipe job/audit log")
+	public void setJobLog(String joblog) {
+		this.joblog=joblog;
+	}
+	@Option(name="job-output", desc="Output file(s) to log")
+	public void setJobLogOutputs(String jobLogOutputs) {
+		this.jobLogOutputs=jobLogOutputs;
 	}
 	@Option(name="mem", charName="m", desc="Memory per job")
 	public void setMem(String mem) {
@@ -245,7 +256,11 @@ public class CGSub extends AbstractCommand{
 		if (nice != 0) {
 			confVals.put("job.nice", new VarInt(nice));
 		}
-		
+
+		if (System.getenv("CGPIPE_DRYRUN") != null && !System.getenv("CGPIPE_DRYRUN").equals("")) {
+			dryrun = true;
+		}
+
 		try {
 			// Load config values from global config. 
 			RootContext root = new RootContext();
@@ -258,6 +273,11 @@ public class CGSub extends AbstractCommand{
 			root.update(confVals);
 
 			runner = JobRunner.load(root, dryrun);
+			
+			if (joblog != null) {
+				root.set("cgpipe.joblog", new VarString(joblog));
+			}
+			
 
 			if (inputs == null) {
 				if (wd != null) {
@@ -270,7 +290,12 @@ public class CGSub extends AbstractCommand{
 					root.set("job.stderr", new VarString(stderr));
 				}
 					
-				JobDef jobdef = new JobDef(StringUtils.join(" ", cmds), root.cloneValues("job."));
+				JobDef jobdef;
+				if (jobLogOutputs==null) {
+					jobdef = new JobDef(StringUtils.join(" ", cmds), root.cloneValues("job."));
+				} else {
+					jobdef = new JobDef(StringUtils.join(" ", cmds), root.cloneValues("job."), ListBuilder.build(jobLogOutputs.split(",")));
+				}
 				if (dependencies != null) {
 					for (String dep: dependencies) {
 						jobdef.addDependency(new ExistingJob(dep));
@@ -302,7 +327,16 @@ public class CGSub extends AbstractCommand{
 						root.set("job.stderr", new VarString(convertStringForInput(stderr, input)));
 					}
 	
-					JobDef jobdef = new JobDef(StringUtils.join(" ", inputcmds)+"\n", root.cloneValues("job."));
+					JobDef jobdef;
+					if (jobLogOutputs==null) {
+						jobdef = new JobDef(StringUtils.join(" ", cmds), root.cloneValues("job."));
+					} else {
+						List<String> outs = new ArrayList<String>();
+						for (String s: jobLogOutputs.split(",")) {
+							outs.add(convertStringForInput(s, input));
+						}
+						jobdef = new JobDef(StringUtils.join(" ", inputcmds)+"\n", root.cloneValues("job."), outs, ListBuilder.build(new String[] {input}));
+					}
 					if (dependencies != null) {
 						for (String dep: dependencies) {
 							jobdef.addDependency(new ExistingJob(dep));
