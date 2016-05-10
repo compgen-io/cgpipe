@@ -2,6 +2,9 @@ package io.compgen.cgpipe.parser.variable;
 
 import io.compgen.cgpipe.exceptions.VarTypeException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class VarInt extends VarValue {
 	public VarInt(long val) {
 		super(val);
@@ -51,6 +54,14 @@ public class VarInt extends VarValue {
 			return new VarInt((Long)obj * (Long)val.obj);
 		} else if (val.getClass().equals(VarFloat.class)) {
 			return new VarFloat((Long)obj * (Double)val.obj);
+		} else if (val.getClass().equals(VarList.class)) {
+			List<VarValue> tmp = new ArrayList<VarValue>();
+			for (long i=0; i<(Long) obj; i++) {
+				for (VarValue v: ((VarList)val).vals) {
+					tmp.add(v);
+				}
+			}
+			return new VarList(tmp);
 		}
 		throw new VarTypeException("Invalid operation");
 	}

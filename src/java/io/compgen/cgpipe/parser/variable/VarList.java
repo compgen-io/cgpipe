@@ -41,6 +41,21 @@ public class VarList extends VarValue {
 		return this;
 	}
 
+	public VarValue mul(VarValue val) throws VarTypeException {
+		if (val.getClass().equals(VarInt.class)) {
+			long len = ((VarInt)val).toInt();
+			List<VarValue> tmp = new ArrayList<VarValue>();
+			for (long i=0; i<len; i++) {
+				for (VarValue v: ((VarList)val).vals) {
+					tmp.add(v);
+				}
+			}
+			return new VarList(tmp);
+		}
+		throw new VarTypeException("Invalid operation");
+	}
+
+	
 	public Iterable<VarValue> iterate() {
 		return Collections.unmodifiableList(vals);
 	}
