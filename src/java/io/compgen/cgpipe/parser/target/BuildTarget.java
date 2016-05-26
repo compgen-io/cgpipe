@@ -20,18 +20,21 @@ import java.util.Set;
 
 public class BuildTarget {
 
-	private List<String> inputs;
-	private List<String> outputs;
-	private Map<String, VarValue> capturedContext;
-	private List<NumberedLine> lines;
+	final private List<String> inputs;
+	final private List<String> outputs;
+	final private String wildcard;
+	final private Map<String, VarValue> capturedContext;
+	final private List<NumberedLine> lines;
+	
 	private Set<String> skippable = new HashSet<String>();
 	private JobDependency submittedJobDep=null;
 
 	private Map<String, BuildTarget> deps = new HashMap<String, BuildTarget>();
 	
-	public BuildTarget(List<String> outputs, List<String> inputs, Map<String, VarValue> capturedContext, List<NumberedLine> lines) {
+	public BuildTarget(List<String> outputs, List<String> inputs, String wildcard, Map<String, VarValue> capturedContext, List<NumberedLine> lines) {
 		this.outputs = outputs;
 		this.inputs = inputs;
+		this.wildcard = wildcard;
 		this.capturedContext = capturedContext;
 		this.lines = lines;
 	}
@@ -65,7 +68,7 @@ public class BuildTarget {
 	}
 
 	public JobDef eval(List<NumberedLine> pre, List<NumberedLine> post, RootContext globalRoot) throws ASTParseException, ASTExecException {
-		RootContext jobRoot = new RootContext(capturedContext, outputs, inputs);
+		RootContext jobRoot = new RootContext(capturedContext, outputs, inputs, wildcard);
 		jobRoot.set("job.custom", new VarList());
 
 		if (globalRoot != null) {

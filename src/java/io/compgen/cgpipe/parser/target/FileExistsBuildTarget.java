@@ -11,7 +11,7 @@ import java.util.List;
 
 public class FileExistsBuildTarget extends BuildTarget {
 	public FileExistsBuildTarget(String output) {
-		super(new ListBuilder<String>().add(output).list(), null, null, null);
+		super(new ListBuilder<String>().add(output).list(), null, null, null, null);
 	}
 	
 	@Override

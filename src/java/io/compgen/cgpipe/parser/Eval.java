@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class Eval {
+	final private static Pattern wildcardPattern = Pattern.compile("^(.*?)\\$%(.*?)$");
 	final private static Pattern outputPattern = Pattern.compile("^(.*?)\\$>([0-9]*)(.*?)$");
 	final private static Pattern inputPattern = Pattern.compile("^(.*?)\\$<([0-9]*)(.*?)$");
 	private static Log log = LogFactory.getLog(Eval.class);
@@ -342,6 +343,8 @@ public class Eval {
 //		log .trace("eval string (inputs) : "+str+" => "+tmp);
 		tmp = evalStringOutputs(tmp, context, line);
 //		log .trace("eval string (post): "+str+" => "+tmp);
+		tmp = evalStringWildcard(tmp, context, line);
+//		log .trace("eval string (wild): "+str+" => "+tmp);
 		return tmp;
 	}
 
@@ -578,6 +581,31 @@ public class Eval {
 		return out;
 	}
 
+	private static String evalStringWildcard(String str, ExecContext context, NumberedLine line) throws ASTExecException {
+		if (context.getRoot().getWildcard() != null) {
+			String tmp = "";
+			while (str.length() > 0) {
+				Matcher m = wildcardPattern.matcher(str);
+				if (m.matches()) {
+					if (m.group(1).endsWith("\\")) {
+						tmp += m.group(1).substring(0,m.group(1).length()-1);
+						tmp += "$%";
+						str = m.group(2);
+					} else {
+						tmp += m.group(1);
+						tmp += context.getRoot().getWildcard();
+						str = m.group(2);
+					}
+				} else {
+					tmp += str;
+					break;
+				}
+			}
+			return tmp;
+		} else {
+			return str;
+		}
+	}
 	private static String evalStringOutputs(String str, ExecContext context, NumberedLine line) throws ASTExecException {
 		if (context.getRoot().getOutputs() != null) {
 			String tmp = "";

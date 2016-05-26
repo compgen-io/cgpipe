@@ -1,7 +1,5 @@
 package io.compgen.cgpipe.parser.target;
 
-import java.util.List;
-
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.RunnerException;
@@ -11,11 +9,13 @@ import io.compgen.cgpipe.runner.JobDef;
 import io.compgen.cgpipe.runner.JobRunner;
 import io.compgen.common.ListBuilder;
 
+import java.util.List;
+
 public class ExistingJobBuildTarget extends BuildTarget {
 	final private String jobId;
 	final private JobRunner runner;
 	public ExistingJobBuildTarget(String output, String jobId, JobRunner runner) {
-		super(new ListBuilder<String>().add(output).list(), null, null, null);
+		super(new ListBuilder<String>().add(output).list(), null, null, null, null);
 		this.jobId = jobId;
 		this.runner = runner;
 	}

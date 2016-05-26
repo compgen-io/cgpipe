@@ -35,22 +35,21 @@ public class RootContext extends ExecContext {
 	
 	private final List<String> outputs;
 	private final List<String> inputs;
+	private final String wildcard;
 	private String body = "";
 
 	private PrintStream outputStream = System.out;
 	private Log log = LogFactory.getLog(getClass());
 
 	public RootContext() {
-		super();
-		this.outputs = null;
-		this.inputs = null;
+		this(null, null, null, null);
 	}
 
 	public RootContext(Map<String, VarValue> init) {
-		this(init, null, null);
+		this(init, null, null, null);
 	}
 
-	public RootContext(Map<String, VarValue> init, List<String> outputs, List<String> inputs) {
+	public RootContext(Map<String, VarValue> init, List<String> outputs, List<String> inputs, String wildcard) {
 		super();
 		if (init != null) {
 			for (String k: init.keySet()) {
@@ -59,6 +58,7 @@ public class RootContext extends ExecContext {
 		}
 		this.outputs = outputs;
 		this.inputs = inputs;
+		this.wildcard = wildcard;
 	}
 
 	public void addTarget(BuildTargetTemplate targetDef) {
@@ -164,6 +164,10 @@ public class RootContext extends ExecContext {
 	
 	public String getBody() {
 		return body;
+	}
+	
+	public String getWildcard() {
+		return wildcard;
 	}
 	
 	public List<String> getOutputs() {

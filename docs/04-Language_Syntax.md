@@ -290,8 +290,8 @@ Using wildcards, the above could also be rewritten like this:
     %.gz: %
         gzip -c $< > $>
 
-Note: The '%' is only valid as a wildcard placeholder for inputs / outputs
-of build targets. 
+Note: The '%' is only valid as a wildcard placeholder for inputs / outputs.
+To use the wildcard in the body of the target, use `$%`.
 
 ### Target substitutions
 In addition to global variable substitutions, within a target these
@@ -306,6 +306,8 @@ defined.
 
     $<              - The list of all inputs
     $<num           - The {num}'th input (starts at 1)
+    
+    $%              - The wildcard match
 
 
 ### Special targets

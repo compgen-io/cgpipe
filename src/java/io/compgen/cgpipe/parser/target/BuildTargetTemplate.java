@@ -114,7 +114,7 @@ public class BuildTargetTemplate {
 			}
 		}
 
-		BuildTarget tgt = new BuildTarget(matchedOutputs, matchedInputs, capturedContext, lines);
+		BuildTarget tgt = new BuildTarget(matchedOutputs, matchedInputs, wildcard, capturedContext, lines);
 		cache.put(wildcard, tgt);
 		return tgt;
 	}
@@ -131,8 +131,9 @@ public class BuildTargetTemplate {
 		return outputs.get(0);
 	}
 
+	// setup an "importable" target (foo::)
 	public BuildTarget importTarget() {
-		BuildTarget tgt = new BuildTarget(null, null, capturedContext, lines);
+		BuildTarget tgt = new BuildTarget(null, null, null, capturedContext, lines);
 		return tgt;
 	}
 	
