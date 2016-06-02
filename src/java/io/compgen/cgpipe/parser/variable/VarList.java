@@ -46,7 +46,7 @@ public class VarList extends VarValue {
 			long len = ((VarInt)val).toInt();
 			List<VarValue> tmp = new ArrayList<VarValue>();
 			for (long i=0; i<len; i++) {
-				for (VarValue v: ((VarList)val).vals) {
+				for (VarValue v: vals) {
 					tmp.add(v);
 				}
 			}
