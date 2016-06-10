@@ -68,6 +68,16 @@ public class VarString extends VarValue {
 					throw new MethodCallException("Bad or missing argument! sub(bait,replace)");
 				}
 				return new VarString(((String)obj).replaceAll(args[0].toString(), args[1].toString()));
+			} else if (method.equals("upper")) {
+				if (args.length != 0) {
+					throw new MethodCallException("Bad or missing argument! upper()");
+				}
+				return new VarString(((String)obj).toUpperCase());
+			} else if (method.equals("lower")) {
+				if (args.length != 0) {
+					throw new MethodCallException("Bad or missing argument! lower()");
+				}
+				return new VarString(((String)obj).toLowerCase());
 			} else if (method.equals("length")) {
 				if (args.length != 0) {
 					throw new MethodCallException("Bad or missing argument! length()");
