@@ -44,3 +44,8 @@ print "@{baz[:-1]}"
 print "${baz}"
 print "pre_@{baz[:-1]}_suf"
 
+t = "foo_bar".split("_")
+print t
+
+t = "foo".split("_")
+print t
