@@ -7,4 +7,6 @@ print "${bar+2}"
 
 test="foobar"
 print "${test.sub(\"o\", \"a\")}"
-#print """${test.sub("a", "o")}"""
+
+
+print "${test.upper()}"
