@@ -1,0 +1,10 @@
+foo="bar=1+1"
+eval foo
+print bar
+
+print "${\"foo\"+\"bar\"}"
+print "${bar+2}"
+
+test="foobar"
+print "${test.sub(\"o\", \"a\")}"
+#print """${test.sub("a", "o")}"""

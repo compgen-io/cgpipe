@@ -33,6 +33,7 @@ public class TargetNode extends ASTNode {
 			}
 			p = p.getParent();
 		}
+//		System.err.println("TOKENS: " + tokens);
 
 		for (Token tok: tokens) {
 			if (tok.isColon()) { 

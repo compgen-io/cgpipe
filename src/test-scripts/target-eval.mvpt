@@ -1,0 +1,19 @@
+test = "bar"
+one: foo
+
+bar:
+    touch bar
+
+bbr:
+    touch bbr
+
+foobar:
+    touch foobar
+
+foo: ${test} ${test.sub("a", "b")} ${"foo"+test}
+    echo "\$< = $<"
+
+    echo "\$<1 = $<1"
+    echo "\$<2 = $<2"
+    echo "\$<3 = $<3"
+    

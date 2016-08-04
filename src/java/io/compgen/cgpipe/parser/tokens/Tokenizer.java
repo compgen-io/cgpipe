@@ -407,7 +407,7 @@ public class Tokenizer {
 		
 		return out;
 	}
-
+	
 	public static List<Token> extractQuotedStrings(String line) throws ASTParseException {
 		char quoteChar = '"';
 		char commentChar='#';
@@ -418,7 +418,9 @@ public class Tokenizer {
 		boolean inquote = false;
 		boolean inshell = false;
 		boolean intriple = false;
+		boolean invar = false;
 		boolean lastSlash = false;
+
 		for (int i=0; i<line.length(); i++) {
 			if (buf.endsWith("\\")) {
 				if (!lastSlash) {
@@ -453,6 +455,14 @@ public class Tokenizer {
 				} else {
 					buf += line.charAt(i);
 				}
+			} else if (invar) {
+				if (line.charAt(i) == '}') { // && !buf.endsWith("\\")) {
+					tokens.add(Token.string(buf+"}"));
+					invar = false;
+					buf = "";
+				} else {
+					buf += line.charAt(i);
+				}
 			}  else {
 				if (i < line.length()-3 && line.substring(i,  i+3).equals(tripleQuote)) {
 					if (!buf.equals("")) {
@@ -467,6 +477,13 @@ public class Tokenizer {
 					}
 					buf = "";
 					inshell = true;
+					i++;
+				} else if (i < line.length()-2 && line.substring(i, i+2).equals("${")) { // && !buf.endsWith("\\")) {
+					if (!buf.equals("")) {
+						tokens.add(Token.raw(buf));
+					}
+					buf = "${";
+					invar = true;
 					i++;
 				} else if (line.charAt(i) == quoteChar) { // && !buf.endsWith("\\")) {
 					if (!buf.equals("")) {

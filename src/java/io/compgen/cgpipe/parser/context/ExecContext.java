@@ -71,7 +71,7 @@ public class ExecContext {
 			try {
 				SimpleFileLoggerImpl.setFilename(val.toString());
 			} catch (FileNotFoundException e) {
-				log .error(e);
+				log.error(e);
 			}
 		}
 		

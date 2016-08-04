@@ -1,0 +1,23 @@
+func_1() {
+JOB_ID="func_1"
+touch bar
+}
+func_2() {
+JOB_ID="func_2"
+touch bbr
+}
+func_3() {
+JOB_ID="func_3"
+touch foobar
+}
+func_4() {
+JOB_ID="func_4"
+echo "$< = bar bbr foobar"
+echo "$<1 = bar"
+echo "$<2 = bbr"
+echo "$<3 = foobar"
+}
+func_1 || exit $?
+func_2 || exit $?
+func_3 || exit $?
+func_4 || exit $?

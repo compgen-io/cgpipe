@@ -35,7 +35,7 @@ public class Eval {
 	private static Log log = LogFactory.getLog(Eval.class);
 
 	public static VarValue evalTokenExpression(TokenList tokens, ExecContext context) throws ASTExecException {
-		log.trace("TOKENS: " + tokens);
+//		log.trace("TOKENS: " + tokens);
 		if (tokens.size() == 0) {
 			return null;
 		}
@@ -332,9 +332,9 @@ public class Eval {
 	
 	public static String evalString(String str, ExecContext context, NumberedLine line) throws ASTExecException {
 		String tmp = "";
-//		log .trace("eval string (pre) : "+str);
+		log .trace("eval string (pre) : "+str);
 		tmp = evalStringVar(str, context, line);
-//		log .trace("eval string (var) : "+str+" => "+tmp);
+		log .trace("eval string (var) : "+str+" => "+tmp);
 		tmp = evalStringList(tmp, context, line);
 //		log .trace("eval string (list) : "+str+" => "+tmp);
 		tmp = evalStringShell(tmp, context, line);
