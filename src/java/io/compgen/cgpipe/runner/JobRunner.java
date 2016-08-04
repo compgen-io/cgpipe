@@ -230,7 +230,7 @@ public abstract class JobRunner {
 			for (String allout: target.getOutputs()) {
 				File outputFile = new File(allout);
 				if (outputFile.exists()) {
-					if (outputFile.lastModified() > lastModified) {
+					if (outputFile.lastModified() >= lastModified) {
 						log.debug("Marking output-target as skippable: "+allout);
 						target.setSkippable(allout);
 						if (retval != -1 && outputFile.lastModified() > retval) {
