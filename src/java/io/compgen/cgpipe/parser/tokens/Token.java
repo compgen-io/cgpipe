@@ -24,16 +24,16 @@ public class Token {
 		return new Token(TokenType.RAW, str, null, null, null);
 	}
 
-//	static public Token quoted(String str) {
-//		return new Token(TokenClass.QUOTED_STRING, str, null, null, null);
-//	}
-
 	static public Token dot() {
 		return new Token(TokenType.DOT, "." , null, null, null);
 	}
 
 	static public Token var(String str) {
 		return new Token(TokenType.VARIABLE, str, null, null, null);
+	}
+
+	static public Token eval(String str) {
+		return new Token(TokenType.EVAL, "${"+str+"}", null, null, null);
 	}
 
 	static public Token value(VarValue val) {
@@ -147,6 +147,10 @@ public class Token {
 
 	public boolean isString() {
 		return type == TokenType.STRING;
+	}
+
+	public boolean isEval() {
+		return type == TokenType.EVAL;
 	}
 
 	public boolean isShell() {

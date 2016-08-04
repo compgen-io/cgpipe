@@ -332,19 +332,19 @@ public class Eval {
 	
 	public static String evalString(String str, ExecContext context, NumberedLine line) throws ASTExecException {
 		String tmp = "";
-		log .trace("eval string (pre) : "+str);
+//		System.err.println("eval string (pre) : "+str);
 		tmp = evalStringVar(str, context, line);
-		log .trace("eval string (var) : "+str+" => "+tmp);
+//		System.err.println("eval string (var) : "+str+" => "+tmp);
 		tmp = evalStringList(tmp, context, line);
-//		log .trace("eval string (list) : "+str+" => "+tmp);
+//		System.err.println("eval string (list) : "+str+" => "+tmp);
 		tmp = evalStringShell(tmp, context, line);
-//		log .trace("eval string (shell) : "+str+" => "+tmp);
+//		System.err.println("eval string (shell) : "+str+" => "+tmp);
 		tmp = evalStringInputs(tmp, context, line);
-//		log .trace("eval string (inputs) : "+str+" => "+tmp);
+//		System.err.println("eval string (inputs) : "+str+" => "+tmp);
 		tmp = evalStringOutputs(tmp, context, line);
-//		log .trace("eval string (post): "+str+" => "+tmp);
+//		System.err.println("eval string (post): "+str+" => "+tmp);
 		tmp = evalStringWildcard(tmp, context, line);
-//		log .trace("eval string (wild): "+str+" => "+tmp);
+//		System.err.println("eval string (wild): "+str+" => "+tmp);
 		return tmp;
 	}
 
@@ -621,6 +621,7 @@ public class Eval {
 						if (m.group(2).equals("")) {
 							tmp += StringUtils.join(" ", context.getRoot().getOutputs());
 						} else {
+//							System.err.println("Looking for output #"+Integer.parseInt(m.group(2))+" " + StringUtils.join(";", context.getRoot().getOutputs()));
 							tmp += context.getRoot().getOutputs().get(Integer.parseInt(m.group(2))-1);
 						}
 						str = m.group(3);
@@ -650,6 +651,7 @@ public class Eval {
 						if (m.group(2).equals("")) {
 							tmp += StringUtils.join(" ", context.getRoot().getInputs());
 						} else {
+//							System.err.println("Looking for input #"+Integer.parseInt(m.group(2))+" " + StringUtils.join(";", context.getRoot().getInputs()));
 							tmp += context.getRoot().getInputs().get(Integer.parseInt(m.group(2))-1);
 						}
 						str = m.group(3);

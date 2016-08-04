@@ -14,9 +14,9 @@ func_4() {
 JOB_ID="func_4"
 echo "$> = foo.bar"
 echo "$< = foo bar"
-echo "$>1 = foo.bar"
 echo "$<1 = foo"
 echo "$<2 = bar"
+echo "$>1 = foo.bar"
 }
 func_1 || exit $?
 func_2 || exit $?

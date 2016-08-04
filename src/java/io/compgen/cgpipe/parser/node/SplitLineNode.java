@@ -4,6 +4,7 @@ import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.loader.NumberedLine;
 import io.compgen.cgpipe.parser.context.ExecContext;
+import io.compgen.cgpipe.parser.tokens.Token;
 import io.compgen.cgpipe.parser.tokens.TokenList;
 import io.compgen.cgpipe.parser.tokens.Tokenizer;
 
@@ -16,7 +17,14 @@ public class SplitLineNode extends ASTNode {
 
 	@Override
 	public ASTNode parseLine(NumberedLine line) throws ASTParseException {
-		TokenList newtokens = Tokenizer.tokenize(line);
+		boolean inTargetDef = false;
+		for (Token tok: tokens) {
+			if (tok.isColon()) {
+				inTargetDef = true;
+			}
+		}
+		
+		TokenList newtokens = Tokenizer.tokenize(line, inTargetDef);
 		
 		if (newtokens.size()==0) {
 			return this;

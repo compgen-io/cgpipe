@@ -15,5 +15,6 @@ public enum TokenType {
 	SLICE_OPEN, 
 	SLICE_CLOSE, 
 	SPLIT_LINE, 
-	DOT
+	DOT, 
+	EVAL
 }

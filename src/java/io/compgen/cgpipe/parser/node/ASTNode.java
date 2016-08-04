@@ -35,7 +35,7 @@ public abstract class ASTNode {
 	}
 
 	public ASTNode parseLine(NumberedLine line) throws ASTParseException {
-		final TokenList tokens = Tokenizer.tokenize(line);
+		final TokenList tokens = Tokenizer.tokenize(line, false);
 		if (tokens.size()==0) {
 			return this;
 		}

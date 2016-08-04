@@ -21,19 +21,19 @@ public class Tokenizer {
 	private static Log log = LogFactory.getLog(Tokenizer.class);
 
 	public static TokenList tokenize(NumberedLine line) throws ASTParseException {
+		return tokenize(line, false);
+	}
+	public static TokenList tokenize(NumberedLine line, boolean inTargetDef) throws ASTParseException {
 		try {
-//			System.err.println(line);
+//			System.err.println(line + " [inTargetDef="+inTargetDef+"]");
 			List<Token> tokens = extractQuotedStrings(line.getLine());
 //			System.err.println("extractQuotedStrings: "+StringUtils.join(";", tokens));
 			
-			tokens = markSplitLine(tokens);
-//			System.err.println("markSplitLine       : "+StringUtils.join(";", tokens));
-	
-			tokens = delimiterSplit(tokens, new char[]{' ', '\t'});
-//			System.err.println("delimiterSplit      : "+StringUtils.join(";", tokens));
-
 			tokens = markColonsAndSlices(tokens);
 //			System.err.println("markColons          : "+StringUtils.join(";", tokens));
+	
+			tokens = markSplitLine(tokens);
+//			System.err.println("markSplitLine       : "+StringUtils.join(";", tokens));
 	
 			// Look for target definitions here
 			// if it exists, then we will skip the next two transformations
@@ -67,7 +67,11 @@ public class Tokenizer {
 				}
 			}
 			
-			if (!foundColon) {
+			if (!foundColon && !inTargetDef) {
+				tokens = delimiterSplit(tokens, new char[]{' ', '\t'});
+//				System.err.println("delimiterSplit      : "+StringUtils.join(";", tokens));
+
+				checkForEval(tokens);
 //				tokens = markDots(tokens);
 				tokens = markParens(tokens);
 				tokens = markStatements(tokens);
@@ -81,7 +85,10 @@ public class Tokenizer {
 //				System.err.println("pre-correctNegativeNum  : "+StringUtils.join(";", tokens));
 				tokens = correctNegativeNum(tokens);
 //				System.err.println("post-correctNegativeNum : "+StringUtils.join(";", tokens));
+			} else {
+				tokens = swapEvalString(tokens, new char[]{' ', '\t'});
 			}
+//			System.err.println("done                : "+StringUtils.join(";", tokens));
 			log.trace("Tokenized line: "+StringUtils.join(";", tokens));
 
 			return new TokenList(tokens, line);
@@ -94,6 +101,64 @@ public class Tokenizer {
 	
 	private static Pattern inputVars = Pattern.compile("\\$<[0-9]*");
 	private static Pattern outputVars = Pattern.compile("\\$>[0-9]*");
+	
+	private static void checkForEval(List<Token> tokens) throws ASTParseException {
+		for (Token tok: tokens) {
+			if (tok.isEval()) {
+				throw new ASTParseException("Eval expression outside of string or target definition");
+			}
+		}
+	}
+
+	private static List<Token> swapEvalString(List<Token> tokens, char[] delims) throws ASTParseException {
+		List<Token> out = new ArrayList<Token>();
+		Token last = null;
+		for (Token tok: tokens) {
+			if (tok.isEval()) {
+				last = tok;
+			} else if (!tok.isRaw()) {
+				if (last != null) {
+					out.add(Token.string(last.getStr()));
+					last = null;
+				}
+				out.add(tok);
+			} else {
+				boolean merge = false;
+				if (last != null) {
+					if (tok.getStr().length() > 0) {
+						boolean found = false;
+						for (int i=0; !found && i<delims.length; i++) {
+							if (tok.getStr().charAt(0) == delims[i]) {
+								found = true;
+							}
+						}
+						if (!found) {
+							merge = true;
+						}
+					}
+				}
+				
+				List<Token> split = delimiterSplit(tok, delims);
+				if (merge && split.size()>0) {
+					out.add(Token.string(last.getStr()+split.get(0).getStr()));
+					split = split.subList(1, split.size());
+					last = null;
+				} else if (last != null) {
+					out.add(Token.string(last.getStr()));
+					last = null;
+				}
+				for (Token stok: split) {
+					out.add(stok);
+				}
+			}
+		}
+		if (last != null) {
+			out.add(Token.string(last.getStr()));
+		}
+		
+		return out;
+
+	}
 	
 	private static List<Token> markInputOutputVars(List<Token> tokens) {
 		List<Token> out = new ArrayList<Token>();
@@ -239,34 +304,39 @@ public class Tokenizer {
 	}
 
 
+	public static List<Token> delimiterSplit(Token tok, char[] delims) throws ASTParseException {
+		List<Token> out = new ArrayList<Token>();
+		if (!tok.isRaw()){
+			out.add(tok);
+			return out;
+		}
+
+		String buf = "";
+		for (int i=0; i<tok.getStr().length(); i++ ) {
+			boolean found = false;
+			for (char delim: delims) {
+				if (tok.getStr().charAt(i) == delim) {
+					found = true;
+					if (!buf.equals("")) {
+						out.add(Token.raw(buf));
+					}
+					buf = "";
+				}
+			}
+			if (!found) {
+				buf += tok.getStr().charAt(i);
+			}
+		}
+		if (!buf.equals("")) {
+			out.add(Token.raw(buf));
+		}
+		return out;
+	}
 	public static List<Token> delimiterSplit(List<Token> tokens, char[] delims) throws ASTParseException {
 		List<Token> out = new ArrayList<Token>();
 
 		for (Token tok: tokens) {
-			if (tok.getType()!=TokenType.RAW) {
-				out.add(tok);
-				continue;
-			}
-			
-			String buf = "";
-			for (int i=0; i<tok.getStr().length(); i++ ) {
-				boolean found = false;
-				for (char delim: delims) {
-					if (tok.getStr().charAt(i) == delim) {
-						found = true;
-						if (!buf.equals("")) {
-							out.add(Token.raw(buf));
-						}
-						buf = "";
-					}
-				}
-				if (!found) {
-					buf += tok.getStr().charAt(i);
-				}
-			}
-			if (!buf.equals("")) {
-				out.add(Token.raw(buf));
-			}
+			out.addAll(delimiterSplit(tok, delims));
 		}
 		
 		return out;
@@ -457,7 +527,7 @@ public class Tokenizer {
 				}
 			} else if (invar) {
 				if (line.charAt(i) == '}') { // && !buf.endsWith("\\")) {
-					tokens.add(Token.string(buf+"}"));
+					tokens.add(Token.eval(buf));
 					invar = false;
 					buf = "";
 				} else {
@@ -482,7 +552,7 @@ public class Tokenizer {
 					if (!buf.equals("")) {
 						tokens.add(Token.raw(buf));
 					}
-					buf = "${";
+					buf = "";
 					invar = true;
 					i++;
 				} else if (line.charAt(i) == quoteChar) { // && !buf.endsWith("\\")) {

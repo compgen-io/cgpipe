@@ -1,23 +1,31 @@
 func_1() {
 JOB_ID="func_1"
-touch bar
+touch bar.txt
 }
 func_2() {
 JOB_ID="func_2"
-touch bbr
+touch bar
 }
 func_3() {
 JOB_ID="func_3"
-touch foobar
+touch bbr
 }
 func_4() {
 JOB_ID="func_4"
-echo "$< = bar bbr foobar"
+touch foobar
+}
+func_5() {
+JOB_ID="func_5"
+echo "$< = bar bbr foobar bar.txt bar"
 echo "$<1 = bar"
 echo "$<2 = bbr"
 echo "$<3 = foobar"
+echo "$<4 = bar.txt"
+echo "$<5 = bar"
 }
+
 func_1 || exit $?
 func_2 || exit $?
 func_3 || exit $?
 func_4 || exit $?
+func_5 || exit $?
