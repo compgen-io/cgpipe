@@ -265,10 +265,7 @@ public class CGSub extends AbstractCommand{
 			// Load config values from global config. 
 			RootContext root = new RootContext();
 			CGPipe.loadInitFiles(root);
-			
-			// Load settings from environment variables.
-			root.loadEnvironment();
-			
+					
 			root.setOutputStream(null);
 			root.update(confVals);
 

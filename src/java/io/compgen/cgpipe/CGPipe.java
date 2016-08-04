@@ -7,7 +7,6 @@ import io.compgen.cgpipe.exceptions.RunnerException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
 import io.compgen.cgpipe.loader.SourceLoader;
 import io.compgen.cgpipe.parser.Parser;
-import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.target.BuildTarget;
 import io.compgen.cgpipe.parser.variable.VarBool;
@@ -225,9 +224,6 @@ public class CGPipe {
 			RootContext root = new RootContext();
 			loadInitFiles(root);
 
-			// Load settings from environment variables.
-			root.loadEnvironment();
-			
 			// Set cmd-line arguments
 			if (silent) {
 				root.setOutputStream(null);
@@ -347,7 +343,7 @@ public class CGPipe {
 		}
 	}
 
-	public static void loadInitFiles(ExecContext root) throws ASTParseException, ASTExecException {
+	public static void loadInitFiles(RootContext root) throws ASTParseException, ASTExecException {
 		// Parse the default cgpiperc
 		InputStream is = CGPipe.class.getClassLoader().getResourceAsStream("io/compgen/cgpipe/cgpiperc");
 		if (is != null) {
@@ -373,6 +369,14 @@ public class CGPipe {
 		if (CGPipe.USER_INIT.exists()) {
 			Parser.exec(CGPipe.USER_INIT.getAbsolutePath(), root);
 		}
-		
+
+		// Load settings from environment variables.
+        Map<String, String> env = System.getenv();
+		for (String k: env.keySet()) {
+			if (k.equals("CGPIPE_ENV")) {
+				Parser.eval(env.get(k).split(";"), root);
+			}
+		}
+
 	}
 }

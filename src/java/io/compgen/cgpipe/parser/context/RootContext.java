@@ -243,14 +243,6 @@ public class RootContext extends ExecContext {
 		return super.get(name);
 	}
 
-	public void loadEnvironment() throws ASTParseException, ASTExecException {
-        Map<String, String> env = System.getenv();
-		for (String k: env.keySet()) {
-			if (k.equals("CGPIPE_ENV")) {
-				Parser.eval(env.get(k).split(";"), this);
-			}
-		}
-	}
 
 	public void dump() {
 		super.dump();
