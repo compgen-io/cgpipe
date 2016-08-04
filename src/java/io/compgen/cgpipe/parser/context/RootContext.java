@@ -1,8 +1,5 @@
 package io.compgen.cgpipe.parser.context;
 
-import io.compgen.cgpipe.exceptions.ASTExecException;
-import io.compgen.cgpipe.exceptions.ASTParseException;
-import io.compgen.cgpipe.parser.Parser;
 import io.compgen.cgpipe.parser.target.BuildTarget;
 import io.compgen.cgpipe.parser.target.BuildTargetTemplate;
 import io.compgen.cgpipe.parser.target.ExistingJobBuildTarget;
