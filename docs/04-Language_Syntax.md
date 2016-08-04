@@ -426,7 +426,28 @@ Here's an example:
 You can have strings that span more than one line if you quote them with three
 double quotes. Here is an example:
 
-    str = """this
-    is a very
-    long
-    string""" 
+
+## Eval statement
+
+The eval statment lets us eval a string at runtime
+
+    i=1
+    a="i=i+1"
+    eval a
+
+    i => 2
+
+## Double evaluated variables 
+
+Double var eval is useful in targets to include chunks of text based on
+a var:
+
+    foo="echo \"$>\""
+
+    target: 
+        ${{foo}} 
+
+will result in this being added to the body:
+
+    echo "target"
+
