@@ -1,0 +1,12 @@
+l="foo bar baz".split(" ")
+
+all: merge foo_1.txt
+
+foo_@{1..3}.txt:
+    touch $>
+
+merge: test_@{l}.txt
+    cat $< > merge
+    
+test_@{l}.txt: 
+    touch $>    

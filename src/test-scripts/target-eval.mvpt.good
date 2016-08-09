@@ -23,9 +23,13 @@ echo "$<3 = foobar"
 echo "$<4 = bar.txt"
 echo "$<5 = bar"
 }
-
+func_6() {
+JOB_ID="func_6"
+touch test_bar_barbar.txt
+}
 func_1 || exit $?
 func_2 || exit $?
 func_3 || exit $?
 func_4 || exit $?
 func_5 || exit $?
+func_6 || exit $?

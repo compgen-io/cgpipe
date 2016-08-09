@@ -33,7 +33,7 @@ public class Token {
 	}
 
 	static public Token eval(String str) {
-		return new Token(TokenType.EVAL, "${"+str+"}", null, null, null);
+		return new Token(TokenType.EVAL, str, null, null, null);
 	}
 
 	static public Token value(VarValue val) {

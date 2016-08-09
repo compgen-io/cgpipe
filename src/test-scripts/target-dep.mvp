@@ -4,6 +4,7 @@
 # this should trigger rebuilding output2
 
 touch test/run/output2
+sleep 1 # needs to sleep...
 touch test/run/output1
 
 dist/cgpipe -nolog -f - <<EOF

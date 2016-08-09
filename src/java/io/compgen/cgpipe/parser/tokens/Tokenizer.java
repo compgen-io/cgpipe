@@ -101,7 +101,7 @@ public class Tokenizer {
 	
 	private static Pattern inputVars = Pattern.compile("\\$<[0-9]*");
 	private static Pattern outputVars = Pattern.compile("\\$>[0-9]*");
-	
+
 	private static void checkForEval(List<Token> tokens) throws ASTParseException {
 		for (Token tok: tokens) {
 			if (tok.isEval()) {
@@ -110,56 +110,82 @@ public class Tokenizer {
 		}
 	}
 
+	/*
+	 * If we are in a target eval, we'll need to manually combine eval expressions
+	 * with RAW tokens (prefix and suffix). This allows us to parse the EVAL expressions
+	 * so that they can be included in the input/output definitions.
+	 * 
+	 * Because we do this manual merge, we have to then also manually delimSplit the new
+	 * combined element.
+	 * 
+	 * What we want to support is an input/output like this: foo_${var1}_${var2}.txt
+	 * 
+	 * But the tokens in this case would be: foo_ | ${var1} | _ | ${var2} | .txt
+	 * 
+	 */
 	private static List<Token> swapEvalString(List<Token> tokens, char[] delims) throws ASTParseException {
 		List<Token> out = new ArrayList<Token>();
-		Token last = null;
+
+		boolean prevNoDelim = false;
+		
 		for (Token tok: tokens) {
 			if (tok.isEval()) {
-				last = tok;
-			} else if (!tok.isRaw()) {
-				if (last != null) {
-					out.add(Token.string(last.getStr()));
-					last = null;
+				if (prevNoDelim) {
+					// last token didn't end in a space, so we need to merge w/ this one
+					Token prev = out.remove(out.size()-1);
+					out.add(Token.eval(prev.getStr()+tok.getStr()));
+				} else {
+					// last token didn't end in a space... just add me
+					out.add(tok);
+					prevNoDelim = true; // by definition eval blocks don't end in a delimiter
 				}
-				out.add(tok);
-			} else {
-				boolean merge = false;
-				if (last != null) {
-					if (tok.getStr().length() > 0) {
-						boolean found = false;
-						for (int i=0; !found && i<delims.length; i++) {
-							if (tok.getStr().charAt(0) == delims[i]) {
-								found = true;
-							}
+			} else if (tok.isRaw()) {
+				boolean startWithDelim = false;
+				prevNoDelim = true;
+				if (tok.getStr().length() > 0) {
+					for (int i=0; i<delims.length; i++) {
+						if (tok.getStr().charAt(0) == delims[i]) {
+							startWithDelim = true;
 						}
-						if (!found) {
-							merge = true;
+						if (tok.getStr().charAt(tok.getStr().length()-1) == delims[i]) {
+							prevNoDelim = false;
 						}
 					}
 				}
 				
-				List<Token> split = delimiterSplit(tok, delims);
-				if (merge && split.size()>0) {
-					out.add(Token.string(last.getStr()+split.get(0).getStr()));
-					split = split.subList(1, split.size());
-					last = null;
-				} else if (last != null) {
-					out.add(Token.string(last.getStr()));
-					last = null;
+				if (!startWithDelim && (out.size()>0 && out.get(out.size()-1).isEval())) {
+					// tok doesn't start with a delimiter, and the last one was an eval, so merge with previous...
+
+					Token prev = out.remove(out.size()-1);
+					List<Token> cur = delimiterSplit(tok, delims);
+					if (cur.size()>0) {
+						out.add(Token.eval(prev.getStr()+cur.get(0).getStr()));
+						for (Token t: cur.subList(1, cur.size())) {
+							out.add(t);
+						}
+					} else {
+						out.add(prev);
+					}
+				} else {
+					for (Token t: delimiterSplit(tok, delims)) {
+						out.add(t);
+					}
 				}
-				for (Token stok: split) {
-					out.add(stok);
-				}
+			} else {
+				out.add(tok);
 			}
 		}
-		if (last != null) {
-			out.add(Token.string(last.getStr()));
+		
+		
+		for (int i=0; i<out.size(); i++) {
+			if (out.get(i).isEval()) {
+				out.set(i, Token.string(out.get(i).getStr()));
+			}
 		}
 		
 		return out;
-
 	}
-	
+		
 	private static List<Token> markInputOutputVars(List<Token> tokens) {
 		List<Token> out = new ArrayList<Token>();
 
@@ -527,7 +553,7 @@ public class Tokenizer {
 				}
 			} else if (invar) {
 				if (line.charAt(i) == '}') { // && !buf.endsWith("\\")) {
-					tokens.add(Token.eval(buf));
+					tokens.add(Token.eval("${"+buf+"}"));
 					invar = false;
 					buf = "";
 				} else {

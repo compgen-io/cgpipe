@@ -1,5 +1,5 @@
 test = "bar"
-one: foo
+one: foo test_${test}_${test}${test}.txt
 
 bar:
     touch bar
@@ -12,6 +12,9 @@ bbr:
 
 foobar:
     touch foobar
+
+test_${test}_${test}${test}.txt:
+    touch $>
 
 foo: ${test} ${test.sub("a", "b")} ${"foo"+test} \
      ${test}.txt bar 
