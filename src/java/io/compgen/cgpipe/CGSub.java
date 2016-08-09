@@ -326,7 +326,7 @@ public class CGSub extends AbstractCommand{
 	
 					JobDef jobdef;
 					if (jobLogOutputs==null) {
-						jobdef = new JobDef(StringUtils.join(" ", cmds), root.cloneValues("job."));
+						jobdef = new JobDef(StringUtils.join(" ", inputcmds), root.cloneValues("job."));
 					} else {
 						List<String> outs = new ArrayList<String>();
 						for (String s: jobLogOutputs.split(",")) {
