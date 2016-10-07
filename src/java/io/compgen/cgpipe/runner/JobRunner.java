@@ -115,9 +115,9 @@ public abstract class JobRunner {
 						}
 					}
 					reader.close();
+				} else if (jobfile.getParentFile() != null) {
+					jobfile.getParentFile().mkdirs();
 				}
-				
-				jobfile.getParentFile().mkdirs();
 				obj.joblog = new PrintStream(new FileOutputStream(joblog, true));
 			} catch (IOException e) {
 				throw new RunnerException(e);
