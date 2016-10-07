@@ -115,7 +115,7 @@ public abstract class JobRunner {
 						}
 					}
 					reader.close();
-				} else if (jobfile.getParentFile() != null) {
+				} else if (jobfile.getParentFile() != null && !jobfile.getParentFile().exists()) {
 					jobfile.getParentFile().mkdirs();
 				}
 				obj.joblog = new PrintStream(new FileOutputStream(joblog, true));
