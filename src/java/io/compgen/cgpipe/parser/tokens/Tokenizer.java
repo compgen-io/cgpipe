@@ -536,7 +536,7 @@ public class Tokenizer {
 					buf += line.charAt(i);
 				}
 			} else if (inquote) {
-				if (line.charAt(i) == quoteChar) { // && !buf.endsWith("\\")) {
+				if (line.charAt(i) == quoteChar && !buf.endsWith("\\")) {
 					tokens.add(Token.string(buf));
 					inquote = false;
 					buf = "";
@@ -544,7 +544,7 @@ public class Tokenizer {
 					buf += line.charAt(i);
 				}
 			} else if (inshell) {
-				if (line.charAt(i) == ')') { // && !buf.endsWith("\\")) {
+				if (line.charAt(i) == ')' && !buf.endsWith("\\")) {
 					tokens.add(Token.shell(buf));
 					inshell = false;
 					buf = "";
@@ -552,7 +552,7 @@ public class Tokenizer {
 					buf += line.charAt(i);
 				}
 			} else if (invar) {
-				if (line.charAt(i) == '}') { // && !buf.endsWith("\\")) {
+				if (line.charAt(i) == '}' && !buf.endsWith("\\")) {
 					tokens.add(Token.eval("${"+buf+"}"));
 					invar = false;
 					buf = "";
