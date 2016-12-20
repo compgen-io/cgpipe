@@ -84,6 +84,9 @@ public abstract class JobRunner {
 		case "sjq":
 			obj = new SJQRunner();
 			break;
+		case "graphviz":
+			obj = new GraphvizRunner();
+			break;
 		default:
 			throw new RunnerException("Can't load job runner: "+runner);
 		}

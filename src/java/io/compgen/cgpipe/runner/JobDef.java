@@ -151,14 +151,30 @@ public class JobDef implements JobDependency {
 			n = getSetting("job.name");
 		}
 		if (n != null && n.length() > 0) {
-			if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".contains(""+n.charAt(0))) {
+			if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_".contains(""+n.charAt(0))) {
 				return n;
 			}
 			return "cg_"+n;
 		}
-		return "cgjob";
+		return "cgjob_"+StringUtils.join("_", getOutputs());
 	}
 
+	public String getSafeName() {
+		String ret = "";
+		String name = getName();
+		
+		for (int i=0; i<name.length(); i++) {
+			if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_".contains(""+name.charAt(i))) {
+				ret += name.charAt(i);
+			} else {
+				if (ret.charAt(ret.length()-1) != '_') {
+					ret += "_";
+				}
+			}
+		}
+		return ret;
+	}
+	
 	public void addDependency(JobDependency dep) {
 		this.depends.add(dep);
 	}
