@@ -3,6 +3,7 @@ package io.compgen.cgpipe.parser.variable;
 import io.compgen.cgpipe.exceptions.MethodCallException;
 import io.compgen.cgpipe.exceptions.MethodNotFoundException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
+import io.compgen.common.StringUtils;
 
 import java.io.File;
 
@@ -120,6 +121,14 @@ public class VarString extends VarValue {
 					return VarBool.TRUE;
 				}
 				return VarBool.FALSE;
+			} else if (method.equals("join")) {
+				if (args.length != 1 || !args[0].isList()) {
+					throw new MethodCallException("Bad or missing argument! join(list)");
+				}
+				
+				String ret = StringUtils.join((String)obj, args[0].iterate());
+				return new VarString(ret);
+				
 			}
 			throw new MethodNotFoundException("Method not found: "+method+" obj="+this);
 		}

@@ -195,4 +195,8 @@ public abstract class VarValue {
 	public int toInt() throws VarTypeException {
 		throw new VarTypeException("Invalid operation");
 	}
+
+	public boolean isList() {
+		return false;
+	}
 }

@@ -33,6 +33,10 @@ public class VarList extends VarValue {
 	public String toString() {
 		return StringUtils.join(" ", vals);
 	}
+
+	public boolean isList() {
+		return true;
+	}
 	
 	public VarValue add(VarValue val) throws VarTypeException {
 		for (VarValue v: val.iterate()) {
