@@ -81,6 +81,9 @@ public abstract class JobRunner {
 		case "slurm":
 			obj = new SLURMTemplateRunner();
 			break;
+		case "pbs":
+			obj = new PBSTemplateRunner();
+			break;
 		case "sjq":
 			obj = new SJQRunner();
 			break;
@@ -88,7 +91,7 @@ public abstract class JobRunner {
 			obj = new GraphvizRunner();
 			break;
 		default:
-			throw new RunnerException("Can't load job runner: "+runner);
+			throw new RunnerException("Can't load job runner: "+runner +" (valid options: shell, sge, slurm, pbs, sjq, graphviz)");
 		}
 		
 		String prefix = "cgpipe.runner."+runner;

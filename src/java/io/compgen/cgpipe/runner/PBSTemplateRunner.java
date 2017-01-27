@@ -38,11 +38,14 @@ public class PBSTemplateRunner extends TemplateRunner {
 			if (retcode == 0) {
 				InputStream is = proc.getInputStream();
 				String stdout = StringUtils.readInputStream(is);
-				String[] kv = stdout.trim().split(" = ");
-				
-				if (kv.length == 2 && kv[0].equals("job_state")) {
-					if (kv[1].equals("Q") || kv[1].equals("R") || kv[1].equals("H")) {
-						return true;
+
+				for (String line: stdout.split("\n")) {
+					String[] kv = line.trim().split(" = ");
+					
+					if (kv.length == 2 && kv[0].equals("job_state")) {
+						if (kv[1].equals("Q") || kv[1].equals("R") || kv[1].equals("H")) {
+							return true;
+						}
 					}
 				}
 				
