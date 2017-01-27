@@ -101,7 +101,7 @@ public class SJQRunner extends JobRunner {
 	}
 	
 	@Override
-	public boolean submit(JobDef jobdef) throws RunnerException {
+	public boolean submit(final JobDef jobdef) throws RunnerException {
 		if (dryrun) {
 			dryRunJobCount++;
 			String jobId = "dryrun." + dryRunJobCount;
@@ -127,7 +127,7 @@ public class SJQRunner extends JobRunner {
 			String jobId = client.submitJob(jobdef.getName(), "#!"+ShellScriptRunner.defaultShell+"\n"+jobdef.getBody(), 
 					((int)jobdef.getSettingInt("job.procs", 1)), jobdef.getSetting("job.mem"), 
 					jobdef.getSetting("job.stderr"), jobdef.getSetting("job.stdout"), 
-					jobdef.getSetting("job.wd", new File(".").getCanonicalPath()), null, 
+					jobdef.getSetting("job.wd", new File(".").getCanonicalPath()), System.getenv(), 
 					IterUtils.map(jobdef.getDependencies(), new MapFunc<JobDependency, String>() {
 						@Override
 						public String map(JobDependency dep) {
@@ -139,6 +139,9 @@ public class SJQRunner extends JobRunner {
 			for (String line: jobdef.getBody().split("\n")) {
 				log.debug(jobId + " " + line);
 			}
+			
+			logJob(jobdef);
+			
 			return jobId != null;
 		} catch (ClientException | AuthException | IOException e) {
 			e.printStackTrace();
