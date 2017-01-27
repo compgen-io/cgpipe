@@ -1,0 +1,78 @@
+#!${job.shell}
+#PBS -N ${job.name}
+<% if job.hold %>
+#PBS -h
+<% endif %>
+<% if job.env %>
+#PBS -V
+<% endif %>
+<%
+
+resources = []
+
+job.procs ?= 1
+
+if job.node
+    resources += "nodes=1:ppn="+job.procs+":"+job.node
+else
+    resources += "nodes=1:ppn="+job.procs
+endif
+
+if job.walltime
+    resources += "walltime="+job.walltime
+endif
+
+if job.mem
+    resources += "mem="+job.mem
+endif
+
+if job.qos
+    resources += "qos="+job.qos
+endif
+
+if job.nice
+    resources += "nice="+job.nice
+endif
+
+for tmp in job.resources 
+    resources += tmp
+done
+%>
+
+#PBS -l ${",".join(resources)}
+
+<% if job.pbs.depids %>
+#PBS -W depend=afterok:${job.pbs.depids}
+<% endif %>
+
+
+<% if job.queue %>
+#PBS -q ${job.queue}
+<% endif %>
+<% if job.mail %>
+<% job.mailtype ?= "abe" %>
+#PBS -m ${job.mailtype}
+#PBS -M ${job.mail}
+<% endif %>
+<% if job.wd %>
+#PBS -d ${job.wd}
+<% endif %>
+<% if job.account %>
+#PBS -A ${job.account}
+<% endif %>
+<% if job.stdout %>
+#PBS -o ${job.stdout}
+<% endif %>
+<% if job.stderr %>
+#PBS -e ${job.stderr}
+<% endif %>
+<% for custom in job.custom %>
+<% if custom %>
+#PBS ${custom}
+<% endif %>
+<% done %>
+#
+set -euo pipefail
+JOB_ID=$PBS_JOBID
+
+${job._body}

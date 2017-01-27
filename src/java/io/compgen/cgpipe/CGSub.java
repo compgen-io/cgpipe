@@ -88,6 +88,8 @@ public class CGSub extends AbstractCommand{
 	private String jobLogOutputs = null;
 	private boolean dryrun = false;
 	private int nice = 0;
+	private String resources = null;
+	private String nodeProperty = null;
 	private List<String> dependencies = null;
 	private String logFilename = null;
 	int verbosity = 0;
@@ -144,9 +146,19 @@ public class CGSub extends AbstractCommand{
 		this.mail=mail;
 	}
 	
-	@Option(name="nice",desc="Set the \"nice\" level for this job (SLURM only)")
+	@Option(name="nice",desc="Set the \"nice\" level for this job (SLURM or PBS)")
 	public void setNice(int nice) {
 		this.nice=nice;
+	}
+	
+	@Option(name="node-property", desc="Require a property for node (PBS)")
+	public void setNodeProperty(String nodeProperty) {
+		this.nodeProperty=nodeProperty;
+	}
+	
+	@Option(name="resource", charName="r", desc="Set other resource requests (PBS)")
+	public void setResources(String resources) {
+		this.resources=resources;
 	}
 	
 	@Option(name="log", charName="l", desc="Log output to this file")
@@ -255,6 +267,14 @@ public class CGSub extends AbstractCommand{
 		}
 		if (nice != 0) {
 			confVals.put("job.nice", new VarInt(nice));
+		}
+		
+		if (resources != null) {
+			confVals.put("job.resources", new VarString(resources));
+		}
+		
+		if (nodeProperty != null) {
+			confVals.put("job.node", new VarString(nodeProperty));
 		}
 
 		if (System.getenv("CGPIPE_DRYRUN") != null && !System.getenv("CGPIPE_DRYRUN").equals("")) {
