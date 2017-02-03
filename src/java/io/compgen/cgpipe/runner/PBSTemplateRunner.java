@@ -152,6 +152,8 @@ public class PBSTemplateRunner extends TemplateRunner {
         		"#PBS -h\n" +
         		"#PBS -N holding\n" +
         		"#PBS -k n\n" +
+        		"#PBS -e /dev/null\n" +
+        		"#PBS -o /dev/null\n" +
         		"#PBS -l nodes=1:ppn=1,walltime=00:00:30\n" +
         		"sleep 1\n";
 	}
