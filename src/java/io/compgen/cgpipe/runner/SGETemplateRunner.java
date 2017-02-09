@@ -98,7 +98,7 @@ public class SGETemplateRunner extends TemplateRunner {
 			this.parallelEnv = val.toString();
 			break;
 		case "cgpipe.runner.sge.hvmem_total":
-			this.hvmemIsTotal = val.isTrue();
+			this.hvmemIsTotal = val.toBoolean();
 			break;
 		default:
 			super.setConfig(k, val);

@@ -2,6 +2,7 @@ package io.compgen.cgpipe.runner;
 
 import io.compgen.cgpipe.exceptions.RunnerException;
 import io.compgen.cgpipe.parser.context.ExecContext;
+import io.compgen.cgpipe.parser.variable.VarBool;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.common.StringUtils;
@@ -14,6 +15,7 @@ import java.util.List;
 public class PBSTemplateRunner extends TemplateRunner {
 	private String account=null;
 	private boolean trimJobId = false;
+	private boolean useVmem = false;
 	
 	@Override
 	public String[] getSubCommand() {
@@ -60,6 +62,11 @@ public class PBSTemplateRunner extends TemplateRunner {
 	protected void updateTemplateContext(ExecContext cxt, JobDef jobdef) {
 		if (this.account != null && !cxt.contains("job.account")) {
 			cxt.set("job.account",  new VarString(this.account));
+		}
+		if (this.useVmem) {
+			cxt.set("job.pbs.use_vmem", VarBool.TRUE);
+		} else {
+			cxt.set("job.pbs.use_vmem", VarBool.FALSE);
 		}
 
 		// set the dep list
@@ -133,7 +140,10 @@ public class PBSTemplateRunner extends TemplateRunner {
 			this.account = val.toString();
 			break;
 		case "cgpipe.runner.pbs.trim_jobid":
-			this.trimJobId = true;
+			this.trimJobId = val.toBoolean();
+			break;
+		case "cgpipe.runner.pbs.use_vmem":
+			this.useVmem = val.toBoolean();
 			break;
 		default:
 			super.setConfig(k, val);

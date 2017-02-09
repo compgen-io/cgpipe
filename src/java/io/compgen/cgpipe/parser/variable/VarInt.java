@@ -10,7 +10,7 @@ public class VarInt extends VarValue {
 		super(val);
 	}
 	
-	public boolean isTrue() {
+	public boolean toBoolean() {
 		if (((Long) obj) == 0L) {
 			return false;
 		}

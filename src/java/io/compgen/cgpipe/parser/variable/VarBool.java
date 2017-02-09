@@ -9,7 +9,7 @@ public class VarBool extends VarValue {
 		super(val);
 	}
 	
-	public boolean isTrue() {
+	public boolean toBoolean() {
 		if ((Boolean) obj) {
 			return true;
 		}

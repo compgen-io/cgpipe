@@ -65,7 +65,7 @@ public class ConditionalNode extends ASTNode {
 			if (cond.one == null) {
 				// else condition
 				currentNode = cond.two;
-			} else if (Eval.evalTokenExpression(cond.one, context).isTrue()) {
+			} else if (Eval.evalTokenExpression(cond.one, context).toBoolean()) {
 				currentNode = cond.two;
 				break;
 			}

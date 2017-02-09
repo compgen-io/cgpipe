@@ -12,18 +12,31 @@ resources = []
 
 job.procs ?= 1
 
-if job.node
-    resources += "nodes=1:ppn="+job.procs+":"+job.node
+tmp = ""
+if job.node.hostname
+    tmp += "nodes=" + job.node.hostname
 else
-    resources += "nodes=1:ppn="+job.procs
+    tmp += "nodes=1"
 endif
+
+tmp += ":ppn="+job.procs
+
+if job.node.property
+    tmp += ":"+job.node.property
+endif
+
+resources += tmp
 
 if job.walltime
     resources += "walltime="+job.walltime
 endif
 
 if job.mem
-    resources += "mem="+job.mem
+    if job.pbs.use_vmem
+        resources += "vmem="+job.mem
+    else
+        resources += "mem="+job.mem
+    endif
 endif
 
 if job.qos
@@ -72,7 +85,7 @@ done
 <% endif %>
 <% done %>
 #
-set -euo pipefail
+set -eo pipefail
 JOB_ID=$PBS_JOBID
 
 ${job._body}

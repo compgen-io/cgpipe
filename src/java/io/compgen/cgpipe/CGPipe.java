@@ -35,6 +35,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class CGPipe {
+	
+	private static Log log = LogFactory.getLog(CGPipe.class);
+
 	public static final File CGPIPE_HOME = new File(System.getenv("CGPIPE_HOME") != null ? System.getenv("CGPIPE_HOME") : System.getProperty("user.home"));
 	public static final File USER_INIT = new File(CGPIPE_HOME,".cgpiperc");
 	public static final File GLOBAL_INIT = new File("/etc/cgpiperc");
@@ -377,6 +380,10 @@ public class CGPipe {
 				Parser.eval(env.get(k).split(";"), root);
 			}
 		}
-
+		log.trace("Init context:");
+		Map<String,VarValue> tmp = root.cloneValues();
+		for (String s: tmp.keySet()) {
+			log.trace("  " + s + " => " + tmp.get(s).toString());
+		}
 	}
 }

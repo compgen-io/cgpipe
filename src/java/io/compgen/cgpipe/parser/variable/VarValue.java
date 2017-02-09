@@ -14,7 +14,7 @@ public abstract class VarValue {
 		this.obj = obj;
 	}
 
-	public boolean isTrue() {
+	public boolean toBoolean() {
 		return true;
 	}
 

@@ -9,7 +9,7 @@ public class Not extends BasicOp {
 
 	@Override
 	public VarValue eval(ExecContext context, VarValue lval, VarValue rval) throws ASTExecException {
-		return (rval.isTrue()) ? VarBool.FALSE : VarBool.TRUE;
+		return (rval.toBoolean()) ? VarBool.FALSE : VarBool.TRUE;
 	}
 
 	@Override

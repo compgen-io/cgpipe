@@ -13,7 +13,7 @@ public class VarNull extends VarValue {
 		return null;
 	}
 	
-	public boolean isTrue() {
+	public boolean toBoolean() {
 		return false;
 	}
 	public VarValue eq(VarValue val) throws VarTypeException {

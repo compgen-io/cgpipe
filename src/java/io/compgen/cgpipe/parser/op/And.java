@@ -9,7 +9,7 @@ public class And extends BasicOp {
 
 	@Override
 	public VarValue eval(ExecContext context, VarValue lval, VarValue rval) throws ASTExecException {
-		return (lval.isTrue() && rval.isTrue()) ? VarBool.TRUE : VarBool.FALSE;
+		return (lval.toBoolean() && rval.toBoolean()) ? VarBool.TRUE : VarBool.FALSE;
 	}
 
 	@Override

@@ -105,7 +105,7 @@ public class JobDef implements JobDependency {
 	
 	public boolean getSettingBool(String k, Boolean defval) {
 		if (settings.containsKey(k)) {
-			return settings.get(k).isTrue();
+			return settings.get(k).toBoolean();
 		}
 		return defval;		
 	}

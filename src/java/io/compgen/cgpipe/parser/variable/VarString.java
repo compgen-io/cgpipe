@@ -24,7 +24,7 @@ public class VarString extends VarValue {
 		return (((String)obj).compareTo(val.toString()) < 0) ? VarBool.TRUE: VarBool.FALSE;   
 	}
 	
-	public boolean isTrue() {
+	public boolean toBoolean() {
 		if (((String) obj).equals("")) {
 			return false;
 		}

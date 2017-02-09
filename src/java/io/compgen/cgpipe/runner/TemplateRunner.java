@@ -55,7 +55,7 @@ public abstract class TemplateRunner extends JobRunner {
 	protected void setConfig(String k, VarValue val) {
 		if (k.equals(getConfigPrefix()+".template")) {
 			this.templateFilename = val.toString();
-		} else if (k.equals(getConfigPrefix()+".global_hold") && val.isTrue()) {
+		} else if (k.equals(getConfigPrefix()+".global_hold") && val.toBoolean()) {
 			this.globalHold = true;
 		} else if (k.equals(getConfigPrefix()+".shell")) {
 			this.shell = val.toString();

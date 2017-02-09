@@ -7,7 +7,7 @@ public class VarFloat extends VarValue {
 		super(val);
 	}
 	
-	public boolean isTrue() {
+	public boolean toBoolean() {
 		if (((Double) obj) == 0.0d) {
 			return false;
 		}

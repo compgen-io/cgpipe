@@ -90,6 +90,7 @@ public class CGSub extends AbstractCommand{
 	private int nice = 0;
 	private String resources = null;
 	private String nodeProperty = null;
+	private String nodeHostname = null;
 	private List<String> dependencies = null;
 	private String logFilename = null;
 	int verbosity = 0;
@@ -154,6 +155,11 @@ public class CGSub extends AbstractCommand{
 	@Option(name="node-property", desc="Require a property for node (PBS)")
 	public void setNodeProperty(String nodeProperty) {
 		this.nodeProperty=nodeProperty;
+	}
+	
+	@Option(name="node-hostname", desc="Require a specific node (PBS)")
+	public void setNodeHostname(String nodeHostname) {
+		this.nodeHostname=nodeHostname;
 	}
 	
 	@Option(name="resource", charName="r", desc="Set other resource requests (PBS)")
@@ -274,7 +280,11 @@ public class CGSub extends AbstractCommand{
 		}
 		
 		if (nodeProperty != null) {
-			confVals.put("job.node", new VarString(nodeProperty));
+			confVals.put("job.node.property", new VarString(nodeProperty));
+		}
+
+		if (nodeHostname != null) {
+			confVals.put("job.node.hostname", new VarString(nodeHostname));
 		}
 
 		if (System.getenv("CGPIPE_DRYRUN") != null && !System.getenv("CGPIPE_DRYRUN").equals("")) {
