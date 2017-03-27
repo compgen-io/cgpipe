@@ -1,7 +1,7 @@
 
 # What is CGPipe?
 
-CGPipe is a language for building data analysis pipelines. It is a declarative programming language similar to Makefiles, however instead of directly executing target scripts, jobs are submitted to a dedicated job scheduler, such as SGE or SLURM. 
+CGPipe is a language for building data analysis pipelines. It is a declarative programming language similar to Makefiles, however instead of directly executing target scripts, jobs are submitted to a dedicated job scheduler, such as PBS, SGE, or SLURM. 
 
 ## Similarities and differences to Makefiles
 
