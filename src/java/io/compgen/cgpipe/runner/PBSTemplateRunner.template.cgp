@@ -31,11 +31,13 @@ if job.walltime
     resources += "walltime="+job.walltime
 endif
 
-if job.mem
-    if job.pbs.use_vmem
-        resources += "vmem="+job.mem
-    else
-        resources += "mem="+job.mem
+if !job.pbs.ignore_mem
+    if job.mem
+        if job.pbs.use_vmem
+            resources += "vmem="+job.mem
+        else
+            resources += "mem="+job.mem
+        endif
     endif
 endif
 

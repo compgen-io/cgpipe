@@ -16,6 +16,7 @@ public class PBSTemplateRunner extends TemplateRunner {
 	private String account=null;
 	private boolean trimJobId = false;
 	private boolean useVmem = false;
+	private boolean ignoreMem = false;
 	
 	@Override
 	public String[] getSubCommand() {
@@ -67,6 +68,11 @@ public class PBSTemplateRunner extends TemplateRunner {
 			cxt.set("job.pbs.use_vmem", VarBool.TRUE);
 		} else {
 			cxt.set("job.pbs.use_vmem", VarBool.FALSE);
+		}
+		if (this.ignoreMem) {
+			cxt.set("job.pbs.ignore_mem", VarBool.TRUE);
+		} else {
+			cxt.set("job.pbs.ignore_mem", VarBool.FALSE);
 		}
 
 		// set the dep list
@@ -144,6 +150,9 @@ public class PBSTemplateRunner extends TemplateRunner {
 			break;
 		case "cgpipe.runner.pbs.use_vmem":
 			this.useVmem = val.toBoolean();
+			break;
+		case "cgpipe.runner.pbs.ignore_mem":
+			this.ignoreMem = val.toBoolean();
 			break;
 		default:
 			super.setConfig(k, val);
