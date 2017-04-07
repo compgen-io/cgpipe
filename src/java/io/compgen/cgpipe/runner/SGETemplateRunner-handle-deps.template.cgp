@@ -54,7 +54,58 @@ if job.procs > 1 && job.sge.parallelenv %>
 <% endif %>
 <% done %>
 #$ -notify
+FAILED=""
+notify_stop() {
+kill_deps_signal "SIGSTOP"
+}
+notify_kill() {
+kill_deps_signal "SIGKILL"
+}
 
-set -eo pipefail
+kill_deps_signal() {
+  FAILED="1"
+  kill_deps
+}
+
+kill_deps() {
+  DEPS="$(qstat -f -j $JOB_ID | grep jid_successor_list | awk '{print $2}' | sed -e 's/,/ /g')"
+  if [ "$DEPS" != "" ]; then
+    qdel $DEPS
+  fi
+}
+
+trap notify_stop SIGUSR1
+trap notify_kill SIGUSR2
+    
+set -o pipefail
 
 ${job._body}
+RETVAL=$?
+
+if [ "$FAILED" == "" ]; then
+  if [ $RETVAL -ne 0 ]; then
+    kill_deps
+
+<% 
+if !job.keepfailed
+    for jobout in job._outputs 
+        if jobout[0] != "."
+%>
+    if [ -e "${jobout}" ]; then 
+        rm "${jobout}"
+    fi
+<% 
+        endif 
+    done
+endif
+%>
+  fi
+  exit $RETVAL
+else
+  # wait for SGE to kill the job for accounting purposes (max 60 sec)
+  I=0
+  while [ $I -lt 60 ]; do
+    sleep 1
+    let \"I=$I+1\"
+  done
+fi
