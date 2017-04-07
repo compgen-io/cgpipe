@@ -84,6 +84,9 @@ public abstract class JobRunner {
 		case "pbs":
 			obj = new PBSTemplateRunner();
 			break;
+		case "sbs":
+			obj = new SBSTemplateRunner();
+			break;
 		case "graphviz":
 			obj = new GraphvizRunner();
 			break;

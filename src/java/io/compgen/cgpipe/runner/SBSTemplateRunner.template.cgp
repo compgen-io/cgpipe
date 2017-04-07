@@ -1,0 +1,31 @@
+#!${job.shell}
+#SBS -name ${job.name}
+<% if job.hold %>
+#SBS -hold
+<% 
+job.procs ?= 1
+if job.procs > 1 && job.sge.parallelenv %>
+#SBS -procs ${job.procs}
+<% if job.mem %>
+#SBS -mem ${job.mem}
+<% if job.sbs.depids %>
+#SBS -afterok ${job.sbs.depids}
+<% endif %>
+<% if job.mail %>
+#SBS -mail ${job.mail}
+<% endif %>
+<% if job.stdout %>
+#SBS -stdout ${job.stdout}
+<% endif %>
+<% if job.stderr %>
+#SBS -stderr ${job.stderr}
+<% endif %>
+<% for custom in job.custom %>
+<% if custom %>
+#SBS ${custom}
+<% endif %>
+<% done %>
+
+set -eo pipefail
+
+${job._body}
