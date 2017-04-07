@@ -87,7 +87,14 @@ The bash runner has one specific option that can be set: `autoexec`. If this
 is set, then instead of writing the assembled bash script to stdout, the 
 script will also be executed.
 
+### Template script
 
+PBS, SGE, SLURM, and SBS job runners all operate by processing a job template,
+setting the appropriate variables, and then calling the appropriate executable
+to submit the job (`qsub`, `sbatch`, or `sbs`). A basic job template is included
+in CGPipe for each of these schedulers; however, if you'd like to use your own
+template, this can be specified by setting the variable `cgpipe.runner.{runner_name}.template`.
+This can be done on a per-user or per-host basis. 
 
 ## Bash script export
 
