@@ -1,13 +1,10 @@
 
 # Pipeline runners (backends)
-Right now there are 4 available backends for running pipelines: a combined bash
-script (default), SGE/Open Grid Engine, SLURM, and a embedded job-runner SJQ
-(see below).
+Right now there are 5 available backends for running pipelines: a combined bash
+script (default), SGE/Open Grid Engine, PBS, SLURM, and single-user SBS (also from compgen.io, see below).
 
 Job runners are chosen by setting the configuration value `cgpipe.runner` in
 `$HOME/.cgpiperc` to either: 'sge', 'slurm', 'sjq', or 'bash' (default).
-
-Note: Slurm and SJQ support is still in development 
 
 ## HPC server backends
 The more common use-case for CGPipe, however, is running jobs within an HPC
@@ -22,33 +19,33 @@ basis by setting CGPipe variables. Because of the way that variable scoping
 works, you can set any of the variables below at the script or job level.
 
 
-    setting name   | description                   | bash | sge | slurm | sjq |
-    ---------------+-------------------------------+------+-----+-------+-----|
-    job.name       | Name of the job               |      |  X  |   X   |  X  |
-    job.procs      | Number of CPUs (per node)     |      |  X  |   X   |  X  |
-    job.walltime   | Max wall time for the job     |      |  X  |   X   |     |
-    job.nodes      | Number of nodes to request    |      |  X  |   X   |     |
-    job.tasks      | Number of tasks               |      |     |   X   |     |
-    job.mem        | Req'd RAM (ex: 2M, 4G) [*]    |      |  X  |   X   |  X  |
-    job.stack      | Req'd stack space (ex: 10M)   |      |  X  |       |     |
-    job.hold       | Place a user-hold on the job  |      |  X  |   X   |     |
-    job.env   (T/F)| Capture the current ENV vars  |      |  X  |   X   |     |
-    job.qos        | QoS setting                   |      |  X  |   X   |     |
-    job.wd         | Working directory             |      |  X  |   X   |  X  |
-    job.account    | Billing account               |      |  X  |   X   |     |
-    job.mail       | Mail job status               |      |  X  |   X   |     |
-    job.mailtype   | When to send mail             |      | [1] |  [2]  |     |
-    job.stdout     | Capture stdout to file        |      |  X  |   X   |  X  |
-    job.stderr     | Capture stderr to file        |      |  X  |   X   |  X  |
-    job.keepfailed | Keep outputs from failed jobs |  X   |  X  |   X   |     |
-    job.shell      | Job-specific shell binary     | [3]  |  X  |   X   |     |
+    setting name      | description                           | bash | sge | slurm | pbs | sbs |
+    ------------------+---------------------------------------+------+-----+-------+-----+-----|
+    job.name          | Name of the job                       |      |  X  |   X   |  X  |  X  |
+    job.procs         | Number of CPUs (per node)             |      |  X  |   X   |  X  |  X  |
+    job.walltime      | Max wall time for the job             |      |  X  |   X   |  X  |     |
+    job.mem           | Req'd RAM (ex: 2M, 4G) [*]            |      |  X  |   X   |  X  |  X  |
+    job.stack         | Req'd stack space (ex: 10M)           |      |  X  |       |     |     |
+    job.hold          | Place a user-hold on the job          |      |  X  |   X   |  X  |  X  |
+    job.env   (T/F)   | Capture the current ENV vars          |      |  X  |   X   |  X  |     |
+    job.qos           | QoS setting                           |      |  X  |   X   |  X  |     |
+    job.nice          | Job "nice" setting                    |      |     |       |  X  |     |
+    job.queue         | Specific queue to submit job to       |      |     |       |  X  |     |
+    job.wd            | Working directory                     |      |  X  |   X   |  X  |  X  |
+    job.account       | Billing account                       |      |  X  |   X   |  X  |     |
+    job.mail          | Mail job status                       |      |  X  |   X   |  X  |     |
+    job.mailtype      | When to send mail                     |      | [1] |  [2]  |  X  |     |
+    job.stdout        | Capture stdout to file                |      |  X  |   X   |  X  |  X  |
+    job.stderr        | Capture stderr to file                |      |  X  |   X   |  X  |  X  |
+    job.shell         | Job-specific shell binary             | [3]  |  X  |   X   |  X  |     |
+    job.node.property | Property requirement for an exec node |      |     |       |  X  |     |
 
-
-    global setting | description                   | bash | sge | slurm | sjq |
-    ---------------+-------------------------------+------+-----+-------+-----|
-    job.shexec(T/F)| Exec job; don't submit job    |  X   |  X  |   X   |  X  |
-    job.nopre (T/F)| Don't include global pre      | [4]  |  X  |   X   |  X  |
-    job.nopost(T/F)| Don't include global post     | [4]  |  X  |   X   |  X  |
+     
+    global setting    | description                           | bash | sge | slurm | pbs | sbs |
+    ------------------+---------------------------------------+------+-----+-------+-----+-----|
+    job.shexec(T/F)   | Exec job; don't submit job            |  X   |  X  |   X   |  x  |  X  |
+    job.nopre (T/F)   | Don't include global pre              | [4]  |  X  |   X   |  x  |  X  |
+    job.nopost(T/F)   | Don't include global post             | [4]  |  X  |   X   |  x  |  X  |
 
     * - Memory should be specified as the total amount required for the job, if
         required, CGPipe will re-calculate the per-processor required memory.
@@ -67,7 +64,7 @@ Runner configurations may be set using the form: `cgpipe.runner.{runner_name}.{o
 
 Each runner has different options, which are listed below.
 
-For SGE, SLURM, and SJQ, you have the option: `global_hold`. If 
+For SGE, SLURM, and SBS, you have the option: `global_hold`. If 
 `global_hold` is set to 'T', then a preliminary job will be submitted with a
 user-hold set. All of the rest of the jobs will include this as a dependency.
 Once the entire pipeline has been submitted (successfully), the user-hold will
@@ -94,7 +91,9 @@ script will also be executed.
 
 ## Bash script export
 
-## Simple Job Queue (SJQ)
+## Simple Batch Scheduler (SBS)
+
+https://github.com/compgen-io/sbs
 
 ## SGE/OGE
 

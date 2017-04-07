@@ -27,7 +27,7 @@ In this, it is very similar to the `qmake` program that is available for SGE/OGE
 
 * Build targets are scriptable with CGPipe templates
 
-* `qmake` is only available for SGE clusters and isn't available for other job schedulers. CGPipe pipelines can execute on SGE or SLURM systems as well as on single hosts with SJQ or bash script exports (see below).
+* `qmake` is only available for SGE clusters and isn't available for other job schedulers. CGPipe pipelines can execute on SGE or SLURM systems as well as on single hosts with SBS or bash script exports (see below).
 
 * Multiple targets can be defined for the same output files, enabling multiple execution paths to build the same output files. This means that there can be multiple set of jobs defined to yield the same output file(s), based upon what input files are available. For example, you could have paired-end next-generation sequencing reads stored in two separate FASTQ files or one interleaved FASTQ file. Either of these inputs could be used in a read alignment step to produce a BAM file, but the arguments for the alignment program may be slightly different, depending on which type of input is used. With CGPipe, you can specify two different targets for the same output file, with the targets prioritized in the order they are defined in the pipeline. If the first target (or any of its inputs) can't be used, then the next target is attempted until all possible build-graphs are exhausted.
 
@@ -39,4 +39,4 @@ In this, it is very similar to the `qmake` program that is available for SGE/OGE
 
 ## Executing pipelines
 
-It is expected that jobs will be executed on a computation cluster that is managed by a dedicated job scheduler. This way individual tasks can be efficiently executed in a parallel manner. CGPipe will take care of establishing any inter-task dependencies to make sure that things execute in the proper order. Pipelines can also be run on a single host by using either the embedded Simple Job Queue (SJQ) scheduler or by exporting the pipeline as a bash script. The embedded SJQ scheduler is well suited for single-host systems where there is no existing job scheduler. If SJQ is set as your "job runner", then SJQ will start automatically, execute one or more pipelines, and efficiently manage CPU/memory restrictions.
+It is expected that jobs will be executed on a computation cluster that is managed by a dedicated job scheduler. This way individual tasks can be efficiently executed in a parallel manner. CGPipe will take care of establishing any inter-task dependencies to make sure that things execute in the proper order. Pipelines can also be run on a single host by using either the single file SBS scheduler or by exporting the pipeline as a bash script. SBS is well suited for single-host systems where there is no existing job scheduler. SBS requires having the `sbs` program installed somewhere in your `$PATH`.
