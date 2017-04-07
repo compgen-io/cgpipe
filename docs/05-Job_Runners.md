@@ -19,33 +19,33 @@ basis by setting CGPipe variables. Because of the way that variable scoping
 works, you can set any of the variables below at the script or job level.
 
 
-    setting name      | description                           | bash | sge | slurm | pbs | sbs |
-    ------------------+---------------------------------------+------+-----+-------+-----+-----|
-    job.name          | Name of the job                       |      |  X  |   X   |  X  |  X  |
-    job.procs         | Number of CPUs (per node)             |      |  X  |   X   |  X  |  X  |
-    job.walltime      | Max wall time for the job             |      |  X  |   X   |  X  |     |
-    job.mem           | Req'd RAM (ex: 2M, 4G) [*]            |      |  X  |   X   |  X  |  X  |
-    job.stack         | Req'd stack space (ex: 10M)           |      |  X  |       |     |     |
-    job.hold          | Place a user-hold on the job          |      |  X  |   X   |  X  |  X  |
-    job.env   (T/F)   | Capture the current ENV vars          |      |  X  |   X   |  X  |     |
-    job.qos           | QoS setting                           |      |  X  |   X   |  X  |     |
-    job.nice          | Job "nice" setting                    |      |     |       |  X  |     |
-    job.queue         | Specific queue to submit job to       |      |     |       |  X  |     |
-    job.wd            | Working directory                     |      |  X  |   X   |  X  |  X  |
-    job.account       | Billing account                       |      |  X  |   X   |  X  |     |
-    job.mail          | Mail job status                       |      |  X  |   X   |  X  |     |
-    job.mailtype      | When to send mail                     |      | [1] |  [2]  |  X  |     |
-    job.stdout        | Capture stdout to file                |      |  X  |   X   |  X  |  X  |
-    job.stderr        | Capture stderr to file                |      |  X  |   X   |  X  |  X  |
-    job.shell         | Job-specific shell binary             | [3]  |  X  |   X   |  X  |     |
-    job.node.property | Property requirement for an exec node |      |     |       |  X  |     |
+    setting name      | description                           | shell | sge | slurm | pbs | sbs |
+    ------------------+---------------------------------------+-------+-----+-------+-----+-----|
+    job.name          | Name of the job                       |       |  X  |   X   |  X  |  X  |
+    job.procs         | Number of CPUs (per node)             |       |  X  |   X   |  X  |  X  |
+    job.walltime      | Max wall time for the job             |       |  X  |   X   |  X  |     |
+    job.mem           | Req'd RAM (ex: 2M, 4G) [*]            |       |  X  |   X   |  X  |  X  |
+    job.stack         | Req'd stack space (ex: 10M)           |       |  X  |       |     |     |
+    job.hold          | Place a user-hold on the job          |       |  X  |   X   |  X  |  X  |
+    job.env   (T/F)   | Capture the current ENV vars          |       |  X  |   X   |  X  |     |
+    job.qos           | QoS setting                           |       |  X  |   X   |  X  |     |
+    job.nice          | Job "nice" setting                    |       |     |       |  X  |     |
+    job.queue         | Specific queue to submit job to       |       |     |       |  X  |     |
+    job.wd            | Working directory                     |       |  X  |   X   |  X  |  X  |
+    job.account       | Billing account                       |       |  X  |   X   |  X  |     |
+    job.mail          | Mail job status                       |       |  X  |   X   |  X  |     |
+    job.mailtype      | When to send mail                     |       | [1] |  [2]  |  X  |     |
+    job.stdout        | Capture stdout to file                |       |  X  |   X   |  X  |  X  |
+    job.stderr        | Capture stderr to file                |       |  X  |   X   |  X  |  X  |
+    job.shell         | Job-specific shell binary             |  [3]  |  X  |   X   |  X  |     |
+    job.node.property | Property requirement for an exec node |       |     |       |  X  |     |
 
      
-    global setting    | description                           | bash | sge | slurm | pbs | sbs |
-    ------------------+---------------------------------------+------+-----+-------+-----+-----|
-    job.shexec(T/F)   | Exec job; don't submit job            |  X   |  X  |   X   |  x  |  X  |
-    job.nopre (T/F)   | Don't include global pre              | [4]  |  X  |   X   |  x  |  X  |
-    job.nopost(T/F)   | Don't include global post             | [4]  |  X  |   X   |  x  |  X  |
+    global setting    | description                           | shell | sge | slurm | pbs | sbs |
+    ------------------+---------------------------------------+-------+-----+-------+-----+-----|
+    job.shexec(T/F)   | Exec job; don't submit job            |   X   |  X  |   X   |  x  |  X  |
+    job.nopre (T/F)   | Don't include global pre              |  [4]  |  X  |   X   |  x  |  X  |
+    job.nopost(T/F)   | Don't include global post             |  [4]  |  X  |   X   |  x  |  X  |
 
     * - Memory should be specified as the total amount required for the job, if
         required, CGPipe will re-calculate the per-processor required memory.
