@@ -55,6 +55,7 @@
         <copy todir="${build.dir}/classes/io/compgen/cgpipe/runner/" file="${src.dir}/java/io/compgen/cgpipe/runner/SGETemplateRunner.template.cgp"/>
         <copy todir="${build.dir}/classes/io/compgen/cgpipe/runner/" file="${src.dir}/java/io/compgen/cgpipe/runner/SLURMTemplateRunner.template.cgp"/>
         <copy todir="${build.dir}/classes/io/compgen/cgpipe/runner/" file="${src.dir}/java/io/compgen/cgpipe/runner/PBSTemplateRunner.template.cgp"/>
+        <copy todir="${build.dir}/classes/io/compgen/cgpipe/runner/" file="${src.dir}/java/io/compgen/cgpipe/runner/SBSTemplateRunner.template.cgp"/>
 
 		<mkdir dir="${dist.dir}"/>
 	    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="${blib.dir}/jarjar-1.4.jar"/>

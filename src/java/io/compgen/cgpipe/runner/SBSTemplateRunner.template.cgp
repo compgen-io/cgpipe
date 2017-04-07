@@ -2,12 +2,15 @@
 #SBS -name ${job.name}
 <% if job.hold %>
 #SBS -hold
+<% endif %>
 <% 
 job.procs ?= 1
 if job.procs > 1 && job.sge.parallelenv %>
 #SBS -procs ${job.procs}
+<% endif %>
 <% if job.mem %>
 #SBS -mem ${job.mem}
+<% endif %>
 <% if job.sbs.depids %>
 #SBS -afterok ${job.sbs.depids}
 <% endif %>

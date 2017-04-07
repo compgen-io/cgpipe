@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SBSTemplateRunner extends TemplateRunner {
-	private String sbsHome="sbs";
-	private String sbsPath=".sbs";
+	private String sbsHome=".sbs";
+	private String sbsPath="sbs";
 	
 	@Override
 	public String[] getSubCommand() {
