@@ -1,10 +1,11 @@
 
 # Pipeline runners (backends)
-Right now there are 5 available backends for running pipelines: a combined bash
-script (default), SGE/Open Grid Engine, PBS, SLURM, and single-user SBS (also from compgen.io, see below).
+Right now there are 5 available backends for running pipelines: a combined s
+script (default), SGE/Open Grid Engine, PBS, SLURM, and single-user SBS 
+(also from compgen.io, see below).
 
 Job runners are chosen by setting the configuration value `cgpipe.runner` in
-`$HOME/.cgpiperc` to either: 'sge', 'slurm', 'sjq', or 'bash' (default).
+`$HOME/.cgpiperc` to either: 'sge', 'slurm', 'sjq', or 'shell' (default).
 
 ## HPC server backends
 The more common use-case for CGPipe, however, is running jobs within an HPC
@@ -39,6 +40,7 @@ works, you can set any of the variables below at the script or job level.
     job.stderr        | Capture stderr to file                |       |  X  |   X   |  X  |  X  |
     job.shell         | Job-specific shell binary             |  [3]  |  X  |   X   |  X  |     |
     job.node.property | Property requirement for an exec node |       |     |       |  X  |     |
+    job.node.hostname | Exact host to run job on              |       |     |       |  X  |     |
 
      
     global setting    | description                           | shell | sge | slurm | pbs | sbs |
@@ -53,9 +55,11 @@ works, you can set any of the variables below at the script or job level.
     1, 2 - job.mailtype has slightly different meanings for SGE and SLURM. The
            possible values are different for each scheduler.
 
-    3 - the shell for the bash runner can be set using the global shell config
+    3 - the shell for the shell runner can be set using the global shell config,
+        but the defaults are "/bin/bash", "/usr/bin/bash", "/usr/local/bin/bash", 
+        "/bin/sh" (in that order of priority).
 
-    4 - pre and post script are only included once for the bash runner, so if
+    4 - pre and post script are only included once for the shell runner, so if
         any job includes pre or post, then the final script will as well.
 
 ## Runner specific configuration
@@ -83,9 +87,6 @@ slot (`hvmem_total`; `-l h_vmem` in qsub). The default parallelenv is named
 'shm' and by default `h_vmem` is specified on a per-slot basis
 (`hvmem_total=F`).
 
-The bash runner has one specific option that can be set: `autoexec`. If this
-is set, then instead of writing the assembled bash script to stdout, the 
-script will also be executed.
 
 ### Template script
 
@@ -94,9 +95,22 @@ setting the appropriate variables, and then calling the appropriate executable
 to submit the job (`qsub`, `sbatch`, or `sbs`). A basic job template is included
 in CGPipe for each of these schedulers; however, if you'd like to use your own
 template, this can be specified by setting the variable `cgpipe.runner.{runner_name}.template`.
-This can be done on a per-user or per-host basis. 
+As with all other options, this can be done on an adhoc, per-user or per-host basis. 
 
-## Bash script export
+## Shell script export
+
+Shell scripts will write a single script that contains all of the tasks for a given 
+pipeline as functions in the script. When the script is executed, each of the  functions
+will be executed in order. In case multiple pipelines need to be run, the variable `cgpipe.runner.shell.filename` 
+can be set. If this is set, then each successive pipeline will be added to this single
+script file.
+
+By default the script is written to stdout. 
+
+The shell runner has one specific option that can be set: `cgpipe.runner.shell.autoexec`. If this
+is set, then instead of writing the assembled shell script to stdout, the 
+script will be immediately executed.
+
 
 ## Simple Batch Scheduler (SBS)
 
