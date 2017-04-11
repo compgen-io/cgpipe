@@ -5,7 +5,7 @@
 <% endif %>
 <% 
 job.procs ?= 1
-if job.procs > 1 && job.sge.parallelenv %>
+if job.procs > 1 %>
 #SBS -procs ${job.procs}
 <% endif %>
 <% if job.mem %>

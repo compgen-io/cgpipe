@@ -171,7 +171,7 @@ public abstract class TemplateRunner extends JobRunner {
 			es.close();
 
 			if (retcode != 0) {	
-				throw new RunnerException("Bad return code from submit: "+retcode+" - "+err + "\n\n"+src);
+				throw new RunnerException("Bad return code from submit: "+StringUtils.join(" ", getSubCommand())+"  => ("+retcode+") "+err + "\n\n"+src);
 			}
 			
 			return StringUtils.strip(out);

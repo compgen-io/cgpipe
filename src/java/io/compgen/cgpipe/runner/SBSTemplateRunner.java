@@ -12,35 +12,52 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SBSTemplateRunner extends TemplateRunner {
-	private String sbsHome=".sbs";
+	private String sbsHome=null;
 	private String sbsPath="sbs";
 	
 	@Override
 	public String[] getSubCommand() {
-		return new String[] {sbsPath, "-d", sbsHome, "submit"};
+		if (sbsHome != null) {
+			return new String[] {sbsPath, "-d", sbsHome, "submit"};
+		}
+		return new String[] {sbsPath, "submit"};
 	}
 
 	@Override
 	public String[] getReleaseCommand(String jobId) {
-		return new String[] {sbsPath, "-d", sbsHome, "release", jobId };
+		if (sbsHome != null) {
+			return new String[] {sbsPath, "-d", sbsHome, "release", jobId };
+		}
+		return new String[] {sbsPath, "release", jobId };
 	}
 
 	@Override
 	public String[] getDelCommand(String jobId) {
-		return new String[] {sbsPath, "-d", sbsHome, "cancel", jobId};
+		if (sbsHome != null) {
+			return new String[] {sbsPath, "-d", sbsHome, "cancel", jobId};
+		}
+		return new String[] {sbsPath, "cancel", jobId};
 	}
 
 	@Override
 	public boolean isJobIdValid(String jobId) throws RunnerException {
 		try {
-			Process proc = Runtime.getRuntime().exec(new String[] {sbsPath, "-d", sbsHome, "stat", jobId});
+			String[] cmd;
+			if (sbsHome!=null) {
+				cmd = new String[] {sbsPath, "-d", sbsHome, "status", jobId};
+			} else {
+				cmd = new String[] {sbsPath, "status", jobId};
+			}
+			
+			Process proc = Runtime.getRuntime().exec(cmd);
 			int retcode = proc.waitFor();
 			if (retcode == 0) {
 				InputStream is = proc.getInputStream();
 				String stdout = StringUtils.readInputStream(is);
 				
 				for (String line: stdout.split("\n")) {
-					String[] spl = line.trim().split(" ");
+					String[] spl = line.trim().split(" +");
+					
 					if (!spl[0].equals("job-id")) {
 						if (spl.length > 3) {
 							if (spl[2].equals("U") || spl[2].equals("Q") || spl[2].equals("H") || spl[2].equals("R")) {
