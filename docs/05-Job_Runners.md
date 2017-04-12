@@ -87,26 +87,6 @@ before they are released for execution.
 For PBS, SGE, and SLURM, you can also set a global default account by using the
 `cgpipe.runner.{runner_name}.account` option.
 
-For SGE, there are two additional options (`cgpipe.runner.sge.`): the name of the parallel
-environment needed to request more than one slot per node (`parallelenv`;
-`-pe` in qsub), and if the memory required should be specified per job or per
-slot (`hvmem_total`; `-l h_vmem` in qsub). The default parallelenv is named
-'shm' and by default `h_vmem` is specified on a per-slot basis
-(`hvmem_total=F`).
-
-PBS has three unique options (`cgpipe.runner.pbs.`): `trim_jobid`, `use_vmem` and `ignore_mem`.
-`trim_jobid` will trim away the cluster name from the jobid returned from `qsub`. If your cluster
-returns something like "1234.cluster.hostname.org" from qsub, but requires "1234" for `qstat`, etc...
-then this option will trim away the "cluster.hostname.org" from the captured jobid. `use_vmem` will 
-set all memory restrictions with `-l vmem=XX` as opposed to the default `-l mem=XX`. And `ignore_mem`
-will ignore any memory restrictions whatsoever in the job submission script (this may cause
-problems with your cluster or job scheduler, so use at your own risk).
-
-SBS has two other options (`cgpipe.runner.sbs.`): `sbshome` and `path`. `sbshome` sets where
-the SBS job scripts will be tracked. By default this is in the current directory under `.sbs`. However,
-this can be set by the `$SBSHOME` environmental variable or overridden by this property. `path` is 
-the path to the `sbs` program, if it isn't part of your `$PATH`. 
-
 
 ### Template script
 
@@ -116,6 +96,13 @@ to submit the job (`qsub`, `sbatch`, or `sbs`). A basic job template is included
 in CGPipe for each of these schedulers; however, if you'd like to use your own
 template, this can be specified by setting the variable `cgpipe.runner.{runner_name}.template`.
 As with all other options, this can be done on an adhoc, per-user or per-host basis. 
+If you'd like to write your own templates, the templates are themselves written 
+as CGPipe scripts and can include logic and flow-control.
+
+    * https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/PBSTemplateRunner.template.cgp
+    * https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/SBSTemplateRunner.template.cgp
+    * https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/SGETemplateRunner.template.cgp
+    * https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/SLURMTemplateRunner.template.cgp
 
 ## Shell script export
 
@@ -136,6 +123,34 @@ script will be immediately executed.
 
 https://github.com/compgen-io/sbs
 
+SBS has two other options (`cgpipe.runner.sbs.`): `sbshome` and `path`. `sbshome` sets where
+the SBS job scripts will be tracked. By default this is in the current directory under `.sbs`. However,
+this can be set by the `$SBSHOME` environmental variable or overridden by this property. `path` is 
+the path to the `sbs` program, if it isn't part of your `$PATH`. 
+
+
+## PBS (Torque/PBS)
+
+PBS has three unique options (`cgpipe.runner.pbs.`): `trim_jobid`, `use_vmem` and `ignore_mem`.
+`trim_jobid` will trim away the cluster name from the jobid returned from `qsub`. If your cluster
+returns something like "1234.cluster.hostname.org" from qsub, but requires "1234" for `qstat`, etc...
+then this option will trim away the "cluster.hostname.org" from the captured jobid. `use_vmem` will 
+set all memory restrictions with `-l vmem=XX` as opposed to the default `-l mem=XX`. And `ignore_mem`
+will ignore any memory restrictions whatsoever in the job submission script (this may cause
+problems with your cluster or job scheduler, so use at your own risk).
+
+
 ## SGE/OGE
 
+For SGE, there are two additional options (`cgpipe.runner.sge.`): the name of the parallel
+environment needed to request more than one slot per node (`parallelenv`;
+`-pe` in qsub), and if the memory required should be specified per job or per
+slot (`hvmem_total`; `-l h_vmem` in qsub). The default parallelenv is named
+'shm' and by default `h_vmem` is specified on a per-slot basis
+(`hvmem_total=F`).
+
+
+
 ## SLURM
+
+SLURM has no additional options that haven't already been mentioned above.
