@@ -88,7 +88,7 @@ For PBS, SGE, and SLURM, you can also set a global default account by using the
 `cgpipe.runner.{runner_name}.account` option.
 
 
-### Template script
+### Template scripts
 
 PBS, SGE, SLURM, and SBS job runners all operate by processing a job template,
 setting the appropriate variables, and then calling the appropriate executable
@@ -104,13 +104,15 @@ as CGPipe scripts and can include logic and flow-control.
 * [SGETemplateRunner.template.cgp](https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/SGETemplateRunner.template.cgp)
 * [SLURMTemplateRunner.template.cgp](https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/SLURMTemplateRunner.template.cgp)
 
-## Shell script export
+### Shell script export
 
 Shell scripts will write a single script that contains all of the tasks for a given 
 pipeline as functions in the script. When the script is executed, each of the  functions
 will be executed in order. In case multiple pipelines need to be run, the variable `cgpipe.runner.shell.filename` 
 can be set. If this is set, then each successive pipeline will be added to this single
-script file.
+script file. CGPipe will manage the appropriate job names to avoid collisions. Additionally,
+if you write the output to a file, the presence of each output will be checked by the script.
+This means that only if an output file is missing will a job be executed.
 
 By default the script is written to stdout. 
 
@@ -119,7 +121,7 @@ is set, then instead of writing the assembled shell script to stdout, the
 script will be immediately executed.
 
 
-## Simple Batch Scheduler (SBS)
+### Simple Batch Scheduler (SBS)
 
 https://github.com/compgen-io/sbs
 
@@ -129,7 +131,7 @@ this can be set by the `$SBSHOME` environmental variable or overridden by this p
 the path to the `sbs` program, if it isn't part of your `$PATH`. 
 
 
-## PBS (Torque/PBS)
+### PBS (Torque/PBS)
 
 PBS has three unique options (`cgpipe.runner.pbs.`): `trim_jobid`, `use_vmem` and `ignore_mem`.
 `trim_jobid` will trim away the cluster name from the jobid returned from `qsub`. If your cluster
@@ -140,7 +142,7 @@ will ignore any memory restrictions whatsoever in the job submission script (thi
 problems with your cluster or job scheduler, so use at your own risk).
 
 
-## SGE/OGE
+### SGE/OGE
 
 For SGE, there are two additional options (`cgpipe.runner.sge.`): the name of the parallel
 environment needed to request more than one slot per node (`parallelenv`;
@@ -150,7 +152,20 @@ slot (`hvmem_total`; `-l h_vmem` in qsub). The default parallelenv is named
 (`hvmem_total=F`).
 
 
-
-## SLURM
+### SLURM
 
 SLURM has no additional options that haven't already been mentioned above.
+
+
+## Dry-runs
+
+If you want to see the script that would be sent to the job scheduler, you can specify both the verbose (`-v`) and
+dry-run (`-dr`) options to cgpipe and the job scripts that would be submitted will be printed to stdout as opposed
+to being sent to the job scheduler. This is a good way to troubleshoot parameters and custom templates if needed.
+These options can be sent to any cgpipe command, or if a script uses the `#!cgpipe` or `#!/usr/bin/env cgpipe`
+shebang syntax, these options can be provided directly to that script. Options with a single dash (`-`) are sent 
+to cgpipe whereas options with a double dash (`--`) are sent to your pipeline.
+
+The `shell` job-runner is also very useful for troubleshooting pipelines, so that one can verify if the job
+recipe scripts are correct.
+
