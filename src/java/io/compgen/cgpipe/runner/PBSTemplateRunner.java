@@ -101,6 +101,15 @@ public class PBSTemplateRunner extends TemplateRunner {
 	    	cxt.set("job.pbs.depids", new VarString(StringUtils.join(":", depids).replaceAll("::", ":")));
 	    }
 
+	    // Convert 2G to 2gb
+	    String mem = jobdef.getSetting("job.mem");
+	    if (mem!=null) {
+		    if (!mem.toLowerCase().endsWith("b")) {
+		    	cxt.set("job.mem", new VarString(mem.toLowerCase()+"b"));
+		    }
+	    }
+	    
+	    
 //		// convert 4G to 4000; SLURM uses mem definitions in terms of megabytes.
 //		String mem = jobdef.getSetting("job.mem");
 //		

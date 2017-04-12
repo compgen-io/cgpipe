@@ -180,12 +180,12 @@ public abstract class TemplateRunner extends JobRunner {
 			System.out.println(StringUtils.join("\n", jobids));
 			
 			if (!dryrun && globalHold) {
-				System.out.println("Releasing holds on: " + StringUtils.join(",", globalHolds));
+				//System.out.println("Releasing hold on: " + StringUtils.join(",", globalHolds));
 				for (String jobid: globalHolds) {
 					try {
 						int retcode = Runtime.getRuntime().exec(getReleaseCommand(jobid)).waitFor();
 						if (retcode != 0) {
-							throw new RunnerException("Unable to release global hold");
+							throw new RunnerException("Unable to release default user-hold");
 						}
 					} catch (IOException | InterruptedException e) {
 						throw new RunnerException(e);
