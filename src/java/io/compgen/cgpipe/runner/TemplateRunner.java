@@ -30,18 +30,14 @@ public abstract class TemplateRunner extends JobRunner {
 	protected String templateFilename = getClass().getCanonicalName().replaceAll("\\.", File.separator)+".template.cgp";
 	protected String shell = ShellScriptRunner.defaultShell;
 
-	private JobDependency globalHoldJob = null;
 	private int dryRunJobCount = 0;
 	private List<String> jobids = new ArrayList<String>();
+	private List<String> globalHolds = new ArrayList<String>();
 
 	public abstract String getConfigPrefix();
-	public abstract String[] getSubCommand();
+	public abstract String[] getSubCommand(boolean forceHold);
 	public abstract String[] getReleaseCommand(String jobId);
 	public abstract String[] getDelCommand(String jobId);
-
-	protected String buildGlobalHoldScript() {
-		return null;
-	}
 
 	public String loadTemplate() throws IOException {
 		InputStream is = getClass().getClassLoader().getResourceAsStream(templateFilename);
@@ -101,15 +97,15 @@ public abstract class TemplateRunner extends JobRunner {
 			return false;
 		}
 		
+		boolean globalHoldSet = false;
 		if (globalHold) {
-			if (globalHoldJob == null) {
-				submitGlobalHold();
+			if (!jobdef.getSettingBool("job.hold")) {
+				globalHoldSet = true;
 			}
-			jobdef.addDependency(globalHoldJob);
 		}
 		
 		String src = buildScriptString(jobdef);
-		String jobid = submitScript(src);
+		String jobid = submitScript(src, globalHoldSet);
 		jobdef.setJobId(jobid);
 		jobids.add(jobid);
 
@@ -120,19 +116,11 @@ public abstract class TemplateRunner extends JobRunner {
 	
 		logJob(jobdef);
 		
-		return true;
-	}
-
-	private void submitGlobalHold() throws RunnerException {
-		String src = buildGlobalHoldScript();
-		String jobid = submitScript(src);
-		globalHoldJob = new ExistingJob(jobid);
-		jobids.add(jobid);
-
-		log.info("GLOBAL HOLD: "+jobid);
-		for (String line: src.split("\n")) {
-			log.debug(jobid + " " + line);
+		if (globalHoldSet) {
+			globalHolds.add(jobid);
 		}
+		
+		return true;
 	}
 
 	private String buildScriptString(JobDef jobdef) throws RunnerException {
@@ -148,6 +136,9 @@ public abstract class TemplateRunner extends JobRunner {
 	}
 	
 	protected String submitScript(String src) throws RunnerException {
+		return submitScript(src, false);
+	}
+	protected String submitScript(String src, boolean forceHold) throws RunnerException {
 		if (dryrun) {
 			dryRunJobCount++;
 			System.err.println("[dryrun." + dryRunJobCount+"]");
@@ -156,7 +147,7 @@ public abstract class TemplateRunner extends JobRunner {
 		}
 		
 		try {
-			Process proc = Runtime.getRuntime().exec(getSubCommand());
+			Process proc = Runtime.getRuntime().exec(getSubCommand(forceHold));
 			proc.getOutputStream().write(src.getBytes(Charset.forName("UTF8")));
 			proc.getOutputStream().close();
 			
@@ -171,7 +162,7 @@ public abstract class TemplateRunner extends JobRunner {
 			es.close();
 
 			if (retcode != 0) {	
-				throw new RunnerException("Bad return code from submit: "+StringUtils.join(" ", getSubCommand())+"  => ("+retcode+") "+err + "\n\n"+src);
+				throw new RunnerException("Bad return code from submit: "+StringUtils.join(" ", getSubCommand(forceHold))+"  => ("+retcode+") "+err + "\n\n"+src);
 			}
 			
 			return StringUtils.strip(out);
@@ -188,17 +179,19 @@ public abstract class TemplateRunner extends JobRunner {
 			log.info("submitted jobs: "+StringUtils.join(",", jobids));
 			System.out.println(StringUtils.join("\n", jobids));
 			
-			if (!dryrun && globalHoldJob != null) {
-				try {
-					
-					String[] cmd = getReleaseCommand(globalHoldJob.getJobId()); 
-					int retcode = Runtime.getRuntime().exec(cmd).waitFor();
-					if (retcode != 0) {
-						throw new RunnerException("Unable to release global hold");
+			if (!dryrun && globalHold) {
+				System.out.println("Releasing holds on: " + StringUtils.join(",", globalHolds));
+				for (String jobid: globalHolds) {
+					try {
+						int retcode = Runtime.getRuntime().exec(getReleaseCommand(jobid)).waitFor();
+						if (retcode != 0) {
+							throw new RunnerException("Unable to release global hold");
+						}
+					} catch (IOException | InterruptedException e) {
+						throw new RunnerException(e);
 					}
-				} catch (IOException | InterruptedException e) {
-					throw new RunnerException(e);
 				}
+					
 			}
 		}
 	}

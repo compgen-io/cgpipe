@@ -15,7 +15,10 @@ public class SLURMTemplateRunner extends TemplateRunner {
 	private String account=null;
 
 	@Override
-	public String[] getSubCommand() {
+	public String[] getSubCommand(boolean forceHold) {
+		if (forceHold) {
+			return new String[] {"sbatch", "--parsable", "-H"};
+		}
 		return new String[] {"sbatch", "--parsable"};
 	}
 
@@ -139,16 +142,6 @@ public class SLURMTemplateRunner extends TemplateRunner {
 	@Override
 	public String getConfigPrefix() {
 		return "cgpipe.runner.slurm";
-	}
-
-	protected String buildGlobalHoldScript() {
-        return 	"#!" + shell + "\n" +
-        		"#SBATCH -H\n" +
-        		"#SBATCH -J holding\n" +
-        		"#SBATCH -o /dev/null\n" +
-        		"#SBATCH -e /dev/null\n" +
-        		"#SBATCH -t 00:00:30\n" +
-        		"sleep 1\n";
 	}
 
 }

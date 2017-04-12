@@ -16,7 +16,10 @@ public class SGETemplateRunner extends TemplateRunner {
 	private String parallelEnv = "shm";
 
 	@Override
-	public String[] getSubCommand() {
+	public String[] getSubCommand(boolean forceHold) {
+		if (forceHold) {
+			return new String[] {"qsub", "-h", "u"};
+		}
 		return new String[] {"qsub"};
 	}
 
@@ -110,16 +113,4 @@ public class SGETemplateRunner extends TemplateRunner {
 	public String getConfigPrefix() {
 		return "cgpipe.runner.sge";
 	}
-
-	protected String buildGlobalHoldScript() {
-        return 	"#!" + shell + "\n" +
-        		"#$ -h\n" +
-        		"#$ -terse\n" +
-        		"#$ -N holding\n" +
-        		"#$ -o /dev/null\n" +
-        		"#$ -e /dev/null\n" +
-        		"#$ -l h_rt=00:00:10\n" +
-        		"sleep 1\n";
-	}
-
 }

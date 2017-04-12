@@ -19,7 +19,10 @@ public class PBSTemplateRunner extends TemplateRunner {
 	private boolean ignoreMem = false;
 	
 	@Override
-	public String[] getSubCommand() {
+	public String[] getSubCommand(boolean forceHold) {
+		if (forceHold) {
+			return new String[] {"qsub", "-h"};
+		}
 		return new String[] {"qsub"};
 	}
 
@@ -164,16 +167,5 @@ public class PBSTemplateRunner extends TemplateRunner {
 	@Override
 	public String getConfigPrefix() {
 		return "cgpipe.runner.pbs";
-	}
-
-	protected String buildGlobalHoldScript() {
-        return 	"#!" + shell + "\n" +
-        		"#PBS -h\n" +
-        		"#PBS -N holding\n" +
-        		"#PBS -k n\n" +
-        		"#PBS -e /dev/null\n" +
-        		"#PBS -o /dev/null\n" +
-        		"#PBS -l nodes=1:ppn=1,walltime=00:00:30\n" +
-        		"sleep 1\n";
 	}
 }

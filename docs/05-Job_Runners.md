@@ -5,7 +5,13 @@ script (default), SGE/Open Grid Engine, PBS, SLURM, and single-user SBS
 (also from compgen.io, see below).
 
 Job runners are chosen by setting the configuration value `cgpipe.runner` in
-`$HOME/.cgpiperc` to either: 'sge', 'slurm', 'sjq', or 'shell' (default).
+`$HOME/.cgpiperc` to either: 'pbs', 'sge', 'slurm', 'sbs', or 'shell' (default).
+
+Example:
+
+    cgpipe.runner="sbs"
+    cgpipe.runner.sbs.sbshome="/home/users/me/.sbs"
+
 
 ## HPC server backends
 The more common use-case for CGPipe, however, is running jobs within an HPC
@@ -34,7 +40,7 @@ works, you can set any of the variables below at the script or job level.
     job.queue         | Specific queue to submit job to       |       |     |       |  X  |     |
     job.wd            | Working directory                     |       |  X  |   X   |  X  |  X  |
     job.account       | Billing account                       |       |  X  |   X   |  X  |     |
-    job.mail          | Mail job status                       |       |  X  |   X   |  X  |     |
+    job.mail          | Mail job status                       |       |  X  |   X   |  X  |  X  |
     job.mailtype      | When to send mail                     |       | [1] |  [2]  |  X  |     |
     job.stdout        | Capture stdout to file                |       |  X  |   X   |  X  |  X  |
     job.stderr        | Capture stderr to file                |       |  X  |   X   |  X  |  X  |
@@ -68,24 +74,38 @@ Runner configurations may be set using the form: `cgpipe.runner.{runner_name}.{o
 
 Each runner has different options, which are listed below.
 
-For SGE, SLURM, and SBS, you have the option: `global_hold`. If 
-`global_hold` is set to 'T', then a preliminary job will be submitted with a
-user-hold set. All of the rest of the jobs will include this as a dependency.
-Once the entire pipeline has been submitted (successfully), the user-hold will
-be released and the pipeline can start. This is useful to make sure that any 
-step of the pipeline will run if and only if the entire pipeline was able to 
-be submitted. This also makes sure that quick running jobs don't finish before
-their child jobs have been submitted. 
+For PBS, SGE, SLURM, and SBS, you have the option: `cgpipe.runner.{runner_name}.global_hold`. If 
+`global_hold` is `true`, then each job will have a user-hold placed on it until
+the entire pipeline has been submitted. Once the entire pipeline has been 
+submitted (successfully), the user-hold will be released and the pipeline can 
+start. This is useful to make sure that any step of the pipeline will run if 
+and only if the entire pipeline was able to be submitted. This also makes sure 
+that quick running jobs don't finish before their child jobs have been submitted. 
+If there is an issue with submitting any of the jobs, then all jobs will be aborted
+before they are released for execution.
 
-For SGE and SLURM, you can also set a global default account by using the
-`default_account` option.
+For PBS, SGE, and SLURM, you can also set a global default account by using the
+`cgpipe.runner.{runner_name}.account` option.
 
-For SGE, there are two additional options: the name of the parallel
+For SGE, there are two additional options (`cgpipe.runner.sge.`): the name of the parallel
 environment needed to request more than one slot per node (`parallelenv`;
 `-pe` in qsub), and if the memory required should be specified per job or per
 slot (`hvmem_total`; `-l h_vmem` in qsub). The default parallelenv is named
 'shm' and by default `h_vmem` is specified on a per-slot basis
 (`hvmem_total=F`).
+
+PBS has three unique options (`cgpipe.runner.pbs.`): `trim_jobid`, `use_vmem` and `ignore_mem`.
+`trim_jobid` will trim away the cluster name from the jobid returned from `qsub`. If your cluster
+returns something like "1234.cluster.hostname.org" from qsub, but requires "1234" for `qstat`, etc...
+then this option will trim away the "cluster.hostname.org" from the captured jobid. `use_vmem` will 
+set all memory restrictions with `-l vmem=XX` as opposed to the default `-l mem=XX`. And `ignore_mem`
+will ignore any memory restrictions whatsoever in the job submission script (this may cause
+problems with your cluster or job scheduler, so use at your own risk).
+
+SBS has two other options (`cgpipe.runner.sbs.`): `sbshome` and `path`. `sbshome` sets where
+the SBS job scripts will be tracked. By default this is in the current directory under `.sbs`. However,
+this can be set by the `$SBSHOME` environmental variable or overridden by this property. `path` is 
+the path to the `sbs` program, if it isn't part of your `$PATH`. 
 
 
 ### Template script

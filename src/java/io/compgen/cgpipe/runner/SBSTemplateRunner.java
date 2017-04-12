@@ -16,9 +16,14 @@ public class SBSTemplateRunner extends TemplateRunner {
 	private String sbsPath="sbs";
 	
 	@Override
-	public String[] getSubCommand() {
+	public String[] getSubCommand(boolean forceHold) {
 		if (sbsHome != null) {
-			return new String[] {sbsPath, "-d", sbsHome, "submit"};
+			if (forceHold) {
+				return new String[] {sbsPath, "-d", sbsHome, "submit", "-hold"};
+			}
+		}
+		if (forceHold) {
+			return new String[] {sbsPath, "submit", "-hold"};
 		}
 		return new String[] {sbsPath, "submit"};
 	}
@@ -121,11 +126,5 @@ public class SBSTemplateRunner extends TemplateRunner {
 	@Override
 	public String getConfigPrefix() {
 		return "cgpipe.runner.sbs";
-	}
-
-	protected String buildGlobalHoldScript() {
-        return 	"#!" + shell + "\n" +
-        		"#PBS -hold\n" +
-        		"sleep 1\n";
 	}
 }
