@@ -99,10 +99,10 @@ As with all other options, this can be done on an adhoc, per-user or per-host ba
 If you'd like to write your own templates, the templates are themselves written 
 as CGPipe scripts and can include logic and flow-control.
 
-    * https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/PBSTemplateRunner.template.cgp
-    * https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/SBSTemplateRunner.template.cgp
-    * https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/SGETemplateRunner.template.cgp
-    * https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/SLURMTemplateRunner.template.cgp
+* https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/PBSTemplateRunner.template.cgp
+* https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/SBSTemplateRunner.template.cgp
+* https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/SGETemplateRunner.template.cgp
+* https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/SLURMTemplateRunner.template.cgp
 
 ## Shell script export
 
