@@ -100,14 +100,14 @@ public class JobDef implements JobDependency {
 	}
 
 	public boolean getSettingBool(String k) {
-		return getSettingBool(k, null);
+		return getSettingBool(k, false);
 	}
 	
-	public boolean getSettingBool(String k, Boolean defval) {
+	public boolean getSettingBool(String k, boolean defval) {
 		if (settings.containsKey(k)) {
 			return settings.get(k).toBoolean();
 		}
-		return defval;		
+		return defval;
 	}
 
 	public Set<String> getSettings() {
