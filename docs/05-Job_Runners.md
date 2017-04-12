@@ -1,7 +1,7 @@
 
 # Pipeline runners (backends)
-Right now there are 5 available backends for running pipelines: a combined s
-script (default), SGE/Open Grid Engine, PBS, SLURM, and single-user SBS 
+Right now there are 5 available backends for running pipelines: a combined 
+shell script (default), SGE/Open Grid Engine, PBS, SLURM, and single-user SBS 
 (also from compgen.io, see below).
 
 Job runners are chosen by setting the configuration value `cgpipe.runner` in
