@@ -169,3 +169,10 @@ to cgpipe whereas options with a double dash (`--`) are sent to your pipeline.
 The `shell` job-runner is also very useful for troubleshooting pipelines, so that one can verify if the job
 recipe scripts are correct.
 
+## Job pipeline graph
+
+An optional non-job executing runner is also available that converts the job dependency graph into a graphviz
+model. To use this runner, you need to set `cgpipe.runner="graphviz"`. Instead of executing the job tree, this
+will produce a graphviz dot file to show the dependencies between jobs. This can be used to generate a PDF using 
+the Graphviz tools. This currently does not work across multiple interconnected pipelines through the the joblog, but
+that support is planned for the future. 
