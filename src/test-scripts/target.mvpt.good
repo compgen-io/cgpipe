@@ -1,28 +1,19 @@
 #!/bin/bash
-func_1() {
-JOB_ID="func_1"
+cgpfunc_1() {
+JOB_ID="cgpfunc_1"
 baz
 test3
 three.foo
 touch three
 }
-
-#func_2() {
-## extra job
-#touch four
-#
-#}
-
-func_2() {
-JOB_ID="func_2"
+cgpfunc_2() {
+JOB_ID="cgpfunc_2"
 bar
 test2
 touch two
-
 }
-
-func_3() {
-JOB_ID="func_3"
+cgpfunc_3() {
+JOB_ID="cgpfunc_3"
 foo
 test1
 one
@@ -31,10 +22,14 @@ two three.foo
 two
 three.foo
 touch one
-
 }
-
-func_1 || exit $?
-func_2 || exit $?
-func_3 || exit $?
+if [ ! -e "three.foo" ]; then
+cgpfunc_1 || exit $?
+fi
+if [ ! -e "two" ]; then
+cgpfunc_2 || exit $?
+fi
+if [ ! -e "one" ]; then
+cgpfunc_3 || exit $?
+fi
 

@@ -1,15 +1,29 @@
-func_1() {
-JOB_ID="func_1"
+cgpfunc_1() {
+JOB_ID="cgpfunc_1"
 touch foo_1.txt foo_2.txt foo_3.txt
 }
-func_2() {
-JOB_ID="func_2"
+cgpfunc_2() {
+JOB_ID="cgpfunc_2"
 touch test_foo.txt test_bar.txt test_baz.txt
 }
-func_3() {
-JOB_ID="func_3"
+cgpfunc_3() {
+JOB_ID="cgpfunc_3"
 cat test_foo.txt test_bar.txt test_baz.txt > merge
 }
-func_1 || exit $?
-func_2 || exit $?
-func_3 || exit $?
+if [ ! -e "foo_1.txt" ]; then
+if [ ! -e "foo_2.txt" ]; then
+if [ ! -e "foo_3.txt" ]; then
+cgpfunc_1 || exit $?
+fi
+fi
+fi
+if [ ! -e "test_foo.txt" ]; then
+if [ ! -e "test_bar.txt" ]; then
+if [ ! -e "test_baz.txt" ]; then
+cgpfunc_2 || exit $?
+fi
+fi
+fi
+if [ ! -e "merge" ]; then
+cgpfunc_3 || exit $?
+fi

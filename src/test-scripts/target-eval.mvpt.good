@@ -1,21 +1,21 @@
-func_1() {
-JOB_ID="func_1"
+cgpfunc_1() {
+JOB_ID="cgpfunc_1"
 touch bar.txt
 }
-func_2() {
-JOB_ID="func_2"
+cgpfunc_2() {
+JOB_ID="cgpfunc_2"
 touch bar
 }
-func_3() {
-JOB_ID="func_3"
+cgpfunc_3() {
+JOB_ID="cgpfunc_3"
 touch bbr
 }
-func_4() {
-JOB_ID="func_4"
+cgpfunc_4() {
+JOB_ID="cgpfunc_4"
 touch foobar
 }
-func_5() {
-JOB_ID="func_5"
+cgpfunc_5() {
+JOB_ID="cgpfunc_5"
 echo "$< = bar bbr foobar bar.txt bar"
 echo "$<1 = bar"
 echo "$<2 = bbr"
@@ -23,13 +23,26 @@ echo "$<3 = foobar"
 echo "$<4 = bar.txt"
 echo "$<5 = bar"
 }
-func_6() {
-JOB_ID="func_6"
+cgpfunc_6() {
+JOB_ID="cgpfunc_6"
 touch test_bar_barbar.txt
 }
-func_1 || exit $?
-func_2 || exit $?
-func_3 || exit $?
-func_4 || exit $?
-func_5 || exit $?
-func_6 || exit $?
+if [ ! -e "bar.txt" ]; then
+cgpfunc_1 || exit $?
+fi
+if [ ! -e "bar" ]; then
+cgpfunc_2 || exit $?
+fi
+if [ ! -e "bbr" ]; then
+cgpfunc_3 || exit $?
+fi
+if [ ! -e "foobar" ]; then
+cgpfunc_4 || exit $?
+fi
+if [ ! -e "foo" ]; then
+cgpfunc_5 || exit $?
+fi
+if [ ! -e "test_bar_barbar.txt" ]; then
+cgpfunc_6 || exit $?
+fi
+

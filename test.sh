@@ -22,9 +22,9 @@ else
     echo "bar = \"baz\"" > test/run/global.incl
 
     if [ "$(echo $1 | grep ".mvpt$")" != "" ]; then
-        CGPIPE_HOME=test/run dist/cgpipe $VERBOSE -nolog -f $1 &> .testout
+        CGPIPE_HOME=test/run dist/cgpipe $VERBOSE -nolog -f $1 > .testout 2> .testerr
     else
-        CGPIPE_HOME=test/run $1 &> .testout
+        CGPIPE_HOME=test/run $1 > .testout 2> .testerr
     fi
 
     TEST=$(cat .testout | grep -v '^#' | grep -v '^$' | sed -e 's/^[[:blank:]]*//g' | sed -e 's/CGPIPE ERROR.*/CGPIPE ERROR/g' | $MD)
@@ -50,5 +50,6 @@ else
         rm .testout1 .testout2
     fi
     rm .testout
+    rm .testerr
     rm test/run/*
 fi

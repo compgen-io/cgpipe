@@ -23,8 +23,8 @@ Hey!
 4,24
 5
 done
-func_1() {
-JOB_ID="func_1"
+cgpfunc_1() {
+JOB_ID="cgpfunc_1"
 touch output1.bar
 echo "hi - 1"
 echo "hi - 2"
@@ -33,9 +33,16 @@ echo "hi - 3"
 echo "hi - 5"
 touch output1 output2
 }
-func_2() {
-JOB_ID="func_2"
+cgpfunc_2() {
+JOB_ID="cgpfunc_2"
 touch output3
 }
-func_1 || exit $?
-func_2 || exit $?
+
+if [ ! -e "output1" ]; then
+if [ ! -e "output2" ]; then
+cgpfunc_1 || exit $?
+fi
+fi
+if [ ! -e "output3" ]; then
+cgpfunc_2 || exit $?
+fi

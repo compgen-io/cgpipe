@@ -1,26 +1,31 @@
-func_1() {
-JOB_ID="func_1"
+cgpfunc_1() {
+JOB_ID="cgpfunc_1"
 echo "setup"
 }
-
-func_2() {
-JOB_ID="func_2"
+cgpfunc_2() {
+JOB_ID="cgpfunc_2"
 echo "bar"
 }
-
-func_3() {
-JOB_ID="func_3"
+cgpfunc_3() {
+JOB_ID="cgpfunc_3"
 echo "pre"
 echo "foo"
 echo "post"
 }
-
-func_4() {
-JOB_ID="func_4"
+cgpfunc_4() {
+JOB_ID="cgpfunc_4"
 echo "teardown"
 }
+if [ ! -e "__setup__" ]; then
+cgpfunc_1 || exit $?
+fi
+if [ ! -e "bar" ]; then
+cgpfunc_2 || exit $?
+fi
+if [ ! -e "foo" ]; then
+cgpfunc_3 || exit $?
+fi
+if [ ! -e "__teardown__" ]; then
+cgpfunc_4 || exit $?
+fi
 
-func_1 || exit $?
-func_2 || exit $?
-func_3 || exit $?
-func_4 || exit $?

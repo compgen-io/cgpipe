@@ -1,24 +1,33 @@
-func_1() {
-JOB_ID="func_1"
+cgpfunc_1() {
+JOB_ID="cgpfunc_1"
 touch foo
 }
-func_2() {
-JOB_ID="func_2"
+cgpfunc_2() {
+JOB_ID="cgpfunc_2"
 gzip -c foo > foo.gz
 }
-func_3() {
-JOB_ID="func_3"
+cgpfunc_3() {
+JOB_ID="cgpfunc_3"
 touch bar
 }
-func_4() {
-JOB_ID="func_4"
+cgpfunc_4() {
+JOB_ID="cgpfunc_4"
 echo "$> = foo.bar"
 echo "$< = foo bar"
 echo "$<1 = foo"
 echo "$<2 = bar"
 echo "$>1 = foo.bar"
 }
-func_1 || exit $?
-func_2 || exit $?
-func_3 || exit $?
-func_4 || exit $?
+if [ ! -e "foo" ]; then
+cgpfunc_1 || exit $?
+fi
+if [ ! -e "foo.gz" ]; then
+cgpfunc_2 || exit $?
+fi
+if [ ! -e "bar" ]; then
+cgpfunc_3 || exit $?
+fi
+if [ ! -e "foo.bar" ]; then
+cgpfunc_4 || exit $?
+fi
+
