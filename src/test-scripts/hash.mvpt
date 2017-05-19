@@ -1,2 +1,2 @@
-print cgpipe.current.filename
-print cgpipe.current.hash
+print cgpipe.sys.curfile
+print cgpipe.sys.curhash

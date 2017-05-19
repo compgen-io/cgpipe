@@ -20,6 +20,7 @@ import io.compgen.common.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -47,10 +48,17 @@ public class Eval {
 				return tokens.get(0).getValue();
 			}
 			if (tokens.get(0).isVariable()) {
-				if (tokens.get(0).getStr().equals("cgpipe.current.filename")) {
+				if (tokens.get(0).getStr().equals("cgpipe.sys.curfile")) {
 					return new VarString(tokens.getLine().getPipeline().getName());
-				} else if (tokens.get(0).getStr().equals("cgpipe.current.hash")) {
+				} else if (tokens.get(0).getStr().equals("cgpipe.sys.curhash")) {
 					return new VarString(tokens.getLine().getPipeline().getHashDigest());
+				} else if (tokens.get(0).getStr().equals("cgpipe.sys.scriptname")) {
+					if (System.getProperty("io.compgen.cgpipe.scriptname")!=null) {
+						return new VarString(System.getProperty("io.compgen.cgpipe.scriptname"));
+					}
+					return new VarString("");
+				} else if (tokens.get(0).getStr().equals("cgpipe.sys.cwd")) {
+					return new VarString(Paths.get("").toAbsolutePath().toString());
 				}
 				
 				return context.get(tokens.get(0).getStr());

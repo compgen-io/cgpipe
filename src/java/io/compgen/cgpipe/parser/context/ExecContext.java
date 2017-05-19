@@ -33,7 +33,8 @@ public class ExecContext {
 	public boolean contains(String name) {
 		if (parent != null && parent.contains(name)) {
 			return true;
-		}	
+		}
+		
 		return vars.containsKey(name);
 	}
 	
