@@ -91,6 +91,13 @@ public class VarString extends VarValue {
 				
 				File f = new File((String) obj);
 				return new VarString(f.getName());
+			} else if (method.equals("abspath")) {
+				if (args.length != 0) {
+					throw new MethodCallException("Bad or missing argument! abspath()");
+				}
+				
+				File f = new File((String) obj);
+				return new VarString(f.getAbsolutePath());
 			} else if (method.equals("exists")) {
 				if (args.length != 0) {
 					throw new MethodCallException("Bad or missing argument! exists()");
