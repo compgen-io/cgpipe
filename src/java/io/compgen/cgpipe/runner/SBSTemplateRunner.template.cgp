@@ -28,6 +28,7 @@ if job.procs > 1 %>
 #SBS ${custom}
 <% endif %>
 <% done %>
+#SBS -wd .
 
 set -eo pipefail
 
