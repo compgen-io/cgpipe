@@ -86,7 +86,7 @@ public class VarList extends VarValue {
 				}
 				return new VarInt(((List<VarValue>)vals).size());
 			}
-			throw new MethodNotFoundException("Method not found: "+method+" obj="+this);
+			throw new MethodNotFoundException("Method not found: "+method+" list="+this);
 		}
 	}
 

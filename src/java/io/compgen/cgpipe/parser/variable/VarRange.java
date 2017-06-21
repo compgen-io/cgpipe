@@ -77,7 +77,7 @@ public class VarRange extends VarValue {
 				}
 				return new VarInt(end-start+1);
 			}
-			throw new MethodNotFoundException("Method not found: "+method+" obj="+this);
+			throw new MethodNotFoundException("Method not found: "+method+" range="+this);
 		}
 	}
 }

@@ -137,7 +137,7 @@ public class VarString extends VarValue {
 				return new VarString(ret);
 				
 			}
-			throw new MethodNotFoundException("Method not found: "+method+" obj="+this);
+			throw new MethodNotFoundException("Method not found: "+method+" str="+this);
 		}
 	}
 
