@@ -36,7 +36,7 @@ public class Eval {
 	private static Log log = LogFactory.getLog(Eval.class);
 
 	public static VarValue evalTokenExpression(TokenList tokens, ExecContext context) throws ASTExecException {
-		log.trace("TOKENS: " + tokens);
+//		log.trace("TOKENS: " + tokens);
 		if (tokens.size() == 0) {
 			return null;
 		}
@@ -264,7 +264,7 @@ public class Eval {
 					
 				} else {
 					// this is a method on a variable... 
-					String[] tmp = StringUtils.reverse(methodToken.getStr()).split("\\.");
+					String[] tmp = StringUtils.reverse(methodToken.getStr()).split("\\.", 2);
 					method = StringUtils.reverse(tmp[0]);
 					String var = StringUtils.reverse(tmp[1]);
 	
