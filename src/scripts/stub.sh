@@ -6,6 +6,19 @@ fi
 
 JAVA_OPTS="${JAVA_OPTS} -Dio.compgen.cgpipe.scriptname=\"$MYSELF\""
 
+# limit parallel gc threads (systems with lots of processors)
+FOUNDGC=0
+case "${JAVA_OPTS}" in
+  *"XX:ParallelGCThreads"*)
+  FOUNDGC=1
+  ;;
+esac
+
+if [ $FOUNDGC -eq 0 ]; then
+    JAVA_OPTS="${JAVA_OPTS} -XX:ParallelGCThreads=2"
+fi
+
+
 JAVABIN=$(which java)
 if [ "${JAVA_HOME}" != "" ]; then
     JAVABIN="$JAVA_HOME/bin/java"
