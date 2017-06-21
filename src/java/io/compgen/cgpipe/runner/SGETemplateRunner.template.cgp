@@ -1,7 +1,7 @@
 #!${job.shell}
 #$ -w e
 #$ -terse
-#$ -N ${job.name}
+#$ -N ${job.name.sub("/", "_")}
 <% if job.hold %>
 #$ -h
 <% endif %>

@@ -103,6 +103,10 @@ public abstract class JobRunner {
 		obj.dryrun = dryrun;
 
 		// Attempt to load a list of existing jobs
+		
+		// TODO: add a lock mechanism for job-log?
+		// TODO: add start/stop/retcode to job log?
+		
 		String joblog = cxt.getString("cgpipe.joblog");
 		JobRunner.log.info("job-log: " +joblog);
 		if (joblog != null) {
