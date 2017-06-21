@@ -1,0 +1,6 @@
+val = "foobarbaz"
+print val
+print val.sub("bar", "quux")
+
+print "${val}"
+print "${val.sub(\"bar\", \"quux\")}"
