@@ -13,7 +13,7 @@ import java.util.List;
 public class SGETemplateRunner extends TemplateRunner {
 	private boolean hvmemIsTotal = false;
 	private String account=null;
-	private String parallelEnv = "shm";
+	private String parallelEnv = "smp";
 
 	@Override
 	public String[] getSubCommand(boolean forceHold) {
