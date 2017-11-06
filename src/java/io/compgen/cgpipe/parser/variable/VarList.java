@@ -85,7 +85,22 @@ public class VarList extends VarValue {
 					throw new MethodCallException("Bad or missing argument! length()");
 				}
 				return new VarInt(((List<VarValue>)vals).size());
+			} else if (method.equals("join")) {
+				if (args.length != 1) {
+					throw new MethodCallException("Bad or missing argument! join(str)");
+				}
+				
+				String s = "";
+				for (VarValue val: vals) {
+					if (!s.equals("")) {
+						s += args[0].toString();
+					}
+					s += val.toString();
+				}
+				
+				return new VarString(s);
 			}
+
 			throw new MethodNotFoundException("Method not found: "+method+" list="+this);
 		}
 	}
