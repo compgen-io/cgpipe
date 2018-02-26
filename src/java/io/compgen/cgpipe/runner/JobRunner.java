@@ -6,7 +6,10 @@ import io.compgen.cgpipe.exceptions.RunnerException;
 import io.compgen.cgpipe.loader.NumberedLine;
 import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.target.BuildTarget;
+import io.compgen.cgpipe.parser.variable.VarList;
+import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.common.IterUtils;
 import io.compgen.common.StringUtils;
 
 import java.io.BufferedReader;
@@ -56,6 +59,7 @@ public abstract class JobRunner {
 
 	private List<NumberedLine> prelines=null;
 	private List<NumberedLine> postlines=null;
+//	private List<NumberedLine> postSubmitLines=null;
 
 	
 	public static JobRunner load(RootContext cxt, boolean dryrun) throws RunnerException {
@@ -150,6 +154,8 @@ public abstract class JobRunner {
 
 			int retcode = proc.waitFor();
 			
+			// Note: This will block for large strings
+			// TODO: Make this run in a thread to consume the stream
 			String out = StringUtils.readInputStream(is);
 			String err = StringUtils.readInputStream(es);
 
@@ -162,6 +168,37 @@ public abstract class JobRunner {
 			
 			if (retcode != 0) {
 				throw new RunnerException("Error running job via shexec: "+jobdef.getName());
+			}
+
+		} catch (IOException | InterruptedException e) {
+			throw new RunnerException(e);
+		}
+	}
+
+	protected void shexec(String src) throws RunnerException {
+		try {
+			Process proc = Runtime.getRuntime().exec(new String[] { defaultShell });
+			proc.getOutputStream().write(src.getBytes(Charset.forName("UTF8")));
+			proc.getOutputStream().close();
+
+			InputStream is = proc.getInputStream();
+			InputStream es = proc.getErrorStream();
+
+			int retcode = proc.waitFor();
+			
+			// Note: This will block for large strings
+			// TODO: Make this run in a thread to consume the stream
+			String out = StringUtils.readInputStream(is);
+			String err = StringUtils.readInputStream(es);
+
+			System.out.print(out);
+			System.err.print(err);
+			
+			is.close();
+			es.close();
+			
+			if (retcode != 0) {
+				throw new RunnerException("Error running script!");
 			}
 
 		} catch (IOException | InterruptedException e) {
@@ -198,6 +235,7 @@ public abstract class JobRunner {
 				}
 			}
 
+			// TODO: Move this lower? And add all of the job defs to the context?
 			BuildTarget tdTgt = context.build("__teardown__", true);
 			if (tdTgt!=null) {
 				try {
@@ -209,7 +247,9 @@ public abstract class JobRunner {
 
 			prelines = getLinesForTarget("__pre__", context, true);
 			postlines = getLinesForTarget("__post__", context, true);
-		}
+
+//			postSubmitLines = getLinesForTarget("__postsubmit__", context, true);
+}
 	}
 	
 	public void submitAll(BuildTarget initialTarget, RootContext context) throws RunnerException {
@@ -312,12 +352,14 @@ public abstract class JobRunner {
 				job.addDependencies(deps);
 				if (!blankRoot) {
 					submit(job);
-				
+
 					if (job.getJobId() == null) {
 						abort();
 						log.error("Error submitting job: "+ target);
 						throw new RunnerException("Error submitting job: "+job);
 					}
+					
+					postSubmit(job, context);
 		
 				} else {
 					log.debug("Skipping empty target: "+target);
@@ -424,5 +466,40 @@ public abstract class JobRunner {
 				}
 			}
 		}
+	}
+	public void postSubmit(JobDef jobdef, RootContext context) throws RunnerException {
+		// TODO : Make this work... 
+		//          1) create a new context with postSubmitLines as the source, 
+		//          2) add the job variable to the context, 
+		//          3) execute (shell out)
+
+		BuildTarget postSubmitTgt = context.build("__postsubmit__", true);
+		if (postSubmitTgt != null) {
+			try {
+				RootContext jobRoot = new RootContext();
+				for (String setting: jobdef.getSettings()) {
+					if (setting.startsWith("job.")) {
+						jobRoot.set(setting, jobdef.getSettingsMap().get(setting));
+					}
+				}
+				jobRoot.set("job.id", new VarString(jobdef.getJobId()));
+				String deps = "";
+				for (JobDependency dep: jobdef.getDependencies()) {
+					if (!deps.equals("")) {
+						deps += ":";
+					}
+					deps += dep.getJobId();
+				}
+				jobRoot.set("job.depids", new VarString(deps));
+
+				JobDef postSubmit = postSubmitTgt.eval(null,  null, null, jobRoot.cloneValues());
+				System.err.println(postSubmit.getBody());
+				shexec(postSubmit);
+
+			} catch (ASTParseException | ASTExecException e) {
+				throw new RunnerException(e);
+			}
+		}
+	
 	}
 }

@@ -38,6 +38,9 @@ public class RootContext extends ExecContext {
 	private PrintStream outputStream = System.out;
 	private Log log = LogFactory.getLog(getClass());
 
+	// File.exists() lookups are expensive (and slow on NFS), so let's cache these requests.
+	private Map<String, Boolean> fileCache = new HashMap<String, Boolean>();
+	
 	public RootContext() {
 		this(null, null, null, null);
 	}
@@ -84,6 +87,26 @@ public class RootContext extends ExecContext {
 		submittedOutputs.put(output, new ExistingJobBuildTarget(output, jobId, runner));
 	}
 	
+	private boolean cachedFileExists(String fname) {
+		if (fname == null) {
+			return false;
+		}
+		if (!fileCache.containsKey(fname)) {
+			if (new File(fname).exists()) {
+				fileCache.put(fname, true);
+			} else {
+				fileCache.put(fname, false);
+			}
+		}
+		return fileCache.get(fname);
+	}
+	
+	/**
+	 * 
+	 * @param output - the output file we are trying to make
+	 * @param allowMissing - allow missing input file(s)
+	 * @return
+	 */
 	public BuildTarget build(String output, boolean allowMissing) {
 		BuildTarget tgt = null;
 		
@@ -101,6 +124,7 @@ public class RootContext extends ExecContext {
 			Map<String, BuildTarget> deps = new HashMap<String, BuildTarget>();
 			
 			boolean foundAllInputs = true;
+			String missingInput = null;
 			
 			for (String input: tgt.getInputs()) {
 				if (input == null) {
@@ -112,6 +136,7 @@ public class RootContext extends ExecContext {
 				BuildTarget dep = build(input, allowMissing);
 				if (dep == null) {
 					foundAllInputs = false;
+					missingInput = input;
 					break;
 				}
 				deps.put(input, dep);
@@ -122,11 +147,12 @@ public class RootContext extends ExecContext {
 				log.debug("output: "+output+" provider: "+tgt);
 				return tgt;
 			} else {
-				log.debug("Missing a required dependency - attempting to find alternative build path");
+				log.debug("Missing a required dependency ("+missingInput+") - attempting to find alternative build path");
 			}
 		}
 		
-		if (output!=null && new File(output).exists()) {
+		if (cachedFileExists(output)) {
+//			if (output!=null && new File(output).exists()) {
 			// If we have the build-target for an input, we'll find it above
 			// otherwise, if the file exists on disk, we don't necessarily 
 			// need to rebuild it. 
@@ -142,7 +168,7 @@ public class RootContext extends ExecContext {
 					log.debug("Found: " + absOutput + " provided by existing/valid job: " + submittedOutputs.get(absOutput).getJobId() );
 					return submittedOutputs.get(absOutput);
 				} else {
-					log.debug("Found: " + absOutput + " provided by existing job: " + submittedOutputs.get(absOutput).getJobId() + ", but it is not a valid job!" );
+					log.debug("Found: " + absOutput + " provided by existing job: " + submittedOutputs.get(absOutput).getJobId() + ", but it is no longer valid!" );
 				}
 			}
 		}
@@ -152,6 +178,10 @@ public class RootContext extends ExecContext {
 			return new FileExistsBuildTarget(output);
 		}
 		
+		if (output != null) {
+			log.info("Error finding a build path for file: "+output);
+		}
+
 		return null;
 	}
 	
