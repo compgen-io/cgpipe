@@ -1,17 +1,5 @@
 package io.compgen.cgpipe.runner;
 
-import io.compgen.cgpipe.exceptions.ASTExecException;
-import io.compgen.cgpipe.exceptions.ASTParseException;
-import io.compgen.cgpipe.exceptions.RunnerException;
-import io.compgen.cgpipe.loader.NumberedLine;
-import io.compgen.cgpipe.parser.context.RootContext;
-import io.compgen.cgpipe.parser.target.BuildTarget;
-import io.compgen.cgpipe.parser.variable.VarList;
-import io.compgen.cgpipe.parser.variable.VarString;
-import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.common.IterUtils;
-import io.compgen.common.StringUtils;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,6 +17,16 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import io.compgen.cgpipe.exceptions.ASTExecException;
+import io.compgen.cgpipe.exceptions.ASTParseException;
+import io.compgen.cgpipe.exceptions.RunnerException;
+import io.compgen.cgpipe.loader.NumberedLine;
+import io.compgen.cgpipe.parser.context.RootContext;
+import io.compgen.cgpipe.parser.target.BuildTarget;
+import io.compgen.cgpipe.parser.variable.VarString;
+import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.common.StringUtils;
 
 public abstract class JobRunner {
 	abstract public boolean submit(JobDef jobdef) throws RunnerException;
