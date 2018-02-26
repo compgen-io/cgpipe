@@ -10,6 +10,9 @@ __setup__:
 __teardown__:
     echo "teardown"
 
+__postsubmit__:
+    echo "post submit"
+    echo "jobid: ${job.id}"
     
 all: foo bar
 
