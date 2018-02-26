@@ -234,6 +234,8 @@ public abstract class JobRunner {
 			}
 
 			// TODO: Move this lower? And add all of the job defs to the context?
+			//       (Like -- show the final outputs and temp. files...)
+			
 			BuildTarget tdTgt = context.build("__teardown__", true);
 			if (tdTgt!=null) {
 				try {
@@ -466,11 +468,6 @@ public abstract class JobRunner {
 		}
 	}
 	public void postSubmit(JobDef jobdef, RootContext context) throws RunnerException {
-		// TODO : Make this work... 
-		//          1) create a new context with postSubmitLines as the source, 
-		//          2) add the job variable to the context, 
-		//          3) execute (shell out)
-
 		BuildTarget postSubmitTgt = context.build("__postsubmit__", true);
 		if (postSubmitTgt != null) {
 			try {
