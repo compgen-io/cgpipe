@@ -1,7 +1,29 @@
 
 # What is CGPipe?
 
-CGPipe is a language for building data analysis pipelines. It is a declarative programming language similar to Makefiles, however instead of directly executing target scripts, jobs are submitted to a dedicated job scheduler, such as PBS, SGE, or SLURM. 
+CGPipe is a language for building data analysis pipelines. It is a declarative programming language similar to Makefiles, however instead of directly executing target scripts, jobs are submitted to a dedicated job scheduler, such as PBS, SGE, or SLURM.
+
+You define output files, which input files they need, and the script required to get from input > output. Each output file (or job) is defined separately. So what you end up with is a directed acyclic graph (DAG).
+
+    input > file1 --> file2 > file3 > ... > output1
+                 \
+                  \-> file1b > output2
+
+
+or map-reduce style...
+
+	# split input
+    input > file1 + file2 + file3
+
+    # map
+    file1 > fileA
+    file2 > fileB
+    file3 > fileC
+
+    #reduce
+    fileA + fileB + fileC > output
+
+You give CGPipe these definitions and the name of the file you ultimately want. Knowing these task definitions and the desired output, CGPipe will figure out how to "walk the graph" to figure out what files/jobs are needed. It also backtracks the walk in case there are multiple ways to get to your output. CGPipe will look first *on-disk* for required input files. It will only submit a job to build a missing or out of date file. If an input is newer than an output, that output file is considered out of date. So far, this is the same as how `make` works, except for the job submission part... where `make` executes the tasks, CGPipe submits them as jobs to a scheduler.
 
 ## Similarities and differences to Makefiles
 
@@ -15,7 +37,7 @@ CGPipe pipelines have a very simliar syntax to Makefiles, particularly in the wa
 
 * If a given output file exists, it will not be rebuilt unless a defined input file will be rebuilt. CGPipe extends this to also track outputs/jobs that have been submitted to a job scheduler. If an built-target requires an input that has already been submitted to the scheduler, that input will not be resubmitted, rather the existing job will be listed as a job dependency.
 
-In this, it is very similar to the `qmake` program that is available for SGE/OGE clusters, which executes unmodified Makefiles using the SGE scheduler. This allows for some parallelization. But there are some key differences between CGPipe pipelines and using `qmake` to execute an unaltered Makefile.
+In this way, CGPipe is very similar to the `qmake` program that is available for SGE clusters, which executes unmodified Makefiles using the SGE scheduler. This allows for some parallelization. But there are some key differences between CGPipe pipelines and using `qmake` to execute an unaltered Makefile.
 
 * CGPipe allows you to specify job requirements, such as execution time, CPUs, and memory. These requirements can be set on a job or pipeline basis, allowing the pipeline author to set requirements globally or for only individual tasks. For example, the `account` setting can be set for all tasks, but `walltime` could be set on a per-task basis.
 
@@ -33,10 +55,10 @@ In this, it is very similar to the `qmake` program that is available for SGE/OGE
 
 * Pipelines can be stored remotely, such as on a GitHub repository or web server.
 
-* Pipelines can be used as executable scripts using the #! (shebang) first line syntax (like shell or Python scripts).
+* Pipelines can be used as executable scripts using the #! (shebang) first line syntax (like bash, perl, ruby, or python scripts).
 
 * Pipelines can display help text. If the first lines are comments, then they will be displayed when help text is requested (excluding #! first lines). The first blank or non-commented line marks the end of the help text.
 
 ## Executing pipelines
 
-It is expected that jobs will be executed on a computation cluster that is managed by a dedicated job scheduler. This way individual tasks can be efficiently executed in a parallel manner. CGPipe will take care of establishing any inter-task dependencies to make sure that things execute in the proper order. Pipelines can also be run on a single host by using either the single file SBS scheduler or by exporting the pipeline as a bash script. SBS is well suited for single-host systems where there is no existing job scheduler. SBS requires having the `sbs` program installed somewhere in your `$PATH`.
+It is expected that jobs will be executed on an HPC cluster with a job scheduler (SGE, SLURM, or PBS supported). This way individual tasks can be efficiently executed in a parallel manner. CGPipe will take care of setting inter-task dependencies to make sure that jobs execute in the proper order. Pipelines can also be run on a single host by using either the simple [SBS scheduler](http://compgen.io/sbs) or by exporting the pipeline as a bash script. SBS is well suited for single-host systems where there is no existing job scheduler. SBS requires having the `sbs` program installed somewhere in your `$PATH`.

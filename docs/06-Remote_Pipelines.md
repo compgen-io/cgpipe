@@ -1,15 +1,24 @@
 
 # Remote pipelines
 
-Pipeline files don't have to be on the local filesystem in order to be run. Remote pipelines can be used anywhere that a local pathname could be used. Remote pipelines can either be given as explicit HTTP or HTTPS URLs or use "named remote". Named remotes are remote web sites that can be accessed using a shortcut naming scheme to make it easier to use interactively.
+* Note: this is an experimental feature *
 
-*Note: If you will be using the same pipeline from multiple hosts, it is advisable to store the pipelines on a common web server and setup a named remote.*
 
-## Available compgen.io pipelines
-
-For more information on available remote pipelines from compgen.io, run `cgpipe -h -f compgen_io:pipelines`.
+Pipeline files don't have to be on the local filesystem in order to be run. Remote pipelines can be used anywhere that a local pathname could be used for CGPipe. Remote pipelines can either be given as explicit HTTP or HTTPS URLs or use a "named remote". Named remotes are web addresses that can be accessed using a shortcut naming scheme to make it easier to use interactively.
 
 ## Defining custom named remote sources
+
+Defining a new named remote source can be accomplished by setting a new variable in CGPipe (either from a pipeline or from a global RC script). The
+new value should be `cgpipe.remote.$shortname$.baseurl`. The value should be the base-url to use for the resource.  As an example:
+
+	cgpipe.remote.compgen_io.baseurl = "https://raw.githubusercontent.com/compgen-io/cgpipe-pipelines/master/"
+
+You can then load a remote pipeline using the `remote-name:filename` syntax. As an example, to see the help text for the pipeline `compgen_io:pipelines`, you'd be able to run the following:
+
+	cgpipe -h -f compgen_io:pipelines
+
+where the pipeline script itself is loaded from `https://raw.githubusercontent.com/compgen-io/cgpipe-pipelines/master/pipelines`.
+
 
 ## SHA-1 hashes
 
