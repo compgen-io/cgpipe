@@ -40,6 +40,7 @@ public class RootContext extends ExecContext {
 
 	// File.exists() lookups are expensive (and slow on NFS), so let's cache these requests.
 	private Map<String, Boolean> fileCache = new HashMap<String, Boolean>();
+	private Map<String, BuildTarget> buildTargetCache = new HashMap<String, BuildTarget>();
 	
 	public RootContext() {
 		this(null, null, null, null);
@@ -107,8 +108,21 @@ public class RootContext extends ExecContext {
 	 * @param allowMissing - allow missing input file(s)
 	 * @return
 	 */
-	public BuildTarget build(String output, boolean allowMissing) {
+	public BuildTarget build(String rawOutput, boolean allowMissing) {
 		BuildTarget tgt = null;
+		
+		// temporary file will have '^' as a prefix. This needs to be trimmed
+		// away before we actually do something with it.
+		String output = null;
+		if (rawOutput != null) {
+			if (rawOutput.startsWith("^")) {
+				output = rawOutput.substring(1);
+			} else if (rawOutput.startsWith("\\^")) {
+				output = rawOutput.substring(1);
+			} else {
+				output = rawOutput;
+			}
+		}
 		
 		for (BuildTargetTemplate tgtdef: targets) {
 			tgt = tgtdef.matchOutput(output);
@@ -117,6 +131,7 @@ public class RootContext extends ExecContext {
 			}
 
 			if (output == null) {
+				// this is the default target to run
 				output = tgt.getOutputs().get(0);
 				log.debug("Looking for build-target: " + output);
 			}
@@ -133,7 +148,7 @@ public class RootContext extends ExecContext {
 					break;
 				}
 				log.debug("Looking for required input: "+ input + " (from "+output+")");
-				BuildTarget dep = build(input, allowMissing);
+				BuildTarget dep = cachedBuild(input, allowMissing);
 				if (dep == null) {
 					foundAllInputs = false;
 					missingInput = input;
@@ -185,6 +200,17 @@ public class RootContext extends ExecContext {
 		return null;
 	}
 	
+	private BuildTarget cachedBuild(String input, boolean allowMissing) {
+		if (input == null) {
+			log.info("input is null???");
+			return build(input, allowMissing);
+		}
+		if (!buildTargetCache.containsKey(input)) {
+			buildTargetCache.put(input, build(input, allowMissing));
+		}
+		return buildTargetCache.get(input);
+	}
+
 	public void addBodyLine(String body) {
 		this.body += body+"\n";
 	}
@@ -198,8 +224,48 @@ public class RootContext extends ExecContext {
 	}
 	
 	public List<String> getOutputs() {
-		return outputs == null ? null: Collections.unmodifiableList(outputs);
+		if (outputs == null) { 
+			return null; 
+		}
+
+		// need to convert tmp-flagged files to normal names.
+		
+		List<String> tmp = null;
+		for (String o:outputs) {
+			if (tmp == null) {
+				tmp = new ArrayList<String>();
+			}
+			if (o.startsWith("^")) {
+				tmp.add(o.substring(1));
+			} else if (o.startsWith("\\^")) {
+					tmp.add(o.substring(1));
+			} else {
+				tmp.add(o);
+			}
+		}
+
+		return Collections.unmodifiableList(tmp);
+//		return outputs == null ? null: Collections.unmodifiableList(outputs);
 	}
+
+	public List<String> getTempOutputs() {
+		if (outputs == null) { 
+			return null; 
+		}
+		
+		List<String> tmpOutputs = null;
+		for (String o:outputs) {
+			if (o.startsWith("^")) {
+				if (tmpOutputs == null) {
+					tmpOutputs = new ArrayList<String>();
+				}
+				tmpOutputs.add(o.substring(1));
+			}
+		}
+
+		return Collections.unmodifiableList(tmpOutputs);
+	}
+
 
 	public List<String> getInputs() {
 		return inputs == null ? null: Collections.unmodifiableList(inputs);

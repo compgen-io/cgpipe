@@ -11,6 +11,7 @@ import io.compgen.cgpipe.runner.JobDef;
 import io.compgen.cgpipe.runner.JobDependency;
 import io.compgen.common.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ public class BuildTarget {
 
 	final private List<String> inputs;
 	final private List<String> outputs;
+	final private List<String> tempOutputs;
 	final private String wildcard;
 	final private Map<String, VarValue> capturedContext;
 	final private List<NumberedLine> lines;
@@ -32,7 +34,20 @@ public class BuildTarget {
 	private Map<String, BuildTarget> deps = new HashMap<String, BuildTarget>();
 	
 	public BuildTarget(List<String> outputs, List<String> inputs, String wildcard, Map<String, VarValue> capturedContext, List<NumberedLine> lines) {
-		this.outputs = outputs;
+		this.outputs = new ArrayList<String>();
+		this.tempOutputs = new ArrayList<String>();
+		
+		for (String o: outputs) {
+			if (o.startsWith("^")) {
+				this.outputs.add(o.substring(1));
+				this.tempOutputs.add(o.substring(1));
+			} else if (o.startsWith("\\^")) {
+				this.outputs.add(o.substring(1));
+			} else {
+				this.outputs.add(o);
+			}
+		}
+		
 		this.inputs = inputs;
 		this.wildcard = wildcard;
 		this.capturedContext = capturedContext;
@@ -49,6 +64,10 @@ public class BuildTarget {
 
 	public List<String> getOutputs() {
 		return Collections.unmodifiableList(outputs);
+	}
+
+	public List<String> getTempOutputs() {
+		return Collections.unmodifiableList(tempOutputs);
 	}
 
 	public List<NumberedLine> getLines() {

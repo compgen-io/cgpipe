@@ -1,0 +1,26 @@
+__teardown__:
+    echo "??"
+    echo "${cgpipe.tmpfiles}"
+    echo "${cgpipe.outputfiles}"
+    <% for f in cgpipe.tmpfiles %>
+    rm ${f}
+    <% done %>
+
+
+ar = []
+
+ar += "one"
+ar += "two"
+ar += "three"
+
+all: bar
+
+^chr.%:
+    echo $>
+
+^foo: ^chr.@{ar}
+    echo "foo"
+
+bar: foo
+    echo "bar"
+

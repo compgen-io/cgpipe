@@ -21,11 +21,14 @@ import org.apache.commons.logging.LogFactory;
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.RunnerException;
+import io.compgen.cgpipe.exceptions.VarTypeException;
 import io.compgen.cgpipe.loader.NumberedLine;
 import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.target.BuildTarget;
+import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.common.MapBuilder;
 import io.compgen.common.StringUtils;
 
 public abstract class JobRunner {
@@ -51,16 +54,21 @@ public abstract class JobRunner {
 	
 	protected PrintStream joblog = null;
 	protected Map<String, JobDependency> submittedJobs = new HashMap<String, JobDependency>();	 // key = output-file, value = job-id
+	protected List<JobDependency> submittedJobDefs = new ArrayList<JobDependency>();
 
-	private JobDef teardown = null;
+	protected RootContext rootContext = null;
+	
 	protected boolean setupRun = false;
 
-	private List<NumberedLine> prelines=null;
-	private List<NumberedLine> postlines=null;
+	protected List<NumberedLine> prelines=null;
+	protected List<NumberedLine> postlines=null;
 //	private List<NumberedLine> postSubmitLines=null;
-
+	
+	protected List<String> outputFilesSubmitted = new ArrayList<String>();
+	protected List<String> tempOutputFilesSubmitted = new ArrayList<String>();
 	
 	public static JobRunner load(RootContext cxt, boolean dryrun) throws RunnerException {
+		
 		String runner = cxt.getString("cgpipe.runner");
 		if (runner == null) {
 			runner = "shell";
@@ -96,6 +104,8 @@ public abstract class JobRunner {
 			throw new RunnerException("Can't load job runner: "+runner +" (valid options: shell, sge, slurm, pbs, sjq, graphviz)");
 		}
 		
+		obj.rootContext = cxt;
+
 		String prefix = "cgpipe.runner."+runner;
 		Map<String, VarValue> cxtvals = cxt.cloneValues(prefix);
 		for (String k: cxtvals.keySet()) {
@@ -220,7 +230,7 @@ public abstract class JobRunner {
 			BuildTarget setupTgt = context.build("__setup__", true);
 			if (setupTgt != null) {
 				try {
-					JobDef setup = setupTgt.eval(null,  null, null);
+					JobDef setup = setupTgt.eval(null,  null, context);
 					if (setup.getSettingBool("job.shexec", false)) {
 						if (!dryrun) {
 							shexec(setup);
@@ -233,23 +243,9 @@ public abstract class JobRunner {
 				}
 			}
 
-			// TODO: Move this lower? And add all of the job defs to the context?
-			//       (Like -- show the final outputs and temp. files...)
-			
-			BuildTarget tdTgt = context.build("__teardown__", true);
-			if (tdTgt!=null) {
-				try {
-					teardown = tdTgt.eval(null,  null, null);
-				} catch (ASTParseException | ASTExecException e) {
-					throw new RunnerException(e);
-				}
-			}
-
 			prelines = getLinesForTarget("__pre__", context, true);
 			postlines = getLinesForTarget("__post__", context, true);
-
-//			postSubmitLines = getLinesForTarget("__postsubmit__", context, true);
-}
+		}
 	}
 	
 	public void submitAll(BuildTarget initialTarget, RootContext context) throws RunnerException {
@@ -370,6 +366,11 @@ public abstract class JobRunner {
 				for (String out: target.getOutputs()) {
 					submittedJobs.put(Paths.get(out).toAbsolutePath().toString(), job);
 				}
+				
+				this.submittedJobDefs.add(job);
+				this.outputFilesSubmitted.addAll(target.getOutputs());
+				this.tempOutputFilesSubmitted.addAll(target.getTempOutputs());
+				
 			} else {
 				log.debug("Empty job for target: "+target);
 			}
@@ -401,12 +402,59 @@ public abstract class JobRunner {
 	}
 	
 	public void done() throws RunnerException {
-		if (teardown != null) {
+		
+		// look for a __teardown__ target and execute if found.
+		JobDef teardown = null;
+		
+		// TODO: Move this lower? And add all of the job defs to the context?
+		//       (Like -- show the final outputs and temp. files...)
+		
+		BuildTarget tdTgt = rootContext.build("__teardown__", true);
+		if (tdTgt!=null) {
+			try {
+				System.err.println("ALL OUTPUTS :  "+StringUtils.join(",",outputFilesSubmitted));
+				System.err.println("TEMP-OUTPUTS: "+StringUtils.join(",",tempOutputFilesSubmitted));
+				
+				MapBuilder<String, VarValue> mb = new MapBuilder<String, VarValue>();
+				
+				if (tempOutputFilesSubmitted.size() > 0) {
+					VarString[] tmpFileVar = new VarString[tempOutputFilesSubmitted.size()];
+					for (int i=0; i<tempOutputFilesSubmitted.size(); i++) {
+						tmpFileVar[i] = new VarString(tempOutputFilesSubmitted.get(i));
+					}
+					
+					try {
+						mb.put("cgpipe.tmpfiles", new VarList(tmpFileVar));
+					} catch (VarTypeException e) {
+						throw new RunnerException(e);
+					}
+				}
+
+				if (outputFilesSubmitted.size() > 0) {
+					VarString[] tmpFileVar = new VarString[outputFilesSubmitted.size()];
+					for (int i=0; i<outputFilesSubmitted.size(); i++) {
+						tmpFileVar[i] = new VarString(outputFilesSubmitted.get(i));
+					}
+					
+					try {
+						mb.put("cgpipe.outputfiles", new VarList(tmpFileVar));
+					} catch (VarTypeException e) {
+						throw new RunnerException(e);
+					}
+				}
+
+				teardown = tdTgt.eval(null,  null, rootContext, mb.build());
+
+			} catch (ASTParseException | ASTExecException e) {
+				throw new RunnerException(e);
+			}
+			
 			if (teardown.getSettingBool("job.shexec", false)) {
 				if (!dryrun) {
 					shexec(teardown);
 				}
 			} else {
+				teardown.addDependencies(submittedJobDefs);
 				submit(teardown);
 			}
 		}

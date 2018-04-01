@@ -59,11 +59,20 @@ public class BuildTargetTemplate {
 		return "<build-target-templ> " + StringUtils.join(" ", outputs) + " : " + StringUtils.join(" ", inputs);
 	}
 	
+	/**
+	 * Find a target for a given output, taking into account wildcards in the output filenames
+	 * @param testOutput
+	 * @return
+	 */
+	
 	public BuildTarget matchOutput(String testOutput) {
 		String wildcard = "";
 		if (testOutput != null) {
 			boolean matched = false;
 			for (String outputName: outputs) {
+				if (outputName.startsWith("^") || outputName.startsWith("\\^")) {
+					outputName = outputName.substring(1);
+				}
 				Pattern regex = Pattern.compile("\\Q"+outputName.replace("%", "\\E(.*)\\Q")+"\\E");
 				Matcher m = regex.matcher(testOutput);
 				if (m.matches()) {
