@@ -1,3 +1,6 @@
+__setup__:
+    echo "setting up..."
+
 __teardown__:
     echo "??"
     echo "${cgpipe.tmpfiles}"

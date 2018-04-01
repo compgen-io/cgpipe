@@ -58,7 +58,7 @@ public abstract class JobRunner {
 
 	protected RootContext rootContext = null;
 	
-	protected boolean setupRun = false;
+	protected JobDef setupJob = null;
 
 	protected List<NumberedLine> prelines=null;
 	protected List<NumberedLine> postlines=null;
@@ -225,18 +225,17 @@ public abstract class JobRunner {
 	}
 	
 	private void setup(RootContext context) throws RunnerException {
-		if (!setupRun) {
-			setupRun = true;
+		if (setupJob == null) {
 			BuildTarget setupTgt = context.build("__setup__", true);
 			if (setupTgt != null) {
 				try {
-					JobDef setup = setupTgt.eval(null,  null, context);
-					if (setup.getSettingBool("job.shexec", false)) {
+					setupJob = setupTgt.eval(null,  null, context);
+					if (setupJob.getSettingBool("job.shexec", false)) {
 						if (!dryrun) {
-							shexec(setup);
+							shexec(setupJob);
 						}
 					} else {
-						submit(setup);
+						submit(setupJob);
 					}
 				} catch (ASTParseException | ASTExecException e) {
 					throw new RunnerException(e);
@@ -346,6 +345,11 @@ public abstract class JobRunner {
 				}
 			
 				job.addDependencies(deps);
+				
+				if (setupJob != null && setupJob.getJobId() != null) {
+					job.addDependency(setupJob);
+				}
+				
 				if (!blankRoot) {
 					submit(job);
 
@@ -455,6 +459,9 @@ public abstract class JobRunner {
 				}
 			} else {
 				teardown.addDependencies(submittedJobDefs);
+				if (setupJob != null && setupJob.getJobId() != null) {
+					teardown.addDependency(setupJob);
+				}
 				submit(teardown);
 			}
 		}
