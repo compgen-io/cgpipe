@@ -416,8 +416,8 @@ public abstract class JobRunner {
 		BuildTarget tdTgt = rootContext.build("__teardown__", true);
 		if (tdTgt!=null) {
 			try {
-				System.err.println("ALL OUTPUTS :  "+StringUtils.join(",",outputFilesSubmitted));
-				System.err.println("TEMP-OUTPUTS: "+StringUtils.join(",",tempOutputFilesSubmitted));
+				//System.err.println("ALL OUTPUTS :  "+StringUtils.join(",",outputFilesSubmitted));
+				//System.err.println("TEMP-OUTPUTS: "+StringUtils.join(",",tempOutputFilesSubmitted));
 				
 				MapBuilder<String, VarValue> mb = new MapBuilder<String, VarValue>();
 				
