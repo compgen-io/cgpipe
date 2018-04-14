@@ -26,7 +26,7 @@ cgpfunc_7() {
 JOB_ID="cgpfunc_7"
 echo "??"
 echo "chr.two chr.one chr.three foo"
-echo "chr.two chr.one chr.three foo bar all"
+echo "chr.two chr.one chr.three foo bar"
 rm chr.two
 rm chr.one
 rm chr.three

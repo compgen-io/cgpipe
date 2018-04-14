@@ -360,21 +360,22 @@ public abstract class JobRunner {
 					}
 					
 					postSubmit(job, context);
-		
+
+					this.outputFilesSubmitted.addAll(target.getOutputs());
+					this.tempOutputFilesSubmitted.addAll(target.getTempOutputs());
+
+					for (String out: target.getOutputs()) {
+						submittedJobs.put(Paths.get(out).toAbsolutePath().toString(), job);
+					}
+
 				} else {
 					log.debug("Skipping empty target: "+target);
 					job.setJobId("");
 				}
 				
 				target.setSubmittedJobDep(job);
-				for (String out: target.getOutputs()) {
-					submittedJobs.put(Paths.get(out).toAbsolutePath().toString(), job);
-				}
-				
 				this.submittedJobDefs.add(job);
-				this.outputFilesSubmitted.addAll(target.getOutputs());
-				this.tempOutputFilesSubmitted.addAll(target.getTempOutputs());
-				
+			
 			} else {
 				log.debug("Empty job for target: "+target);
 			}
@@ -415,54 +416,59 @@ public abstract class JobRunner {
 		
 		BuildTarget tdTgt = rootContext.build("__teardown__", true);
 		if (tdTgt!=null) {
+			boolean teardownBlank = false;
 			try {
 				//System.err.println("ALL OUTPUTS :  "+StringUtils.join(",",outputFilesSubmitted));
 				//System.err.println("TEMP-OUTPUTS: "+StringUtils.join(",",tempOutputFilesSubmitted));
 				
 				MapBuilder<String, VarValue> mb = new MapBuilder<String, VarValue>();
 				
-				if (tempOutputFilesSubmitted.size() > 0) {
-					VarString[] tmpFileVar = new VarString[tempOutputFilesSubmitted.size()];
-					for (int i=0; i<tempOutputFilesSubmitted.size(); i++) {
-						tmpFileVar[i] = new VarString(tempOutputFilesSubmitted.get(i));
-					}
-					
-					try {
-						mb.put("cgpipe.tmpfiles", new VarList(tmpFileVar));
-					} catch (VarTypeException e) {
-						throw new RunnerException(e);
-					}
+				VarString[] tmpFileVar = new VarString[tempOutputFilesSubmitted.size()];
+				for (int i=0; i<tempOutputFilesSubmitted.size(); i++) {
+					tmpFileVar[i] = new VarString(tempOutputFilesSubmitted.get(i));
+				}
+				
+				try {
+					mb.put("cgpipe.tmpfiles", new VarList(tmpFileVar));
+				} catch (VarTypeException e) {
+					throw new RunnerException(e);
 				}
 
-				if (outputFilesSubmitted.size() > 0) {
-					VarString[] tmpFileVar = new VarString[outputFilesSubmitted.size()];
-					for (int i=0; i<outputFilesSubmitted.size(); i++) {
-						tmpFileVar[i] = new VarString(outputFilesSubmitted.get(i));
-					}
+				VarString[] tmpFileVar2 = new VarString[outputFilesSubmitted.size()];
+				for (int i=0; i<outputFilesSubmitted.size(); i++) {
+					tmpFileVar2[i] = new VarString(outputFilesSubmitted.get(i));
+				}
 					
-					try {
-						mb.put("cgpipe.outputfiles", new VarList(tmpFileVar));
-					} catch (VarTypeException e) {
-						throw new RunnerException(e);
-					}
+				try {
+					mb.put("cgpipe.outputfiles", new VarList(tmpFileVar2));
+				} catch (VarTypeException e) {
+					throw new RunnerException(e);
 				}
 
 				teardown = tdTgt.eval(null,  null, rootContext, mb.build());
+				
+				String tmp = teardown.getBody().replaceAll("[ \\t\\r\\n]", "");
+				if (tmp.equals("")) {
+					teardownBlank = true;
+				}
+
 
 			} catch (ASTParseException | ASTExecException e) {
 				throw new RunnerException(e);
 			}
 			
-			if (teardown.getSettingBool("job.shexec", false)) {
-				if (!dryrun) {
-					shexec(teardown);
+			if (!teardownBlank) {
+				if (teardown.getSettingBool("job.shexec", false)) {
+					if (!dryrun) {
+						shexec(teardown);
+					}
+				} else {
+					teardown.addDependencies(submittedJobDefs);
+					if (setupJob != null && setupJob.getJobId() != null) {
+						teardown.addDependency(setupJob);
+					}
+					submit(teardown);
 				}
-			} else {
-				teardown.addDependencies(submittedJobDefs);
-				if (setupJob != null && setupJob.getJobId() != null) {
-					teardown.addDependency(setupJob);
-				}
-				submit(teardown);
 			}
 		}
 		

@@ -192,12 +192,14 @@ public class TemplateParser {
 	static public String parseTemplate(List<NumberedLine> lines, List<NumberedLine> pre, List<NumberedLine> post, RootContext rootContext) throws ASTExecException, ASTParseException {
 		TemplateParser parser = new TemplateParser(pre, post);
 		int indent = -1;
-		for (NumberedLine line: lines) {
-			if (indent == -1) {
-				indent = line.calcLinePrefixLength();
+		if (lines != null) {
+			for (NumberedLine line: lines) {
+				if (indent == -1) {
+					indent = line.calcLinePrefixLength();
+				}
+				
+				parser.parseLine(line.stripPrefix(indent));
 			}
-			
-			parser.parseLine(line.stripPrefix(indent));
 		}
 		
 		parser.processPost();
