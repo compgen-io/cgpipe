@@ -311,12 +311,18 @@ defined.
 
 
 ### Special targets
-There are four special target names that can be added for any pipeline: 
-`__pre__`, `__post__`, `__setup__`, and `__teardown__`. These are target
-definitions that accept no input dependencies. `__pre__` is automatically
-added to the start of the body for all targets.  `__post__` is automatically
+There are five special target names that can be added for any pipeline: 
+`__pre__`, `__post__`, `__setup__`, `__teardown__`, and `__postsubmit__`. 
+These are target definitions that accept no input dependencies. `__pre__` 
+is automatically added to the start of the body for all targets.  `__post__` is automatically
 added to the end of the body for all targets. `__setup__` and `__teardown__`
-will always run as the first and last job in the pipeline.
+will always run as the first and last job in the pipeline. `__postsubmit__` is
+a new job that is run after each other job has been submitted. There will be only one `__teardown__`
+job for the entire pipeline, but a separate `__postsubmit__` job for each other job submitted.
+`__postsubmit__` is normally be a shexec
+job (but doesn't have to be) and can be used to add monitoring based on the newly submitted job-id. For example,
+if you'd like to keep track of jobs that were submitted, this could be used to 
+add the new job's info (and job-id) to a database.
 
 You can selectively disable `__pre__` and `__post__` for any job by setting
 the variable `job.nopre` and `job.nopost`.
