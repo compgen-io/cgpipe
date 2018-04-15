@@ -83,6 +83,8 @@ public abstract class JobRunner {
 
 		switch (runner) {
 		case "shell":
+		case "bash":
+		case "sh":
 			obj = new ShellScriptRunner();
 			break;
 		case "sge":
