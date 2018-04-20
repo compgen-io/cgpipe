@@ -24,7 +24,14 @@ public class JobDef implements JobDependency {
 		this.body = body;
 		this.settings = settings;
 		this.outputs = Collections.unmodifiableList(new ArrayList<String>(outputs));
-		this.inputs = Collections.unmodifiableList(new ArrayList<String>(inputs));
+
+		// inputs could be null...
+		if (inputs == null) {
+			this.inputs = Collections.unmodifiableList(new ArrayList<String>(){
+				private static final long serialVersionUID = -1597169196436247445L;});
+		} else {
+			this.inputs = Collections.unmodifiableList(new ArrayList<String>(inputs));
+		}
 	}
 	
 	public JobDef(String body, Map<String, VarValue> settings, List<String> outputs) {
