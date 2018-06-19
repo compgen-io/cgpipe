@@ -37,14 +37,16 @@ public class BuildTarget {
 		this.outputs = new ArrayList<String>();
 		this.tempOutputs = new ArrayList<String>();
 		
-		for (String o: outputs) {
-			if (o.startsWith("^")) {
-				this.outputs.add(o.substring(1));
-				this.tempOutputs.add(o.substring(1));
-			} else if (o.startsWith("\\^")) {
-				this.outputs.add(o.substring(1));
-			} else {
-				this.outputs.add(o);
+		if (outputs != null) {
+			for (String o: outputs) {
+				if (o.startsWith("^")) {
+					this.outputs.add(o.substring(1));
+					this.tempOutputs.add(o.substring(1));
+				} else if (o.startsWith("\\^")) {
+					this.outputs.add(o.substring(1));
+				} else {
+					this.outputs.add(o);
+				}
 			}
 		}
 		
