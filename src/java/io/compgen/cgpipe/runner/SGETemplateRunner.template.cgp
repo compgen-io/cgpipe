@@ -25,8 +25,11 @@ if job.procs > 1 && job.sge.parallelenv %>
 <% if job.sge.depids %>
 #$ -hold_jid ${job.sge.depids}
 <% endif %>
-<% if job.qos %>
-#$ -P ${job.qos}
+<% if job.project %>
+#$ -P ${job.project}
+<% endif %>
+<% if job.priority %>
+#$ -p ${job.priority}
 <% endif %>
 <% if job.queue %>
 #$ -q ${job.queue}

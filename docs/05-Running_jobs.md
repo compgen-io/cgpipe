@@ -46,7 +46,9 @@ works, you can set any of the variables below at the script or job level.
     job.stack         | Req'd stack space (ex: 10M)           |       |  X  |       |     |     |
     job.hold          | Place a user-hold on the job          |       |  X  |   X   |  X  |  X  |
     job.env   (T/F)   | Capture the current ENV vars          |       |  X  |   X   |  X  |     |
-    job.qos           | QoS setting                           |       |  X  |   X   |  X  |     |
+    job.qos           | QoS setting                           |       |     |   X   |  X  |     |
+    job.project       | Project setting                       |       |  X  |       |     |     |
+    job.priority      | Priority setting                      |       |  X  |       |     |     |
     job.nice          | Job "nice" setting                    |       |     |       |  X  |     |
     job.queue         | Specific queue to submit job to       |       |     |       |  X  |     |
     job.wd            | Working directory                     |       |  X  |   X   |  X  |  X  |
