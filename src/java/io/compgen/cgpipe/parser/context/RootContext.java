@@ -102,6 +102,40 @@ public class RootContext extends ExecContext {
 		return fileCache.get(fname);
 	}
 	
+	public BuildTarget buildDependencies(BuildTarget tgt, String output, boolean allowMissing) {
+		
+		Map<String, BuildTarget> deps = new HashMap<String, BuildTarget>();
+		
+		boolean foundAllInputs = true;
+		String missingInput = null;
+		
+		for (String input: tgt.getInputs()) {
+			if (input == null) {
+				log.error("Required input is null: "+ input + " (from "+output+")");
+				foundAllInputs = false;
+				break;
+			}
+			log.debug("Looking for required input: "+ input + " (from "+output+")");
+			BuildTarget dep = cachedBuild(input, allowMissing);
+			if (dep == null) {
+				foundAllInputs = false;
+				missingInput = input;
+				break;
+			}
+			deps.put(input, dep);
+		}
+		
+		if (foundAllInputs) {
+			tgt.addDeps(deps);
+			log.debug("output: "+output+" provider: "+tgt);
+			return tgt;
+		} else {
+			log.debug("Missing a required dependency ("+missingInput+") - attempting to find alternative build path");
+			return null;
+		}
+	}
+
+	
 	/**
 	 * 
 	 * @param output - the output file we are trying to make
@@ -109,7 +143,6 @@ public class RootContext extends ExecContext {
 	 * @return
 	 */
 	public BuildTarget build(String rawOutput, boolean allowMissing) {
-		BuildTarget tgt = null;
 		
 		// temporary file will have '^' as a prefix. This needs to be trimmed
 		// away before we actually do something with it.
@@ -123,59 +156,88 @@ public class RootContext extends ExecContext {
 				output = rawOutput;
 			}
 		}
-		
-		for (BuildTargetTemplate tgtdef: targets) {
-			tgt = tgtdef.matchOutput(output);
-			if (tgt == null) {
-				continue;
+
+		if (output == null) {
+			BuildTarget tgt = null;
+			// we need to find the default target and run that.
+			// first, we look for a target named "__default__".
+			// if that fails, we use the first target that doesn't start with "__"
+
+			boolean foundDefault = false;
+			for (BuildTargetTemplate tgtdef: targets) {
+				if (tgtdef.getFirstOutput().equals("__default__")) {
+					foundDefault = true;
+					tgt  = tgtdef.makeBuildTarget();
+				}
 			}
 
-			if (output == null) {
-				// this is the default target to run
-				output = tgt.getOutputs().get(0);
-				log.debug("Looking for build-target: " + output);
-			}
-			
-			Map<String, BuildTarget> deps = new HashMap<String, BuildTarget>();
-			
-			boolean foundAllInputs = true;
-			String missingInput = null;
-			
-			for (String input: tgt.getInputs()) {
-				if (input == null) {
-					log.error("Required input is null: "+ input + " (from "+output+")");
-					foundAllInputs = false;
-					break;
+			if (!foundDefault) {
+				for (BuildTargetTemplate tgtdef: targets) {
+					if (!tgtdef.getFirstOutput().startsWith("__")) {
+						tgt  = tgtdef.makeBuildTarget();
+						break;
+					}
 				}
-				log.debug("Looking for required input: "+ input + " (from "+output+")");
-				BuildTarget dep = cachedBuild(input, allowMissing);
-				if (dep == null) {
-					foundAllInputs = false;
-					missingInput = input;
-					break;
-				}
-				deps.put(input, dep);
 			}
 			
-			if (foundAllInputs) {
-				tgt.addDeps(deps);
-				log.debug("output: "+output+" provider: "+tgt);
-				return tgt;
-			} else {
-				log.debug("Missing a required dependency ("+missingInput+") - attempting to find alternative build path");
+			if (tgt == null) {
+				// we don't have a default method...
+				return null;
 			}
+			
+			
+			BuildTarget t2 = buildDependencies(tgt, output, allowMissing);
+			if (t2 != null) {
+				return t2;
+			}
+		}
+
+//		targets.get(0).
+		
+		for (BuildTargetTemplate tgtdef: targets) {
+			BuildTarget tgt = null;
+
+			// for the targets we know about, does this one match the requested output?
+			// 
+			// This is what lets us have multiple jobs that can make the same outputs.
+			// We will scan all targets that can produce an output for a valid input/dep tree.
+			// The first target that can successfully produce an output file wins.
+			
+			tgt = tgtdef.matchOutput(output);
+			
+			if (tgt == null) {
+				// this target doesn't match -- try the next one
+				continue;
+			}
+		
+			// Make sure that for this build-target, all inputs are available.
+			BuildTarget t2 = buildDependencies(tgt, output, allowMissing);
+			if (t2 != null) {
+				return t2;
+			}
+
 		}
 		
 		if (cachedFileExists(output)) {
 //			if (output!=null && new File(output).exists()) {
-			// If we have the build-target for an input, we'll find it above
-			// otherwise, if the file exists on disk, we don't necessarily 
-			// need to rebuild it. 
+
+			// If any of the inputs required for this output are missing --
+			// it will be captured above and we need to submit this job.
+			//
+			// But -- if the inputs are all present *and* this output exists
+			// on disk, then we can just cache the output here.
+			
 			log.debug("File exists on disk: " + output);
 			return new FileExistsBuildTarget(output);
 		}
 		
 		if (output != null) {
+			
+			// If the inputs are valid, but the output file doesn't exist on disk, we might still
+			// be able to avoid submitting the job *if* it has already been submitted.
+			//
+			// Check the submit log.
+			
 			String absOutput = Paths.get(output).toAbsolutePath().toString();
 			log.debug("Looking for build-target: " + output + " ("+absOutput+")");
 			if (submittedOutputs.containsKey(absOutput)) {
@@ -189,6 +251,9 @@ public class RootContext extends ExecContext {
 		}
 
 		if (!allowMissing && this.contains("cgpipe.ignore_missing_inputs")) {
+			// If the inputs are valid, but the output file doesn't exist on disk, 
+			// a job hasn't been submitted, we can skip the job if "allowMissing" is set
+
 			log.debug("Ignoring missing dependency: " + output);
 			return new FileExistsBuildTarget(output);
 		}

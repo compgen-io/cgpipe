@@ -1,0 +1,15 @@
+cgpfunc_1() {
+JOB_ID="cgpfunc_1"
+echo "bar"
+}
+cgpfunc_2() {
+JOB_ID="cgpfunc_2"
+echo "foo"
+}
+if [ ! -e "bar" ]; then
+cgpfunc_1 || exit $?
+fi
+if [ ! -e "foo" ]; then
+cgpfunc_2 || exit $?
+fi
+

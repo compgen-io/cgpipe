@@ -1,0 +1,12 @@
+all: foo bar
+
+foo:
+    echo "foo"
+
+bar:
+    echo "bar"
+
+baz:
+    echo "baz"
+
+__default__: baz

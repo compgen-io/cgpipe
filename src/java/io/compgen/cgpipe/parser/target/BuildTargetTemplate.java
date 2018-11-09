@@ -60,37 +60,74 @@ public class BuildTargetTemplate {
 	}
 	
 	/**
-	 * Find a target for a given output, taking into account wildcards in the output filenames
-	 * @param testOutput
+	 * Find a target for a given output, without worrying about wildcard matching
+	 * @param query
 	 * @return
 	 */
 	
-	public BuildTarget matchOutput(String testOutput) {
-		String wildcard = "";
-		if (testOutput != null) {
-			boolean matched = false;
-			for (String outputName: outputs) {
-				if (outputName.startsWith("^") || outputName.startsWith("\\^")) {
-					outputName = outputName.substring(1);
-				}
-				Pattern regex = Pattern.compile("\\Q"+outputName.replace("%", "\\E(.*)\\Q")+"\\E");
-				Matcher m = regex.matcher(testOutput);
-				if (m.matches()) {
-					matched = true;
-					if (m.groupCount()>0) {
-						wildcard = m.group(1);
-					}
-					break;
-				}
+	public BuildTarget makeBuildTarget() {
+		List<String> matchedOutputs = new ArrayList<String>();
+		List<String> matchedInputs = new ArrayList<String>();
+
+		// replace outputs w/ wildcard
+		for (String output:outputs) {
+			matchedOutputs.add(output);
+		}
+		if (inputs != null) {
+			for (String input:inputs) {
+				matchedInputs.add(input);
 			}
+		}
+
+		// looks like we are good -- return a build target that can make the requested output, and populate the inputs/wildcard, etc...
+		
+		BuildTarget tgt = new BuildTarget(matchedOutputs, matchedInputs, "", capturedContext, lines);
+		return tgt;
+
+	}
+
 	
-			if (!matched) {
-				return null;
-			}
-		} else if (outputs.get(0).startsWith("__")) {
-			// these can't be the default target.
+	/**
+	 * Find a target for a given output, taking into account wildcards in the output filenames
+	 * @param query
+	 * @return
+	 */
+	
+	public BuildTarget matchOutput(String query) {
+		
+		if (query == null) {
 			return null;
 		}
+		
+		String wildcard = "";
+//		if (testOutput != null) {
+
+		// for the outputs this target can produce, check to see if we can make the query
+		boolean matched = false;
+		for (String outputName: outputs) {
+			if (outputName.startsWith("^") || outputName.startsWith("\\^")) {
+				outputName = outputName.substring(1);
+			}
+			Pattern regex = Pattern.compile("\\Q"+outputName.replace("%", "\\E(.*)\\Q")+"\\E");
+			Matcher m = regex.matcher(query);
+			if (m.matches()) {
+				matched = true;
+				if (m.groupCount()>0) {
+					wildcard = m.group(1);
+				}
+				break;
+			}
+		}
+
+		// we can't match -- bail.
+		if (!matched) {
+			return null;
+		}
+
+//		} else if (outputs.get(0).startsWith("__")) {
+//			// these can't be the default target.
+//			return null;
+//		}
 		
 		// we want singletons for each wildcard
 		if (cache.containsKey(wildcard)) {
@@ -123,6 +160,8 @@ public class BuildTargetTemplate {
 			}
 		}
 
+		// looks like we are good -- return a build target that can make the requested output, and populate the inputs/wildcard, etc...
+		
 		BuildTarget tgt = new BuildTarget(matchedOutputs, matchedInputs, wildcard, capturedContext, lines);
 		cache.put(wildcard, tgt);
 		return tgt;
