@@ -18,7 +18,8 @@ if [ "$1" == "" ]; then
     find src/test-scripts -name '*.mvp' -exec $0 $VERBOSE \{\} \;
     find src/test-scripts -name '*.mvpt' -exec $0 $VERBOSE \{\} \;
 else
-    echo "global_foo = \"bar\"" > test/run/.cgpipe_init
+    mkdir -p test/run
+    echo "global_foo = \"bar\"" > test/run/.cgpiperc
     echo "bar = \"baz\"" > test/run/global.incl
 
     if [ "$(echo $1 | grep ".mvpt$")" != "" ]; then
