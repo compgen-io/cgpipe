@@ -29,3 +29,9 @@ foo bar baz
 pre_foo_suf pre_bar_suf
 foo bar
 foo
+contains bar
+does not contain quux
+missing "1"
+contains "2"
+contains 1
+missing 2

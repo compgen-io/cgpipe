@@ -49,3 +49,42 @@ print t
 
 t = "foo".split("_")
 print t
+
+if foo.contains("bar")
+print "contains bar"
+else
+print "does not contain bar"
+endif
+if foo.contains("quux")
+print "contains quux"
+else
+print "does not contain quux"
+endif
+
+newfoo = []
+newfoo += 1
+newfoo += "2"
+if newfoo.contains("1")
+print "contains \"1\""
+else
+print "missing \"1\""
+endif
+
+if newfoo.contains("2")
+print "contains \"2\""
+else
+print "missing \"2\""
+endif
+
+if newfoo.contains(1)
+print "contains 1"
+else
+print "missing 1"
+endif
+if newfoo.contains(2)
+print "contains 2"
+else
+print "missing 2"
+endif
+
+

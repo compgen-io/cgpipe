@@ -25,6 +25,22 @@ public abstract class VarValue {
 	public Object getObject() {
 		return obj;
 	}
+
+	@Override
+	public int hashCode() {
+		return 57 + obj.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+			if (!(obj instanceof VarValue))
+				return false;
+			if (obj == this) {
+				return true;
+			}
+			return this.obj.equals(((VarValue)obj).getObject());
+	}
 	
 	public String toString() {
 		if (obj != null) {
