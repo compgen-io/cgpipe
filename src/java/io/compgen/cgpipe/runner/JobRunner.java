@@ -255,8 +255,28 @@ public abstract class JobRunner {
 			markSkippable(initialTarget, context, initialTarget.getOutputs().get(0));
 			submitTargets(initialTarget, context, initialTarget.getOutputs().get(0), true);
 		}
+		runOpportunistic(context);
 	}
 
+	private void runOpportunistic(RootContext context) throws RunnerException {
+		List<BuildTarget> opp = context.getOpportunistic();
+
+		for (BuildTarget tgt: opp) {
+			try {
+				JobDef job = tgt.eval(null,  null, context);
+				if (job.getSettingBool("job.shexec", false)) {
+					if (!dryrun) {
+						shexec(job);
+					}
+				} else {
+					submit(job);
+				}
+			} catch (ASTParseException | ASTExecException e) {
+				throw new RunnerException(e);
+			}
+		}
+		
+	}
 	private long markSkippable(BuildTarget target, RootContext context, String outputName) throws RunnerException {
 		long lastModified = 0;
 		String lastModifiedDep = "";

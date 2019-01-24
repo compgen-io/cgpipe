@@ -137,6 +137,44 @@ public class RootContext extends ExecContext {
 
 	
 	/**
+	 * These are targets that don't have an output (getOutput.equals(""))
+	 * These should always run if possible, but not submit dependencies
+	 * @return
+	 */
+	public List<BuildTarget> getOpportunistic() {
+		List<BuildTarget> opp = new ArrayList<BuildTarget>();
+		for (BuildTargetTemplate tgtdef: targets) {
+			if (tgtdef.getFirstOutput().equals("")) {
+				BuildTarget tgt = tgtdef.makeBuildTarget();
+				Map<String, BuildTarget> deps = new HashMap<String, BuildTarget>();
+				boolean foundAll = true;
+
+				log.debug("Looking for opportunistic inputs: " + StringUtils.join(",", tgt.getInputs()));
+				
+				for (String input: tgt.getInputs()) {
+					if (cachedFileExists(input)) {
+						log.debug("found: "+ input + " -- file exists");
+					} else if (buildTargetCache.containsKey(input)) {
+						deps.put(input, buildTargetCache.get(input));
+						log.debug("found: "+ input + " -- job will build " + buildTargetCache.get(input));
+					}  else {
+						log.debug("missing: "+ input + " -- job will not run");
+						
+						foundAll = false;
+					}
+				}
+				
+				if (foundAll) {
+					tgt.addDeps(deps);
+					opp.add(tgt);
+				}
+			}
+		}
+		return opp;
+	}
+
+	
+	/**
 	 * 
 	 * @param output - the output file we are trying to make
 	 * @param allowMissing - allow missing input file(s)
@@ -307,6 +345,10 @@ public class RootContext extends ExecContext {
 			} else {
 				tmp.add(o);
 			}
+		}
+		
+		if (tmp == null) {
+			return null;
 		}
 
 		return Collections.unmodifiableList(tmp);

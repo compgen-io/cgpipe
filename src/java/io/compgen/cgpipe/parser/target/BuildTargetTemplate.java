@@ -48,9 +48,9 @@ public class BuildTargetTemplate {
 			}
 		}
 		
-		if (this.outputs.size() == 0) {
-			throw new ASTExecException("No outputs specified for build-target!");
-		}
+//		if (this.outputs.size() == 0) {
+//			throw new ASTExecException("No outputs specified for build-target!");
+//		}
 		
 		this.importable = importable;
 	}
@@ -168,7 +168,12 @@ public class BuildTargetTemplate {
 	}
 
 	public String getFirstOutput() {
-		return outputs.get(0);
+		if (outputs!=null && outputs.size()>0) {
+			return outputs.get(0);
+		}
+		// this marks the target as opportunistic -- meaning, it will run *if* it can always.
+		// however, it *will not* submit dependencies
+		return "";
 	}
 
 	public boolean isImportable() {

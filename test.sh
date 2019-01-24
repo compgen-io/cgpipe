@@ -22,6 +22,8 @@ else
     echo "global_foo = \"bar\"" > test/run/.cgpiperc
     echo "bar = \"baz\"" > test/run/global.incl
 
+    touch file1 file2
+
     if [ "$(echo $1 | grep ".mvpt$")" != "" ]; then
         CGPIPE_HOME=test/run dist/cgpipe $VERBOSE -nolog -f $1 > .testout 2> .testerr
     else
@@ -50,6 +52,7 @@ else
         fi
         rm .testout1 .testout2
     fi
+    rm file1 file2
     rm .testout
     rm .testerr
     rm test/run/*

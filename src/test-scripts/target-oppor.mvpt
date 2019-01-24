@@ -1,0 +1,11 @@
+all: foo
+
+foo: file1
+    echo "foo"
+
+:file1 file2 foo
+    echo "opp1"
+
+:file1 file2 file3
+    echo "opp2"
+
