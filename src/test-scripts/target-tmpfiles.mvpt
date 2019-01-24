@@ -21,7 +21,7 @@ all: bar
 ^chr.%:
     echo $>
 
-^foo: ^chr.@{ar}
+^foo: chr.@{ar}
     echo "foo"
 
 bar: foo

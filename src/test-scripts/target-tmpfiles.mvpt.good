@@ -4,11 +4,11 @@ echo "setting up..."
 }
 cgpfunc_2() {
 JOB_ID="cgpfunc_2"
-echo chr.two
+echo chr.one
 }
 cgpfunc_3() {
 JOB_ID="cgpfunc_3"
-echo chr.one
+echo chr.two
 }
 cgpfunc_4() {
 JOB_ID="cgpfunc_4"
@@ -25,20 +25,20 @@ echo "bar"
 cgpfunc_7() {
 JOB_ID="cgpfunc_7"
 echo "??"
-echo "chr.two chr.one chr.three foo"
-echo "chr.two chr.one chr.three foo bar"
-rm chr.two
+echo "chr.one chr.two chr.three foo"
+echo "chr.one chr.two chr.three foo bar"
 rm chr.one
+rm chr.two
 rm chr.three
 rm foo
 }
 if [ ! -e "__setup__" ]; then
 cgpfunc_1 || exit $?
 fi
-if [ ! -e "chr.two" ]; then
+if [ ! -e "chr.one" ]; then
 cgpfunc_2 || exit $?
 fi
-if [ ! -e "chr.one" ]; then
+if [ ! -e "chr.two" ]; then
 cgpfunc_3 || exit $?
 fi
 if [ ! -e "chr.three" ]; then
