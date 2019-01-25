@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# Primary output already exists, and one of the dependencies do not.
+# The dependencies are marked as temp files, but because one of the dependencies exists,
+# this should trigger a re-run.
+#
+touch test/run/final_out1
+sleep 1
+touch test/run/bar-output1
+
+dist/cgpipe -v -f - <<EOF
+
+test/run/final_out1: test/run/bar-output2
+    touch test/run/final_out1
+
+^test/run/bar-output2: test/run/bar-output1
+    touch test/run/bar-output2
+
+^test/run/bar-output1:
+    touch test/run/bar-output1
+      
+EOF

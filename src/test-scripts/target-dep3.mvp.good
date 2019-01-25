@@ -1,0 +1,15 @@
+cgpfunc_1() {
+JOB_ID="cgpfunc_1"
+touch test/run/bar-output2
+}
+cgpfunc_2() {
+JOB_ID="cgpfunc_2"
+touch test/run/final_out1
+}
+if [ ! -e "test/run/bar-output2" ]; then
+cgpfunc_1 || exit $?
+fi
+if [ ! -e "test/run/final_out1" ]; then
+cgpfunc_2 || exit $?
+fi
+

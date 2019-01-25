@@ -282,6 +282,7 @@ public abstract class JobRunner {
 		String lastModifiedDep = "";
 		for (String dep: target.getDepends().keySet()) {
 			long depLastMod = markSkippable(target.getDepends().get(dep), context, dep);
+			log.debug("Checking dep: " + dep + " lastmod: "+depLastMod);
 			if (depLastMod == -1) {
 				lastModified = -1;
 			} else if (depLastMod > lastModified) {
@@ -308,8 +309,13 @@ public abstract class JobRunner {
 						retval = -1;
 					}
 				} else {
-					log.debug("Marking output-target as not skippable: " + allout + " doesn't exist! (" + outputFile.getAbsolutePath()+")");
-					retval = -1;
+					if (target.getTempOutputs().contains(allout)) {
+						log.debug(outputFile + " is a tmp file -- we can skip this (assuming downstream files are older than: "+lastModified+")");
+						return lastModified;
+					} else {
+						log.debug("Marking output-target as not skippable: " + allout + " doesn't exist! (" + outputFile.getAbsolutePath()+")");
+						retval = -1;
+					}
 				}
 			}
 		} else {

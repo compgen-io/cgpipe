@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# Primary output already exists, and one of the dependencies is missing. However, the first
+# one does exist -- but it is older than the final output. Even though one dep in the middle
+# is missing, it is a temp file, and should be skipped.
+#
+touch test/run/baz-output1
+sleep 1
+touch test/run/final_out1
+
+dist/cgpipe -v -f - <<EOF
+
+test/run/final_out1: test/run/baz-output2
+    touch test/run/final_out1
+
+^test/run/baz-output2: test/run/baz-output1
+    touch test/run/baz-output2
+
+^test/run/baz-output1:
+    touch test/run/baz-output1
+      
+EOF
