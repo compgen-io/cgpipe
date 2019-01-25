@@ -6,6 +6,12 @@ foo: file1
 bar: foo
     echo "bar"
 
+file1:
+    echo "file1"
+
+file2:
+    echo "file2"
+
 :file1 file2 foo
     echo "opp1"
 

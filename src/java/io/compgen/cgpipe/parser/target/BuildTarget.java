@@ -1,5 +1,13 @@
 package io.compgen.cgpipe.parser.target;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.loader.NumberedLine;
@@ -10,14 +18,6 @@ import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.cgpipe.runner.JobDef;
 import io.compgen.cgpipe.runner.JobDependency;
 import io.compgen.common.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class BuildTarget {
 
@@ -116,9 +116,12 @@ public class BuildTarget {
 	public boolean isSkippable() {
 		for (String out: outputs) {
 			if (!skippable.contains(out)) {
+//				LogFactory.getLog(BuildTarget.class).debug("++++++++++++ Skippable in build-target? no " + StringUtils.join(",", outputs) + " ? " + this.hashCode());
 				return false;
 			}
 		}
+//		LogFactory.getLog(BuildTarget.class).debug("++++++++++++ Skippable in build-target? yes " + StringUtils.join(",", outputs) + " ? " + this.hashCode());
+
 		return true;
 	}
 

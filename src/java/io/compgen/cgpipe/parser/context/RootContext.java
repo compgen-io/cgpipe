@@ -154,11 +154,12 @@ public class RootContext extends ExecContext {
 				for (String input: tgt.getInputs()) {
 					if (cachedFileExists(input)) {
 						log.debug("found: "+ input + " -- file exists");
+						deps.put(input, cachedFileExistsBuildTarget(input));
 					} else if (buildTargetCache.containsKey(input)) {
 						deps.put(input, buildTargetCache.get(input));
-						log.debug("found: "+ input + " -- job will build " + buildTargetCache.get(input));
+						log.debug("found: "+ input + " -- job defined" + buildTargetCache.get(input).hashCode());
 					}  else {
-						log.debug("missing: "+ input + " -- job will not run");
+						log.debug("missing: "+ input + " -- no job defined to build and the file doesn't exist");
 						
 						foundAll = false;
 					}
@@ -266,7 +267,7 @@ public class RootContext extends ExecContext {
 			// on disk, then we can just cache the output here.
 			
 			log.debug("File exists on disk: " + output);
-			return new FileExistsBuildTarget(output);
+			return cachedFileExistsBuildTarget(output);
 		}
 		
 		if (output != null) {
@@ -303,13 +304,27 @@ public class RootContext extends ExecContext {
 		return null;
 	}
 	
+	private BuildTarget cachedFileExistsBuildTarget(String output) {
+		if (!buildTargetCache.containsKey(output)) {
+			buildTargetCache.put(output, new FileExistsBuildTarget(output));
+		}
+		
+		return buildTargetCache.get(output);
+	}
+
 	private BuildTarget cachedBuild(String input, boolean allowMissing) {
 		if (input == null) {
 			log.info("input is null???");
 			return build(input, allowMissing);
 		}
 		if (!buildTargetCache.containsKey(input)) {
-			buildTargetCache.put(input, build(input, allowMissing));
+			BuildTarget tgt = build(input, allowMissing);
+			for (String o: tgt.getOutputs()) {
+				buildTargetCache.put(o, tgt);
+			}
+			log.debug("Using fresh BuildTarget for input: " + input + " ? " + buildTargetCache.get(input).hashCode());
+		} else {
+			log.debug("Using cached BuildTarget for input: " + input + " ? " + buildTargetCache.get(input).hashCode());
 		}
 		return buildTargetCache.get(input);
 	}

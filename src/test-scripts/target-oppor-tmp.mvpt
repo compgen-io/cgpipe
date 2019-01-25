@@ -1,0 +1,14 @@
+all: file1
+
+# this file exists during the test
+file1: missing1
+    echo "foo"
+
+^missing1: missing2
+    echo "nothing"
+^missing2:
+    echo "nothing2"
+
+:file1 missing1 missing2
+    echo "opp1"
+

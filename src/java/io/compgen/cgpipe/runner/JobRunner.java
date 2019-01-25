@@ -261,7 +261,28 @@ public abstract class JobRunner {
 	private void runOpportunistic(RootContext context) throws RunnerException {
 		List<BuildTarget> opp = context.getOpportunistic();
 
+		boolean foundAll = true;
 		for (BuildTarget tgt: opp) {
+			for (String k: tgt.getDepends().keySet()) {
+				
+				// if the file isn't skippable (exists on disk)
+				if (!tgt.getDepends().get(k).isSkippable()) {
+					// if we haven't submitted the job
+					if (tgt.getDepends().get(k).getJobDep() == null) {
+						// if the job hasn't been previously scheduled
+						if (findJobProviding(k) == null) {
+							// we can't run this opportunistic job
+							foundAll = false;
+							continue;
+						}
+					}
+				}
+			}
+
+			if (!foundAll) {
+				continue;
+			}
+			
 			try {
 				JobDef job = tgt.eval(null,  null, context);
 				if (job.getSettingBool("job.shexec", false)) {
@@ -350,7 +371,7 @@ public abstract class JobRunner {
 		// Okay... we are submitting this job, start with submitting it's dependencies...
 		
 		List<JobDependency> deps = new ArrayList<JobDependency>();
-		
+
 		try {
 			JobDef job = target.eval(prelines, postlines, context);
 			if (job != null) {
