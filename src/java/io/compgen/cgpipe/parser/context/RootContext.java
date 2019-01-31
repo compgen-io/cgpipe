@@ -319,10 +319,14 @@ public class RootContext extends ExecContext {
 		}
 		if (!buildTargetCache.containsKey(input)) {
 			BuildTarget tgt = build(input, allowMissing);
-			for (String o: tgt.getOutputs()) {
-				buildTargetCache.put(o, tgt);
+			if (tgt != null) {
+				for (String o: tgt.getOutputs()) {
+					buildTargetCache.put(o, tgt);
+				}
+				log.debug("Using fresh BuildTarget for input: " + input + " ? " + buildTargetCache.get(input).hashCode());
+			} else {
+				log.warn("No build target found for input: "+ input);
 			}
-			log.debug("Using fresh BuildTarget for input: " + input + " ? " + buildTargetCache.get(input).hashCode());
 		} else {
 			log.debug("Using cached BuildTarget for input: " + input + " ? " + buildTargetCache.get(input).hashCode());
 		}
