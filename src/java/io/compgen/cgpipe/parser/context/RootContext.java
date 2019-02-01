@@ -102,6 +102,11 @@ public class RootContext extends ExecContext {
 		return fileCache.get(fname);
 	}
 	
+	public String getAbsolutePath(String filename) {
+		// done in a method so that we can swap in/out other endpoints (S3, etc)
+		return Paths.get(filename).toAbsolutePath().toString();
+	}
+	
 	public BuildTarget buildDependencies(BuildTarget tgt, String output, boolean allowMissing) {
 		
 		Map<String, BuildTarget> deps = new HashMap<String, BuildTarget>();
@@ -277,7 +282,7 @@ public class RootContext extends ExecContext {
 			//
 			// Check the submit log.
 			
-			String absOutput = Paths.get(output).toAbsolutePath().toString();
+			String absOutput = getAbsolutePath(output);
 			log.debug("Looking for build-target: " + output + " ("+absOutput+")");
 			if (submittedOutputs.containsKey(absOutput)) {
 				if (submittedOutputs.get(absOutput).isJobValid()) {
@@ -320,10 +325,19 @@ public class RootContext extends ExecContext {
 		if (!buildTargetCache.containsKey(input)) {
 			BuildTarget tgt = build(input, allowMissing);
 			if (tgt != null) {
+				String foundOutput = null;
 				for (String o: tgt.getOutputs()) {
+					if (o.equals(input) || o.equals(getAbsolutePath(input))) {
+						foundOutput = o;
+					}
 					buildTargetCache.put(o, tgt);
 				}
-				log.debug("Using fresh BuildTarget for input: " + input + " ? " + buildTargetCache.get(input).hashCode());
+				if (foundOutput!=null) {
+					log.debug("Using fresh BuildTarget for input: " + input + " ? " + foundOutput + " / "+ buildTargetCache.get(foundOutput).hashCode());
+					return buildTargetCache.get(foundOutput);
+				} else {
+					log.debug("Using fresh BuildTarget for input: " + input + ", but missing in output?!?!?!");
+				}
 			} else {
 				log.warn("No build target found for input: "+ input);
 			}
