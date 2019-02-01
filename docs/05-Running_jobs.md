@@ -55,6 +55,7 @@ works, you can set any of the variables below at the script or job level.
     job.account       | Billing account                       |       |  X  |   X   |  X  |     |
     job.mail          | Mail job status                       |       |  X  |   X   |  X  |  X  |
     job.mailtype      | When to send mail                     |       | [1] |  [2]  |  X  |     |
+    job.src           | Write the submitted script to a file  |       |  X  |   X   |  X  |  X  |
     job.stdout        | Capture stdout to file                |       |  X  |   X   |  X  |  X  |
     job.stderr        | Capture stderr to file                |       |  X  |   X   |  X  |  X  |
     job.shell         | Job-specific shell binary             |  [3]  |  X  |   X   |  X  |     |
