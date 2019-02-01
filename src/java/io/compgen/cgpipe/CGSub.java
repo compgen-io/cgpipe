@@ -81,11 +81,13 @@ public class CGSub extends AbstractCommand{
 	private String walltime = null;
 	private String stackMem = null;
 	private String queue = null;
+	private String project = null;
 	private String wd = null;
 	private String stdout = null;
 	private String stderr = null;
 	private String joblog = null;
 	private String jobLogOutputs = null;
+	private String jobSrc = null;
 	private boolean dryrun = false;
 	private int nice = 0;
 	private String resources = null;
@@ -121,6 +123,10 @@ public class CGSub extends AbstractCommand{
 		}
 	}
 	
+	@Option(name="project", charName="P", desc="Project for job (SGE)")
+	public void setProject(String project) {
+		this.project = project;
+	}
 	@Option(name="queue", charName="q", desc="Queue for jobs (partition)")
 	public void setQueue(String queue) {
 		this.queue = queue;
@@ -133,9 +139,13 @@ public class CGSub extends AbstractCommand{
 	public void setJobLog(String joblog) {
 		this.joblog=joblog;
 	}
-	@Option(name="job-output", desc="Output file(s) to log")
+	@Option(name="job-output", desc="Output file(s) to add to the audit log")
 	public void setJobLogOutputs(String jobLogOutputs) {
 		this.jobLogOutputs=jobLogOutputs;
+	}
+	@Option(name="job-src", desc="Write the submit script to this file (replaces %JOBID and %JOBNAME)")
+	public void setJobSrc(String jobSrc) {
+		this.jobSrc=jobSrc;
 	}
 	@Option(name="mem", charName="m", desc="Memory per job")
 	public void setMem(String mem) {
@@ -271,6 +281,9 @@ public class CGSub extends AbstractCommand{
 		if (queue != null) {
 			confVals.put("job.queue", new VarString(queue));
 		}
+		if (project != null) {
+			confVals.put("job.project", new VarString(project));
+		}
 		if (nice != 0) {
 			confVals.put("job.nice", new VarInt(nice));
 		}
@@ -305,6 +318,9 @@ public class CGSub extends AbstractCommand{
 				root.set("cgpipe.joblog", new VarString(joblog));
 			}
 			
+			if (jobSrc != null) {
+				root.set("job.src", new VarString(jobSrc));
+			}
 
 			if (inputs == null) {
 				if (wd != null) {

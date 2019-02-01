@@ -1,5 +1,18 @@
 package io.compgen.cgpipe.runner;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.RunnerException;
@@ -11,17 +24,6 @@ import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.common.StringUtils;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public abstract class TemplateRunner extends JobRunner {
 	protected Log log = LogFactory.getLog(getClass());
@@ -118,6 +120,19 @@ public abstract class TemplateRunner extends JobRunner {
 		
 		if (globalHoldSet) {
 			globalHolds.add(jobid);
+		}
+		
+		if (jobdef.getSettingsMap().containsKey("job.src")) {
+			String fname = jobdef.getSetting("job.src");
+			fname = fname.replaceAll("%JOBID", jobid);
+			fname = fname.replaceAll("%JOBNAME", jobdef.getName());
+			try {
+				OutputStream os = new FileOutputStream(fname);
+				os.write(src.getBytes());
+				os.close();
+			} catch (IOException e) {
+				throw new RunnerException(e);
+			}
 		}
 		
 		return true;
