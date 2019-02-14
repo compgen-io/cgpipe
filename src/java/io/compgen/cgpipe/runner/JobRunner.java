@@ -28,6 +28,7 @@ import io.compgen.cgpipe.parser.target.BuildTarget;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.cgpipe.support.StreamRedirect;
 import io.compgen.common.MapBuilder;
 import io.compgen.common.StringUtils;
 
@@ -155,6 +156,8 @@ public abstract class JobRunner {
 
 	protected void shexec(JobDef jobdef) throws RunnerException {
 		try {
+			log.trace("shexec: "+jobdef.getSafeName());
+
 			Process proc = Runtime.getRuntime().exec(new String[] { defaultShell });
 			proc.getOutputStream().write(jobdef.getBody().getBytes(Charset.forName("UTF8")));
 			proc.getOutputStream().close();
@@ -162,22 +165,23 @@ public abstract class JobRunner {
 			InputStream is = proc.getInputStream();
 			InputStream es = proc.getErrorStream();
 
-			int retcode = proc.waitFor();
-			
-			// Note: This will block for large strings
-			// TODO: Make this run in a thread to consume the stream
-			String out = StringUtils.readInputStream(is);
-			String err = StringUtils.readInputStream(es);
+			StreamRedirect t1 = new StreamRedirect(is, System.out);
+			t1.start();
 
+			StreamRedirect t2 = new StreamRedirect(is, System.err);
+			t2.start();
+
+			int retcode = proc.waitFor();
+			t1.join();
+			t2.join();
+			
 			log.trace("retcode: "+retcode);
-			log.trace("stdout: " + out);
-			log.trace("stderr: " + err);
 			
 			is.close();
 			es.close();
-			
+
 			if (retcode != 0) {
-				throw new RunnerException("Error running job via shexec: "+jobdef.getName());
+				throw new RunnerException("Error running job via shexec: "+jobdef.getName()+" $? = "+retcode+"\n"+jobdef.getBody());
 			}
 
 		} catch (IOException | InterruptedException e) {
@@ -194,18 +198,24 @@ public abstract class JobRunner {
 			InputStream is = proc.getInputStream();
 			InputStream es = proc.getErrorStream();
 
-			int retcode = proc.waitFor();
-			
-			// Note: This will block for large strings
-			// TODO: Make this run in a thread to consume the stream
-			String out = StringUtils.readInputStream(is);
-			String err = StringUtils.readInputStream(es);
+			StreamRedirect t1 = new StreamRedirect(is, System.out);
+			t1.start();
 
-			System.out.print(out);
-			System.err.print(err);
+			StreamRedirect t2 = new StreamRedirect(is, System.err);
+			t2.start();
+
+			int retcode = proc.waitFor();
+			t1.join();
+			t2.join();
+			
+			log.trace("retcode: "+retcode);
 			
 			is.close();
 			es.close();
+
+			// don't close stdout/stderr, it stops the program.
+			//fout.close();
+			//ferr.close();
 			
 			if (retcode != 0) {
 				throw new RunnerException("Error running script!");
