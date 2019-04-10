@@ -155,7 +155,12 @@ public abstract class JobRunner {
 	}
 
 	protected void shexec(JobDef jobdef) throws RunnerException {
-		if (!dryrun) {
+		if (dryrun) {
+			System.err.println("[dryrun." + jobdef.getSafeName() +"]");
+			for (String line: jobdef.getBody().split("\n")) {
+				System.err.println("> " + line);
+			}
+		} else {
 			try {
 				log.trace("shexec: "+jobdef.getSafeName());
 	
@@ -245,9 +250,7 @@ public abstract class JobRunner {
 				try {
 					setupJob = setupTgt.eval(null,  null, context);
 					if (setupJob.getSettingBool("job.shexec", false)) {
-						if (!dryrun) {
-							shexec(setupJob);
-						}
+						shexec(setupJob);
 					} else {
 						submit(setupJob);
 						if (setupJob.getJobId() == null) {
@@ -305,9 +308,7 @@ public abstract class JobRunner {
 			try {
 				JobDef job = tgt.eval(null,  null, context);
 				if (job.getSettingBool("job.shexec", false)) {
-					if (!dryrun) {
-						shexec(job);
-					}
+					shexec(job);
 				} else {
 					submit(job);
 				}
@@ -420,9 +421,7 @@ public abstract class JobRunner {
 				
 				if (!blankRoot) {
 					if (job.getDependencies().size()==0 && job.getSettingBool("job.shexec", false)) {
-						if (!dryrun) {
-							shexec(job);
-						}
+						shexec(job);
 					} else {
 						submit(job);
 	
@@ -532,9 +531,7 @@ public abstract class JobRunner {
 			
 			if (!teardownBlank) {
 				if (teardown.getSettingBool("job.shexec", false)) {
-					if (!dryrun) {
-						shexec(teardown);
-					}
+					shexec(teardown);
 				} else {
 					teardown.addDependencies(submittedJobDefs);
 					if (setupJob != null && setupJob.getJobId() != null) {
