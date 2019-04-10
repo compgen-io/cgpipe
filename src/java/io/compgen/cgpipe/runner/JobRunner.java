@@ -169,7 +169,7 @@ public abstract class JobRunner {
 				StreamRedirect t1 = new StreamRedirect(is, System.out);
 				t1.start();
 	
-				StreamRedirect t2 = new StreamRedirect(is, System.err);
+				StreamRedirect t2 = new StreamRedirect(es, System.err);
 				t2.start();
 	
 				int retcode = proc.waitFor();
@@ -191,42 +191,42 @@ public abstract class JobRunner {
 		}
 	}
 
-	protected void shexec(String src) throws RunnerException {
-		try {
-			Process proc = Runtime.getRuntime().exec(new String[] { defaultShell });
-			proc.getOutputStream().write(src.getBytes(Charset.forName("UTF8")));
-			proc.getOutputStream().close();
-
-			InputStream is = proc.getInputStream();
-			InputStream es = proc.getErrorStream();
-
-			StreamRedirect t1 = new StreamRedirect(is, System.out);
-			t1.start();
-
-			StreamRedirect t2 = new StreamRedirect(is, System.err);
-			t2.start();
-
-			int retcode = proc.waitFor();
-			t1.join();
-			t2.join();
-			
-			log.trace("retcode: "+retcode);
-			
-			is.close();
-			es.close();
-
-			// don't close stdout/stderr, it stops the program.
-			//fout.close();
-			//ferr.close();
-			
-			if (retcode != 0) {
-				throw new RunnerException("Error running script!");
-			}
-
-		} catch (IOException | InterruptedException e) {
-			throw new RunnerException(e);
-		}
-	}
+//	protected void shexec(String src) throws RunnerException {
+//		try {
+//			Process proc = Runtime.getRuntime().exec(new String[] { defaultShell });
+//			proc.getOutputStream().write(src.getBytes(Charset.forName("UTF8")));
+//			proc.getOutputStream().close();
+//
+//			InputStream is = proc.getInputStream();
+//			InputStream es = proc.getErrorStream();
+//
+//			StreamRedirect t1 = new StreamRedirect(is, System.out);
+//			t1.start();
+//
+//			StreamRedirect t2 = new StreamRedirect(is, System.err);
+//			t2.start();
+//
+//			int retcode = proc.waitFor();
+//			t1.join();
+//			t2.join();
+//			
+//			log.trace("retcode: "+retcode);
+//			
+//			is.close();
+//			es.close();
+//
+//			// don't close stdout/stderr, it stops the program.
+//			//fout.close();
+//			//ferr.close();
+//			
+//			if (retcode != 0) {
+//				throw new RunnerException("Error running script!");
+//			}
+//
+//		} catch (IOException | InterruptedException e) {
+//			throw new RunnerException(e);
+//		}
+//	}
 
 	private List<NumberedLine> getLinesForTarget(String name, RootContext context, boolean allowMissing) {
 		BuildTarget tgt = context.build(name, allowMissing);
@@ -250,6 +250,13 @@ public abstract class JobRunner {
 						}
 					} else {
 						submit(setupJob);
+						if (setupJob.getJobId() == null) {
+							abort();
+							log.error("Error submitting job: __setup__");
+							throw new RunnerException("Error submitting job: __setup__");
+						}
+						
+						postSubmit(setupJob, context);
 					}
 				} catch (ASTParseException | ASTExecException e) {
 					throw new RunnerException(e);
@@ -412,23 +419,28 @@ public abstract class JobRunner {
 				}
 				
 				if (!blankRoot) {
-					submit(job);
-
-					if (job.getJobId() == null) {
-						abort();
-						log.error("Error submitting job: "+ target);
-						throw new RunnerException("Error submitting job: "+job);
+					if (job.getDependencies().size()==0 && job.getSettingBool("job.shexec", false)) {
+						if (!dryrun) {
+							shexec(job);
+						}
+					} else {
+						submit(job);
+	
+						if (job.getJobId() == null) {
+							abort();
+							log.error("Error submitting job: "+ target);
+							throw new RunnerException("Error submitting job: "+job);
+						}
+						
+						postSubmit(job, context);
+	
+						this.outputFilesSubmitted.addAll(target.getOutputs());
+						this.tempOutputFilesSubmitted.addAll(target.getTempOutputs());
+	
+						for (String out: target.getOutputs()) {
+							submittedJobs.put(Paths.get(out).toAbsolutePath().toString(), job);
+						}
 					}
-					
-					postSubmit(job, context);
-
-					this.outputFilesSubmitted.addAll(target.getOutputs());
-					this.tempOutputFilesSubmitted.addAll(target.getTempOutputs());
-
-					for (String out: target.getOutputs()) {
-						submittedJobs.put(Paths.get(out).toAbsolutePath().toString(), job);
-					}
-
 				} else {
 					log.debug("Skipping empty target: "+target);
 					job.setJobId("");
@@ -529,6 +541,13 @@ public abstract class JobRunner {
 						teardown.addDependency(setupJob);
 					}
 					submit(teardown);
+					if (teardown.getJobId() == null) {
+						abort();
+						log.error("Error submitting job: __teardown__");
+						throw new RunnerException("Error submitting job: __teardown__");
+					}
+					
+					postSubmit(teardown, rootContext);
 				}
 			}
 		}
@@ -610,7 +629,7 @@ public abstract class JobRunner {
 				jobRoot.set("job.depids", new VarString(deps));
 
 				JobDef postSubmit = postSubmitTgt.eval(null,  null, null, jobRoot.cloneValues());
-				System.err.println(postSubmit.getBody());
+				//System.err.println(postSubmit.getBody());
 				shexec(postSubmit);
 
 			} catch (ASTParseException | ASTExecException e) {

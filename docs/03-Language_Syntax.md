@@ -319,8 +319,7 @@ added to the end of the body for all targets. `__setup__` and `__teardown__`
 will always run as the first and last job in the pipeline. `__postsubmit__` is
 a new job that is run after each other job has been submitted. There will be only one `__teardown__`
 job for the entire pipeline, but a separate `__postsubmit__` job for each other job submitted.
-`__postsubmit__` is normally be a shexec
-job (but doesn't have to be) and can be used to add monitoring based on the newly submitted job-id. For example,
+`__postsubmit__` is **always** a shexec block and can be used to add monitoring based on the newly submitted job-id. For example,
 if you'd like to keep track of jobs that were submitted, this could be used to 
 add the new job's info (and job-id) to a database.
 
@@ -401,12 +400,12 @@ The shell may also be chosen on a per-job basis by setting the `job.shell`
 variable for each job.
 
 ### Direct execution of jobs
-Jobs can also be directly executed as part of the pipeline building process.
-Instead of submitting the jobs to a scheduler, the jobs can be put into a
+Certain jobs can also be directly executed as part of the pipeline building process. 
+Instead of submitting these jobs to a scheduler, the jobs can be put into a
 temporary shell script and executed directly. The global shell will be used
-to run the script. If you would like a job to just run directly without being
-scheduled, set the variable `job.shexec=true`. `__setup__` and `__teardown__` can
-also be directly executed instead of scheduled.
+to run the script. Only jobs without any dependencies can be executed in this manner.
+If you would like a job to just run directly without being scheduled, set the variable 
+`job.shexec=true`. Also, the `__setup__` and `__teardown__` can be executed as `shexec`.
 
 One use for this is to setup any output folders that may be required. For example:
 

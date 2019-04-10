@@ -15,11 +15,14 @@ import io.compgen.cgpipe.parser.variable.VarInt;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.cgpipe.support.StreamRedirect;
 import io.compgen.common.Pair;
 import io.compgen.common.StringUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -686,21 +689,48 @@ public class Eval {
 		try {
 			log.trace("execScript: "+script);
 			Process proc = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c" , script});
+
 			InputStream is = proc.getInputStream();
-//			InputStream es = proc.getErrorStream();
+			InputStream es = proc.getErrorStream();
+
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			
+			StreamRedirect t1 = new StreamRedirect(is, baos);
+			t1.start();
+
+			StreamRedirect t2 = new StreamRedirect(es, System.err);
+			t2.start();
 
 			int retcode = proc.waitFor();
+			t1.join();
+			t2.join();
 			
-			String out = StringUtils.readInputStream(is);
-//			String err = StringUtils.readInputStream(es);
-
+			log.trace("retcode: "+retcode);
+			
 			is.close();
-//			es.close();
+			es.close();
 			
-			return new Pair<String, Integer>(StringUtils.rstrip(out), retcode);
-//			if (retcode == 0) {
-//			}
-//			throw new ASTExecException("Error processing shell command: "+script+" - "+err);
+			
+			return new Pair<String, Integer>(StringUtils.rstrip(baos.toString()), retcode);
+			
+			
+//			
+//			
+//			InputStream is = proc.getInputStream();
+////			InputStream es = proc.getErrorStream();
+//
+//			int retcode = proc.waitFor();
+//			
+//			String out = StringUtils.readInputStream(is);
+////			String err = StringUtils.readInputStream(es);
+//
+//			is.close();
+////			es.close();
+//			
+//			return new Pair<String, Integer>(StringUtils.rstrip(out), retcode);
+////			if (retcode == 0) {
+////			}
+////			throw new ASTExecException("Error processing shell command: "+script+" - "+err);
 
 		} catch (IOException | InterruptedException e) {
 			throw new ASTExecException(e);

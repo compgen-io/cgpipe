@@ -1,3 +1,11 @@
+post submit
+jobid: cgpfunc_1
+post submit
+jobid: cgpfunc_2
+post submit
+jobid: cgpfunc_3
+post submit
+jobid: cgpfunc_4
 cgpfunc_1() {
 JOB_ID="cgpfunc_1"
 echo "setup"
