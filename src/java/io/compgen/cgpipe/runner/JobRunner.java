@@ -155,37 +155,39 @@ public abstract class JobRunner {
 	}
 
 	protected void shexec(JobDef jobdef) throws RunnerException {
-		try {
-			log.trace("shexec: "+jobdef.getSafeName());
-
-			Process proc = Runtime.getRuntime().exec(new String[] { defaultShell });
-			proc.getOutputStream().write(jobdef.getBody().getBytes(Charset.forName("UTF8")));
-			proc.getOutputStream().close();
-
-			InputStream is = proc.getInputStream();
-			InputStream es = proc.getErrorStream();
-
-			StreamRedirect t1 = new StreamRedirect(is, System.out);
-			t1.start();
-
-			StreamRedirect t2 = new StreamRedirect(is, System.err);
-			t2.start();
-
-			int retcode = proc.waitFor();
-			t1.join();
-			t2.join();
-			
-			log.trace("retcode: "+retcode);
-			
-			is.close();
-			es.close();
-
-			if (retcode != 0) {
-				throw new RunnerException("Error running job via shexec: "+jobdef.getName()+" $? = "+retcode+"\n"+jobdef.getBody());
+		if (!dryrun) {
+			try {
+				log.trace("shexec: "+jobdef.getSafeName());
+	
+				Process proc = Runtime.getRuntime().exec(new String[] { defaultShell });
+				proc.getOutputStream().write(jobdef.getBody().getBytes(Charset.forName("UTF8")));
+				proc.getOutputStream().close();
+	
+				InputStream is = proc.getInputStream();
+				InputStream es = proc.getErrorStream();
+	
+				StreamRedirect t1 = new StreamRedirect(is, System.out);
+				t1.start();
+	
+				StreamRedirect t2 = new StreamRedirect(is, System.err);
+				t2.start();
+	
+				int retcode = proc.waitFor();
+				t1.join();
+				t2.join();
+				
+				log.trace("retcode: "+retcode);
+				
+				is.close();
+				es.close();
+	
+				if (retcode != 0) {
+					throw new RunnerException("Error running job via shexec: "+jobdef.getName()+" $? = "+retcode+"\n"+jobdef.getBody());
+				}
+	
+			} catch (IOException | InterruptedException e) {
+				throw new RunnerException(e);
 			}
-
-		} catch (IOException | InterruptedException e) {
-			throw new RunnerException(e);
 		}
 	}
 
