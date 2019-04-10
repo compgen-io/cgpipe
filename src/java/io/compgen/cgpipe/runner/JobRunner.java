@@ -25,6 +25,7 @@ import io.compgen.cgpipe.exceptions.VarTypeException;
 import io.compgen.cgpipe.loader.NumberedLine;
 import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.target.BuildTarget;
+import io.compgen.cgpipe.parser.variable.VarBool;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
@@ -68,7 +69,9 @@ public abstract class JobRunner {
 	protected List<String> outputFilesSubmitted = new ArrayList<String>();
 	protected List<String> tempOutputFilesSubmitted = new ArrayList<String>();
 	
-	public static JobRunner load(RootContext cxt, boolean dryrun) throws RunnerException {
+	public static JobRunner load(RootContext cxt) throws RunnerException {
+		
+		boolean dryrun = (cxt.get("cgpipe.dryrun") == VarBool.TRUE);
 		
 		String runner = cxt.getString("cgpipe.runner");
 		if (runner == null) {

@@ -300,8 +300,8 @@ public class CGSub extends AbstractCommand{
 			confVals.put("job.node.hostname", new VarString(nodeHostname));
 		}
 
-		if (System.getenv("CGPIPE_DRYRUN") != null && !System.getenv("CGPIPE_DRYRUN").equals("")) {
-			dryrun = true;
+		if (dryrun || (System.getenv("CGPIPE_DRYRUN") != null && !System.getenv("CGPIPE_DRYRUN").equals(""))) {
+			confVals.put("cgpipe.dryrun", VarBool.TRUE);
 		}
 
 		try {
@@ -312,8 +312,8 @@ public class CGSub extends AbstractCommand{
 			root.setOutputStream(null);
 			root.update(confVals);
 
-			runner = JobRunner.load(root, dryrun);
-			
+			runner = JobRunner.load(root);
+
 			if (joblog != null) {
 				root.set("cgpipe.joblog", new VarString(joblog));
 			}

@@ -52,7 +52,6 @@ public class CGPipe {
 
 		int verbosity = 0;
 		boolean silent = false;
-		boolean dryrun = false;
 		boolean silenceStdErr = false;
 		boolean showHelp = false;
 		
@@ -138,7 +137,7 @@ public class CGPipe {
 					}
 					confVals.put(k, VarBool.TRUE);
 				}
-				dryrun = true;
+				confVals.put("cgpipe.dryrun", VarBool.TRUE);
 			} else if (arg.startsWith("--")) {
 				if (k != null) {
 					if (k.contains("-")) {
@@ -218,7 +217,8 @@ public class CGPipe {
 		}
 		
 		if (System.getenv("CGPIPE_DRYRUN") != null && !System.getenv("CGPIPE_DRYRUN").equals("")) {
-			dryrun = true;
+			confVals.put("cgpipe.dryrun", VarBool.TRUE);
+
 		}
 		
 		JobRunner runner = null;
@@ -265,7 +265,7 @@ public class CGPipe {
 			Parser.exec(fname, root);
 
 			// Load the job runner *after* we execute the script to capture any config changes
-			runner = JobRunner.load(root, dryrun);
+			runner = JobRunner.load(root);
 
 			// find a build-target, and submit the job(s) to a runner
 			if (targets.size() > 0) {
