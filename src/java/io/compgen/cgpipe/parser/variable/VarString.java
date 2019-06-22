@@ -108,6 +108,28 @@ public class VarString extends VarValue {
 					return VarBool.TRUE;
 				}
 				return VarBool.FALSE;
+			} else if (method.equals("isdir")) {
+				if (args.length != 0) {
+					throw new MethodCallException("Bad or missing argument! isdir()");
+				}
+				
+				File f = new File((String) obj);
+				if (f.exists() && f.isDirectory()) {
+					return VarBool.TRUE;
+				}
+				return VarBool.FALSE;
+
+			} else if (method.equals("isfile")) {
+				if (args.length != 0) {
+					throw new MethodCallException("Bad or missing argument! isfile()");
+				}
+				
+				File f = new File((String) obj);
+				if (f.exists() && f.isFile()) {
+					return VarBool.TRUE;
+				}
+				return VarBool.FALSE;
+
 			} else if (method.equals("dirname")) {
 				if (args.length != 0) {
 					throw new MethodCallException("Bad or missing argument! dirname()");
