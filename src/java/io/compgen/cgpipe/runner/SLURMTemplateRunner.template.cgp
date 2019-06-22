@@ -44,10 +44,18 @@ if job.procs > 1
 #SBATCH --nice=${job.nice}
 <% endif %>
 <% if job.stdout %>
+<%   if job.stdout.isdir() %>
+#SBATCH -o ${job.stdout}/slurm-%j.out
+        <% else %>
 #SBATCH -o ${job.stdout}
+        <% endif %>
 <% endif %>
 <% if job.stderr %>
+<%   if job.stderr.isdir() %>
+#SBATCH -e ${job.stderr}/slurm-%j.err
+        <% else %>
 #SBATCH -e ${job.stderr}
+        <% endif %>
 <% endif %>
 <% for custom in job.custom %>
 <% if custom %>
