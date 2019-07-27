@@ -10,6 +10,7 @@ import java.util.Set;
 
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
+import io.compgen.cgpipe.exceptions.VarTypeException;
 import io.compgen.cgpipe.loader.NumberedLine;
 import io.compgen.cgpipe.parser.TemplateParser;
 import io.compgen.cgpipe.parser.context.RootContext;
@@ -94,7 +95,21 @@ public class BuildTarget {
 	
 	public JobDef eval(List<NumberedLine> pre, List<NumberedLine> post, RootContext globalRoot, Map<String, VarValue> extraVals) throws ASTParseException, ASTExecException {
 		RootContext jobRoot = new RootContext(capturedContext, outputs, inputs, wildcard);
-		jobRoot.set("job.custom", new VarList());
+		if (!jobRoot.contains("job.custom") || !jobRoot.get("job.custom").isList()) {
+			
+			VarList l = new VarList();
+
+			if (jobRoot.contains("job.custom")) {
+				VarValue tmp = jobRoot.get("job.custom");
+				try {
+					l.add(tmp);
+				} catch (VarTypeException e) {
+					throw new ASTExecException(e);
+				}
+			}
+			jobRoot.set("job.custom", l);
+			
+		}
 
 		if (extraVals != null) {
 			for (String k: extraVals.keySet()) {
