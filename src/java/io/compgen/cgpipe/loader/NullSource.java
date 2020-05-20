@@ -8,6 +8,6 @@ public class NullSource extends Source {
 	public NullSource(NumberedLine line) {
 		super("<null>", null);
 		lines.add(line);
-		finalize();
+		lock();
 	}
 }

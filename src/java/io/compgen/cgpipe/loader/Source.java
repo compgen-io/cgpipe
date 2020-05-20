@@ -8,7 +8,7 @@ public class Source {
 	private SourceLoader loader;
 	private String name;
 	protected List<NumberedLine> lines;
-	private boolean finalized = false;
+	private boolean locked = false;
 	private String hashDigest = null;
 	
 	public Source(String name, SourceLoader loader) {
@@ -18,13 +18,13 @@ public class Source {
 	}
 	
 	public void addLine(String line, int linenum) {
-		if (!finalized) {
+		if (!locked) {
 			this.lines.add(new NumberedLine(this, linenum, line));
 		}
 	}
 	
-	public void finalize() {
-		this.finalized = true;
+	public void lock() {
+		this.locked = true;
 	}
 
 	public List<NumberedLine> getLines() {

@@ -138,7 +138,7 @@ public class SourceLoader {
 		}
 
 		reader.close();
-		source.finalize();
+		source.lock();
 		
 		byte[] digest = md.digest();
 		String digestStr = Hex.toHexString(digest).toLowerCase();
@@ -167,7 +167,7 @@ public class SourceLoader {
 			source.addLine(StringUtils.rstrip(line), ++linenum);
 		}
 
-		source.finalize();
+		source.lock();
 		return source;
 	}
 
