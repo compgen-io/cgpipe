@@ -6,3 +6,4 @@ test/*
 .settings
 *.class
 .zedstate
+.vscode/
