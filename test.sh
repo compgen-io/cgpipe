@@ -14,6 +14,8 @@ if [[ "$1" == "-v" || "$1" == "-vv" || "$1" == "-vvv" ]]; then
     shift
 fi
 
+RET=0
+
 if [ "$1" == "" ]; then
     find src/test-scripts -name '*.mvp' -exec $0 $VERBOSE \{\} \;
     find src/test-scripts -name '*.mvpt' -exec $0 $VERBOSE \{\} \;
@@ -34,6 +36,7 @@ else
     GOOD=$(cat $1.good | grep -v '^#' | grep -v '^$' |sed -e 's/^[[:blank:]]*//g' | $MD)
     if [ "$TEST" != "$GOOD" ]; then
         echo "$1 ERROR"
+        RET=1
     else
         echo "$1 OK"
     fi
@@ -57,3 +60,5 @@ else
     rm .testerr
     rm test/run/*
 fi
+
+exit $RET
