@@ -1,19 +1,19 @@
 all: foo
 
-foo: file1
+foo: test/file1
     echo "foo"
 
 bar: foo
     echo "bar"
 
-file1:
+test/file1:
     echo "file1"
 
-file2:
+test/file2:
     echo "file2"
 
-:file1 file2 foo
+:test/file1 test/file2 foo
     echo "opp1"
 
-:file1 file2 bar
+:test/file1 test/file2 bar
     echo "opp2"
