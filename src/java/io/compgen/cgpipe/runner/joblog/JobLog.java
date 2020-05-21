@@ -114,7 +114,7 @@ public class JobLog {
 			if (child.exists()) {
 				try {
 					BufferedReader reader = new BufferedReader(new FileReader(child));
-					String s = reader.readLine().strip();
+					String s = reader.readLine();
 					reader.close();
 					if (!lockSecret.equals(s)) {
 						// we don't own the lock, don't release
