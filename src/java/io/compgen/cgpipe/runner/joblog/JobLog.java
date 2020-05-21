@@ -179,7 +179,7 @@ public class JobLog {
 						Thread.sleep(100);
 	
 						BufferedReader reader = new BufferedReader(new FileReader(child));
-						String s = reader.readLine().strip();
+						String s = reader.readLine();
 						reader.close();
 	
 						if (lockSecret.equals(s)) {
