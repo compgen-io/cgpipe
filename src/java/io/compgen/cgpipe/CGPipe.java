@@ -1,5 +1,7 @@
 package io.compgen.cgpipe;
 
+import io.compgen.cgpipe.cmd.UpdateJobStart;
+import io.compgen.cgpipe.cmd.UpdateJobEnd;
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.ExitException;
@@ -44,7 +46,23 @@ public class CGPipe {
 
 //	public static final Map<String, VarValue> globalConfig = new HashMap<String, VarValue>(); 
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
+
+		if (args.length > 0 && args[0].equals("update-job-start")) {
+			String [] newargs = new String[args.length-1];
+			for (int i=1; i< args.length; i++) {
+				newargs[i-1] = args[i];
+			}
+			UpdateJobStart.main(newargs);
+		}
+		if (args.length > 0 && args[0].equals("update-job-end")) {
+			String [] newargs = new String[args.length-1];
+			for (int i=1; i< args.length; i++) {
+				newargs[i-1] = args[i];
+			}
+			UpdateJobEnd.main(newargs);
+		}
+
 		String fname = null;
 		String logFilename = null;
 		String outputFilename = null;

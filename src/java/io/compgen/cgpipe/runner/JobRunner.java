@@ -1,13 +1,8 @@
 package io.compgen.cgpipe.runner;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -29,6 +24,8 @@ import io.compgen.cgpipe.parser.variable.VarBool;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.cgpipe.runner.joblog.JobLog;
+import io.compgen.cgpipe.runner.joblog.JobLogRecord;
 import io.compgen.cgpipe.support.StreamRedirect;
 import io.compgen.common.MapBuilder;
 import io.compgen.common.StringUtils;
@@ -54,7 +51,7 @@ public abstract class JobRunner {
 	protected boolean dryrun = false;
 	protected boolean done = false;
 	
-	protected PrintStream joblog = null;
+	protected JobLog joblog = null;
 	protected Map<String, JobDependency> submittedJobs = new HashMap<String, JobDependency>();	 // key = output-file, value = job-id
 	protected List<JobDependency> submittedJobDefs = new ArrayList<JobDependency>();
 
@@ -125,31 +122,48 @@ public abstract class JobRunner {
 		// TODO: add a lock mechanism for job-log?
 		// TODO: add start/stop/retcode to job log?
 		
-		String joblog = cxt.getString("cgpipe.joblog");
-		JobRunner.log.info("job-log: " +joblog);
-		if (joblog != null) {
-			try {
-				File jobfile = new File(joblog);
-				if (jobfile.exists()) {
-					BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(joblog)));
-					String line;
-					while ((line = reader.readLine()) != null) {
-						String[] cols = line.split("\t");
-						if (cols[1].equals("OUTPUT")) {
-							String absOutput = Paths.get(cols[2]).toAbsolutePath().toString();
-							obj.submittedJobs.put(absOutput, new ExistingJob(cols[0]));
-							cxt.getRoot().addPendingJobOutput(absOutput, cols[0], obj);
-							log.trace("Existing/pending output: "+ absOutput);
-						}
-					}
-					reader.close();
-				} else if (jobfile.getParentFile() != null && !jobfile.getParentFile().exists()) {
-					jobfile.getParentFile().mkdirs();
+		String joblogFilename = cxt.getString("cgpipe.joblog");
+		JobRunner.log.info("job-log: " +joblogFilename);
+		if (joblogFilename != null) {
+//			try {
+				JobLog jl = null;
+				try {
+					jl = JobLog.open(joblogFilename);
+				} catch (IOException e) {
+					throw new RunnerException(e);
 				}
-				obj.joblog = new PrintStream(new FileOutputStream(joblog, true));
-			} catch (IOException e) {
-				throw new RunnerException(e);
-			}
+				for (JobLogRecord rec: jl.getRecords()) {
+					for (String output: rec.getOutputs()) {
+						String absOutput = Paths.get(output).toAbsolutePath().toString();
+						obj.submittedJobs.put(absOutput, new ExistingJob(rec.getJobId()));
+						cxt.getRoot().addPendingJobOutput(absOutput, rec.getJobId(), obj);
+						log.trace("Existing/pending output: "+ absOutput);
+					}
+				}
+				
+
+//				File jobfile = new File(joblog);
+//				if (jobfile.exists()) {
+//					BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(joblog)));
+//					String line;
+//					while ((line = reader.readLine()) != null) {
+//						String[] cols = line.split("\t");
+//						if (cols[1].equals("OUTPUT")) {
+//							String absOutput = Paths.get(cols[2]).toAbsolutePath().toString();
+//							obj.submittedJobs.put(absOutput, new ExistingJob(cols[0]));
+//							cxt.getRoot().addPendingJobOutput(absOutput, cols[0], obj);
+//							log.trace("Existing/pending output: "+ absOutput);
+//						}
+//					}
+//					reader.close();
+//				} else if (jobfile.getParentFile() != null && !jobfile.getParentFile().exists()) {
+//					jobfile.getParentFile().mkdirs();
+//				}
+				obj.joblog = jl;
+//				new PrintStream(new FileOutputStream(joblog, true));
+//			} catch (IOException e) {
+//				throw new RunnerException(e);
+//			}
 		}
 		return obj;
 	}
@@ -577,35 +591,38 @@ public abstract class JobRunner {
 		}
 
 		if (!dryrun && joblog != null && job.getJobId() != null && !job.getJobId().equals("")) {
-			joblog.println(job.getJobId()+"\t"+"NAME\t"+job.getName());
-			joblog.println(job.getJobId()+"\t"+"SUBMIT\t"+System.currentTimeMillis());
-			joblog.println(job.getJobId()+"\t"+"USER\t"+System.getProperty("user.name"));
+			JobLogRecord rec = new JobLogRecord(job.getJobId());
+			rec.setName(job.getName());
+			rec.setSubmitTime(System.currentTimeMillis());
+			rec.setUser(System.getProperty("user.name"));
+			
 			
 			for (JobDependency dep:job.getDependencies()) {
 				if (job.getJobId()!=null && !job.getJobId().equals("")) {
-					joblog.println(job.getJobId()+"\t"+"DEP\t"+dep.getJobId());
+					rec.addDep(dep.getJobId());
 				}
 			}
 			for (String out:job.getOutputs()) {
-				joblog.println(job.getJobId()+"\t"+"OUTPUT\t"+out);
+				rec.addOutput(out);
 			}
 			for (String inp:job.getInputs()) {
-				joblog.println(job.getJobId()+"\t"+"INPUT\t"+inp);
+				rec.addInput(inp);
 			}
 			for (String s: job.getBody().split("\n")) {
-				joblog.println(job.getJobId()+"\t"+"SRC\t"+s);
+				rec.addSrcLine(s);
 			}
 			for (String k:job.getSettings()) {
 				if (k.startsWith("job.")) {
 					if (k.equals("job.custom")) {
 						for (String s: job.getSettings("job.custom")) {
-							joblog.println(job.getJobId()+"\t"+"SETTING\t"+k+"\t"+s);
+							rec.addSetting(k, s);
 						}
 					} else {
-						joblog.println(job.getJobId()+"\t"+"SETTING\t"+k+"\t"+job.getSetting(k));
+						rec.addSetting(k, job.getSetting(k));
 					}
 				}
 			}
+			joblog.writeRecord(rec);
 		}
 	}
 	public void postSubmit(JobDef jobdef, RootContext context) throws RunnerException {
