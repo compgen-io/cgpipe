@@ -119,9 +119,6 @@ public abstract class JobRunner {
 
 		// Attempt to load a list of existing jobs
 		
-		// TODO: add a lock mechanism for job-log?
-		// TODO: add start/stop/retcode to job log?
-		
 		String joblogFilename = cxt.getString("cgpipe.joblog");
 		JobRunner.log.info("job-log: " +joblogFilename);
 		if (joblogFilename != null) {
