@@ -133,11 +133,16 @@ public abstract class JobRunner {
 					throw new RunnerException(e);
 				}
 				for (JobLogRecord rec: jl.getRecords()) {
-					for (String output: rec.getOutputs()) {
-						String absOutput = Paths.get(output).toAbsolutePath().toString();
-						obj.submittedJobs.put(absOutput, new ExistingJob(rec.getJobId()));
-						cxt.getRoot().addPendingJobOutput(absOutput, rec.getJobId(), obj);
-						log.trace("Existing/pending output: "+ absOutput);
+					if (rec.getOutputs()!=null) {
+						for (String output: rec.getOutputs()) {
+							String absOutput = Paths.get(output).toAbsolutePath().toString();
+							obj.submittedJobs.put(absOutput, new ExistingJob(rec.getJobId()));
+							cxt.getRoot().addPendingJobOutput(absOutput, rec.getJobId(), obj);
+							log.trace("Existing/pending output: "+ absOutput);
+						}
+					} else {
+						// log.debug("Null output for job: "+rec.getJobId()+" ???");
+						// this is okay -- it happens when you have an opportunistic job to rm tmp files
 					}
 				}
 				
