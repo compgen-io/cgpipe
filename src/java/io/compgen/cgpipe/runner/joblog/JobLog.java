@@ -32,6 +32,7 @@ public class JobLog {
 	
 	protected List<String> jobIds = new ArrayList<String>();
 	protected Map<String, JobLogRecord> records = new HashMap<String,JobLogRecord>();
+	protected Map<String, String> outputs = new HashMap<String,String>(); // output, jobid
 	
 	protected JobLog(String filename) throws IOException {
 		this.filename = filename;
@@ -83,6 +84,7 @@ public class JobLog {
 						rec.addSetting(arg1, arg2);
 						break;
 					case "OUTPUT":
+						outputs.put(arg1, jobid);
 						rec.addOutput(arg1);
 						break;
 					case "INPUT":
@@ -224,12 +226,15 @@ public class JobLog {
 		}		
 	}
 
-	public List<JobLogRecord> getRecords() {
-		List<JobLogRecord> recs = new ArrayList<JobLogRecord>();
-		for (String jobid: jobIds) {
-			recs.add(records.get(jobid));
+	public String getJobIdForOutput(String output) {
+		if (outputs.containsKey(output)) {
+			return outputs.get(output);
 		}
-		return Collections.unmodifiableList(recs);
+		return null;
+	}
+
+	public Map<String, String> getOutputJobIds() {
+		return Collections.unmodifiableMap(outputs);
 	}
 
 	public void close() {
