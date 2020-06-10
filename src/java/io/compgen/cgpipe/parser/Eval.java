@@ -1,5 +1,17 @@
 package io.compgen.cgpipe.parser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.MethodCallException;
@@ -18,19 +30,6 @@ import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.cgpipe.support.StreamRedirect;
 import io.compgen.common.Pair;
 import io.compgen.common.StringUtils;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class Eval {
 	final private static Pattern wildcardPattern = Pattern.compile("^(.*?)\\$%(.*?)$");
