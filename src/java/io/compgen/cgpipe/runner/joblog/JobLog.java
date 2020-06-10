@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
@@ -25,10 +24,10 @@ public class JobLog {
 	static Map<String, JobLog> instances = new HashMap<String, JobLog>();
 	static protected Log log = LogFactory.getLog(JobLog.class);
 
-	private File lockFile = null;
+//	private File lockFile = null;
 
 	private final String filename;
-	private final String lockSecret = generateRandomString();
+//	private final String lockSecret = generateRandomString();
 	
 	protected List<String> jobIds = new ArrayList<String>();
 	protected Map<String, JobLogRecord> records = new HashMap<String,JobLogRecord>();
@@ -109,110 +108,112 @@ public class JobLog {
 	}
 
 	protected void releaseLock() {
-		if (lockFile != null) {
-			File child = new File(lockFile, "lock");
-			if (child.exists()) {
-				try {
-					BufferedReader reader = new BufferedReader(new FileReader(child));
-					String s = reader.readLine();
-					reader.close();
-					if (!lockSecret.equals(s)) {
-						// we don't own the lock, don't release
-						return;
-					}
-				} catch (IOException e) {
-					return;
-				}
-
-				child.delete();
-			}
-			lockFile.delete();
-			log.debug("job-log lock released");
-		}
+//		if (lockFile != null) {
+//			File child = new File(lockFile, "lock");
+//			if (child.exists()) {
+//				try {
+//					BufferedReader reader = new BufferedReader(new FileReader(child));
+//					String s = reader.readLine();
+//					reader.close();
+//					if (!lockSecret.equals(s)) {
+//						// we don't own the lock, don't release
+//						return;
+//					}
+//				} catch (IOException e) {
+//					return;
+//				}
+//
+//				child.delete();
+//			}
+//			lockFile.delete();
+//			log.debug("job-log lock released");
+//		}
 	}
 
 	protected void acquireLock() throws IOException {
-		acquireLock(30000);
+		//acquireLock(30000);
 	}
 
 	protected void acquireLock(long wait_ms) throws IOException  {
-		log.debug("Trying to get job-log lock: " + filename);
-		if (lockFile != null) {
-			log.trace("Lock already acquired!");
-			return;
-		}
-		
-		long ms = System.currentTimeMillis();
-		long end = ms + wait_ms;
-		
-		long wait = 10;
-		
-		boolean first = true;
-		while (lockFile == null && System.currentTimeMillis() < end) {
-			if (!first) {
-				try {
-					log.trace("waiting to try to establish lock");
-					Thread.sleep(wait);
-				} catch (InterruptedException e) {
-				}
-				if (wait < 100) {
-					wait = wait * 2;
-				}
-			}
-			first = false;
-			
-			boolean good = false;
-			File dir = new File(filename+".lock");
-			File child = new File(dir, "lock");
-
-			if (!dir.exists() ) {
-				dir.mkdirs();
-				try {
-					if (!child.exists()) {
-						child.createNewFile();
-						
-						PrintStream ps = new PrintStream(new FileOutputStream(child));
-						ps.println(lockSecret);
-						ps.flush();
-						ps.close();
-	
-						Thread.sleep(100);
-	
-						BufferedReader reader = new BufferedReader(new FileReader(child));
-						String s = reader.readLine();
-						reader.close();
-	
-						if (lockSecret.equals(s)) {
-							// we own the lock!
-							good = true;
-						} else {
-							log.debug("tried to create the lock, but we got beat... waiting");
-						}
-					}
-				} catch (IOException e) {
-					good = false;
-				} catch (InterruptedException e) {
-					good = false;
-				}
-			}
-			
-			if (good) {
-				log.debug("job-log lock acquired");
-				lockFile = dir;
-				Runtime.getRuntime().addShutdownHook(new Thread() {
-					public void run() { 
-						releaseLock();
-					}
-				});
-				dir.deleteOnExit();
-				child.deleteOnExit();
-			}
-		}
-		
-		if (lockFile == null) {
-			log.error("Could not get a lock on job-log: "+filename);
-			System.exit(2);
-		}
+		return;
+				
+//		log.debug("Trying to get job-log lock: " + filename);
+//		if (lockFile != null) {
+//			log.trace("Lock already acquired!");
+//			return;
+//		}
+//		
+//		long ms = System.currentTimeMillis();
+//		long end = ms + wait_ms;
+//		
+//		long wait = 10;
+//		
+//		boolean first = true;
+//		while (lockFile == null && System.currentTimeMillis() < end) {
+//			if (!first) {
+//				try {
+//					log.trace("waiting to try to establish lock");
+//					Thread.sleep(wait);
+//				} catch (InterruptedException e) {
+//				}
+//				if (wait < 100) {
+//					wait = wait * 2;
+//				}
+//			}
+//			first = false;
+//			
+//			boolean good = false;
+//			File dir = new File(filename+".lock");
+//			File child = new File(dir, "lock");
+//
+//			if (!dir.exists() ) {
+//				dir.mkdirs();
+//				try {
+//					if (!child.exists()) {
+//						child.createNewFile();
+//						
+//						PrintStream ps = new PrintStream(new FileOutputStream(child));
+//						ps.println(lockSecret);
+//						ps.flush();
+//						ps.close();
+//	
+//						Thread.sleep(100);
+//	
+//						BufferedReader reader = new BufferedReader(new FileReader(child));
+//						String s = reader.readLine();
+//						reader.close();
+//	
+//						if (lockSecret.equals(s)) {
+//							// we own the lock!
+//							good = true;
+//						} else {
+//							log.debug("tried to create the lock, but we got beat... waiting");
+//						}
+//					}
+//				} catch (IOException e) {
+//					good = false;
+//				} catch (InterruptedException e) {
+//					good = false;
+//				}
+//			}
+//			
+//			if (good) {
+//				log.debug("job-log lock acquired");
+//				lockFile = dir;
+//				Runtime.getRuntime().addShutdownHook(new Thread() {
+//					public void run() { 
+//						releaseLock();
+//					}
+//				});
+//				dir.deleteOnExit();
+//				child.deleteOnExit();
+//			}
+//		}
+//		
+//		if (lockFile == null) {
+//			log.error("Could not get a lock on job-log: "+filename);
+//			System.exit(2);
+//		}
 	}
 
 	public static JobLog open(String filename) throws IOException {
