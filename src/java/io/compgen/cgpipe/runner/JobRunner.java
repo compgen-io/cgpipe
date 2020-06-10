@@ -129,18 +129,13 @@ public abstract class JobRunner {
 				} catch (IOException e) {
 					throw new RunnerException(e);
 				}
-				for (JobLogRecord rec: jl.getRecords()) {
-					if (rec.getOutputs()!=null) {
-						for (String output: rec.getOutputs()) {
-							String absOutput = Paths.get(output).toAbsolutePath().toString();
-							obj.submittedJobs.put(absOutput, new ExistingJob(rec.getJobId()));
-							cxt.getRoot().addPendingJobOutput(absOutput, rec.getJobId(), obj);
-							log.trace("Existing/pending output: "+ absOutput);
-						}
-					} else {
-						// log.debug("Null output for job: "+rec.getJobId()+" ???");
-						// this is okay -- it happens when you have an opportunistic job to rm tmp files
-					}
+
+				for (String output: jl.getOutputJobIds().keySet()) {
+					String jobId = jl.getOutputJobIds().get(output);
+					String absOutput = Paths.get(output).toAbsolutePath().toString();
+					obj.submittedJobs.put(absOutput, new ExistingJob(jobId));
+					cxt.getRoot().addPendingJobOutput(absOutput, jobId, obj);
+					log.trace("Existing/pending output: "+ absOutput);
 				}
 				
 
@@ -162,7 +157,8 @@ public abstract class JobRunner {
 //					jobfile.getParentFile().mkdirs();
 //				}
 				obj.joblog = jl;
-//				new PrintStream(new FileOutputStream(joblog, true));
+				JobRunner.log.debug("done reading job-log: " +joblogFilename);
+				//				new PrintStream(new FileOutputStream(joblog, true));
 //			} catch (IOException e) {
 //				throw new RunnerException(e);
 //			}

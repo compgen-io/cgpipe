@@ -31,6 +31,7 @@ import io.compgen.cgpipe.support.StreamRedirect;
 import io.compgen.common.Pair;
 import io.compgen.common.StringUtils;
 
+
 public class Eval {
 	final private static Pattern wildcardPattern = Pattern.compile("^(.*?)\\$%(.*?)$");
 	final private static Pattern outputPattern = Pattern.compile("^(.*?)\\$>([0-9]*)(.*?)$");
