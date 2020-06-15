@@ -7,3 +7,6 @@ test/*
 *.class
 .zedstate
 .vscode/
+.DS_Store
+.devcontainer/
+
