@@ -1,17 +1,21 @@
 package io.compgen.cgpipe.parser.context;
 
-import io.compgen.cgpipe.exceptions.VarTypeException;
-import io.compgen.cgpipe.parser.variable.VarNull;
-import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.cgpipe.support.SimpleFileLoggerImpl;
-import io.compgen.cgpipe.support.SimpleFileLoggerImpl.Level;
-
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import io.compgen.cgpipe.CGPipe;
+import io.compgen.cgpipe.exceptions.VarTypeException;
+import io.compgen.cgpipe.parser.variable.VarBool;
+import io.compgen.cgpipe.parser.variable.VarInt;
+import io.compgen.cgpipe.parser.variable.VarNull;
+import io.compgen.cgpipe.parser.variable.VarString;
+import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.cgpipe.support.SimpleFileLoggerImpl;
+import io.compgen.cgpipe.support.SimpleFileLoggerImpl.Level;
 
 public class ExecContext {
 	protected final ExecContext parent;
@@ -39,6 +43,15 @@ public class ExecContext {
 	}
 	
 	public VarValue get(String name) {
+		// Read-only values
+		if (name.equals("cgpipe.filename")) {
+			return new VarString(CGPipe.getFilename());
+		} else if (name.equals("cgpipe.dryrun")) {
+			return CGPipe.isDryRun() ?  VarBool.TRUE : VarBool.FALSE;
+		} else if (name.equals("cgpipe.procs")) {
+			return new VarInt(Runtime.getRuntime().availableProcessors());
+		}
+
 		if (!contains(name)) {
 			return VarNull.NULL;
 		}
@@ -75,6 +88,20 @@ public class ExecContext {
 				log.error(e);
 			}
 		}
+
+		// These are read-only values
+		if (name.equals("cgpipe.filename")) {
+			return;
+		} else if (name.equals("cgpipe.dryrun")) {
+			if (val.toBoolean()) {
+				CGPipe.setDryRun(); // this can be set once... once you're in dry-run mode, you're always in dry-run mode
+			}
+			return;
+		} else if (name.equals("cgpipe.procs")) {
+			return;
+		}
+		
+		
 		
 		if (name.equals("cgpipe.loglevel")) {
 			try {

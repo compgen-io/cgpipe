@@ -16,6 +16,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import io.compgen.cgpipe.CGPipe;
 import io.compgen.common.Pair;
 
 public class JobLog {
@@ -53,6 +54,10 @@ public class JobLog {
 					outputs.put(arg1, jobid);
 				}
 
+				//////////////////
+				// THE REST OF THIS IS NOT NEEDED... when we read in the log, it is ONLY to look for the outputs/jobids. 
+				//////////////////
+				
 				// String arg2 = null;
 				// if (key.equals("SETTING")) {
 				// 	cols = line.split("\t", 4);
@@ -255,6 +260,12 @@ public class JobLog {
 		} catch (FileNotFoundException e) {
 			log.error("Missing job log??? (this should have been created) -- " + filename);
 			return;
+		}
+
+		if (CGPipe.getFilename().equals("-")) {
+			ps.println(rec.getJobId()+"\tPIPELINE\t<stdin>");
+		} else {
+			ps.println(rec.getJobId()+"\tPIPELINE\t"+new File(CGPipe.getFilename()).getName());
 		}
 
 		if (rec.getName()!=null) {

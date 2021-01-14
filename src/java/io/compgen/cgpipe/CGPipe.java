@@ -44,6 +44,9 @@ public class CGPipe {
 	public static final File USER_INIT = new File(CGPIPE_HOME,".cgpiperc");
 	public static final File GLOBAL_INIT = new File("/etc/cgpiperc");
 
+	private static String FILENAME = "";
+	private static boolean dryRun = false;
+	
 //	public static final Map<String, VarValue> globalConfig = new HashMap<String, VarValue>(); 
 	
 	public static void main(String[] args) throws Exception {
@@ -54,6 +57,7 @@ public class CGPipe {
 				newargs[i-1] = args[i];
 			}
 			UpdateJobStart.main(newargs);
+			return;
 		}
 		if (args.length > 0 && args[0].equals("update-job-end")) {
 			String [] newargs = new String[args.length-1];
@@ -61,7 +65,13 @@ public class CGPipe {
 				newargs[i-1] = args[i];
 			}
 			UpdateJobEnd.main(newargs);
+			return;
 		}
+		
+		defaultMain(args);
+	}
+		
+	public static void defaultMain(String[] args) throws Exception {
 
 		String fname = null;
 		String logFilename = null;
@@ -155,7 +165,7 @@ public class CGPipe {
 					}
 					confVals.put(k, VarBool.TRUE);
 				}
-				confVals.put("cgpipe.dryrun", VarBool.TRUE);
+				dryRun = true;
 			} else if (arg.startsWith("--")) {
 				if (k != null) {
 					if (k.contains("-")) {
@@ -205,6 +215,8 @@ public class CGPipe {
 			System.exit(1);
 		}
 		
+		CGPipe.FILENAME = fname;
+		
 		if (!showHelp) {
 			switch (verbosity) {
 			case 0:
@@ -235,8 +247,7 @@ public class CGPipe {
 		}
 		
 		if (System.getenv("CGPIPE_DRYRUN") != null && !System.getenv("CGPIPE_DRYRUN").equals("")) {
-			confVals.put("cgpipe.dryrun", VarBool.TRUE);
-
+			dryRun = true;
 		}
 		
 		JobRunner runner = null;
@@ -260,7 +271,6 @@ public class CGPipe {
 			}
 
 			root.update(confVals);
-			root.set("cgpipe.procs", new VarInt(Runtime.getRuntime().availableProcessors()));
 			
 			// update the URL Source loader configs
 			SourceLoader.updateRemoteHandlers(root.cloneString("cgpipe.remote"));
@@ -364,6 +374,18 @@ public class CGPipe {
 		}
 	}
 
+	public static String getFilename() {
+		return CGPipe.FILENAME;
+	}
+	
+	public static boolean isDryRun() {
+		return CGPipe.dryRun;
+	}
+
+	public static void setDryRun() {
+		CGPipe.dryRun = true;
+	}
+	
 	public static void loadInitFiles(RootContext root) throws ASTParseException, ASTExecException {
 		// Parse the default cgpiperc
 		InputStream is = CGPipe.class.getClassLoader().getResourceAsStream("io/compgen/cgpipe/cgpiperc");
