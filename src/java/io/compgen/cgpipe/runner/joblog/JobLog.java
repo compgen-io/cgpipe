@@ -49,6 +49,7 @@ public class JobLog {
 				String arg1 = cols[2];
 
 				if (key.equals("OUTPUT")) {
+					log.debug("Existing output/job: " + arg1 + " => " + jobid);
 					outputs.put(arg1, jobid);
 				}
 
@@ -231,8 +232,10 @@ public class JobLog {
 
 	public String getJobIdForOutput(String output) {
 		if (outputs.containsKey(output)) {
+			log.debug("Looking for an existing job for file: "+output+", found job-id: "+outputs.get(output));
 			return outputs.get(output);
 		}
+		log.debug("Looking for an existing job file: "+output+", not found.");
 		return null;
 	}
 
