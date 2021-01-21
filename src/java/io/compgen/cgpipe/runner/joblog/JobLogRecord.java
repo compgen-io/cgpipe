@@ -9,6 +9,8 @@ public class JobLogRecord {
 
 	private final String jobId;
 	private String name = null;
+	private String pipeline = null;
+	private String workingDirectory = null;
 	private Integer returnCode = null;
 	private Long startTime = null;
 	private Long endTime = null;
@@ -131,6 +133,20 @@ public class JobLogRecord {
 			settings = new ArrayList<Pair<String,String>>();
 		}
 		settings.add(new Pair<String, String>(k, s));
+	}
+
+	public String getPipeline() {
+		return pipeline;
+	}
+	public void setPipeline(String pipeline) {
+		this.pipeline = pipeline;
+	}
+
+	public String getWorkingDirectory() {
+		return workingDirectory;
+	}
+	public void setWorkingDirectory(String workingDirectory) {
+		this.workingDirectory = workingDirectory;
 	}
 
 }

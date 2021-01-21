@@ -45,6 +45,7 @@ public class CGPipe {
 	public static final File GLOBAL_INIT = new File("/etc/cgpiperc");
 
 	private static String FILENAME = "";
+	private static String WORKING_DIR = "";
 	private static boolean dryRun = false;
 	
 //	public static final Map<String, VarValue> globalConfig = new HashMap<String, VarValue>(); 
@@ -216,6 +217,7 @@ public class CGPipe {
 		}
 		
 		CGPipe.FILENAME = fname;
+		CGPipe.WORKING_DIR = new File(".").getAbsolutePath();
 		
 		if (!showHelp) {
 			switch (verbosity) {
@@ -376,6 +378,10 @@ public class CGPipe {
 
 	public static String getFilename() {
 		return CGPipe.FILENAME;
+	}
+	
+	public static String getWorkingDirectory() {
+		return CGPipe.WORKING_DIR;
 	}
 	
 	public static boolean isDryRun() {

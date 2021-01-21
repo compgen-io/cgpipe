@@ -13,6 +13,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import io.compgen.cgpipe.CGPipe;
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.RunnerException;
@@ -590,6 +591,8 @@ public abstract class JobRunner {
 
 		if (!dryrun && joblog != null && job.getJobId() != null && !job.getJobId().equals("")) {
 			JobLogRecord rec = new JobLogRecord(job.getJobId());
+			rec.setPipeline(CGPipe.getFilename());
+			rec.setWorkingDirectory(CGPipe.getWorkingDirectory());
 			rec.setName(job.getName());
 			rec.setSubmitTime(System.currentTimeMillis());
 			rec.setUser(System.getProperty("user.name"));

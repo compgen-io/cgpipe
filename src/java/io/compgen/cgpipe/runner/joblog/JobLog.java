@@ -36,8 +36,6 @@ public class JobLog {
 		this.filename = filename;
 		File jobfile = new File(filename);
 		
-		acquireLock();
-		
 		if (jobfile.exists()) {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
 			String line;
@@ -74,6 +72,12 @@ public class JobLog {
 				// switch(key) {
 				// 	case "NAME":
 				// 		rec.setName(arg1);
+				// 		break;
+				// 	case "PIPELINE":
+				// 		rec.setPipeline(arg1);
+				// 		break;
+				// 	case "WORKINGDIR":
+				// 		rec.setWorkingDirectory(arg1);
 				// 		break;
 				// 	case "RETCODE":
 				// 		rec.setReturnCode(Integer.parseInt(arg1));
@@ -117,115 +121,6 @@ public class JobLog {
 		
 	}
 
-	protected void releaseLock() {
-//		if (lockFile != null) {
-//			File child = new File(lockFile, "lock");
-//			if (child.exists()) {
-//				try {
-//					BufferedReader reader = new BufferedReader(new FileReader(child));
-//					String s = reader.readLine();
-//					reader.close();
-//					if (!lockSecret.equals(s)) {
-//						// we don't own the lock, don't release
-//						return;
-//					}
-//				} catch (IOException e) {
-//					return;
-//				}
-//
-//				child.delete();
-//			}
-//			lockFile.delete();
-//			log.debug("job-log lock released");
-//		}
-	}
-
-	protected void acquireLock() throws IOException {
-		//acquireLock(30000);
-	}
-
-	protected void acquireLock(long wait_ms) throws IOException  {
-		return;
-				
-//		log.debug("Trying to get job-log lock: " + filename);
-//		if (lockFile != null) {
-//			log.trace("Lock already acquired!");
-//			return;
-//		}
-//		
-//		long ms = System.currentTimeMillis();
-//		long end = ms + wait_ms;
-//		
-//		long wait = 10;
-//		
-//		boolean first = true;
-//		while (lockFile == null && System.currentTimeMillis() < end) {
-//			if (!first) {
-//				try {
-//					log.trace("waiting to try to establish lock");
-//					Thread.sleep(wait);
-//				} catch (InterruptedException e) {
-//				}
-//				if (wait < 100) {
-//					wait = wait * 2;
-//				}
-//			}
-//			first = false;
-//			
-//			boolean good = false;
-//			File dir = new File(filename+".lock");
-//			File child = new File(dir, "lock");
-//
-//			if (!dir.exists() ) {
-//				dir.mkdirs();
-//				try {
-//					if (!child.exists()) {
-//						child.createNewFile();
-//						
-//						PrintStream ps = new PrintStream(new FileOutputStream(child));
-//						ps.println(lockSecret);
-//						ps.flush();
-//						ps.close();
-//	
-//						Thread.sleep(100);
-//	
-//						BufferedReader reader = new BufferedReader(new FileReader(child));
-//						String s = reader.readLine();
-//						reader.close();
-//	
-//						if (lockSecret.equals(s)) {
-//							// we own the lock!
-//							good = true;
-//						} else {
-//							log.debug("tried to create the lock, but we got beat... waiting");
-//						}
-//					}
-//				} catch (IOException e) {
-//					good = false;
-//				} catch (InterruptedException e) {
-//					good = false;
-//				}
-//			}
-//			
-//			if (good) {
-//				log.debug("job-log lock acquired");
-//				lockFile = dir;
-//				Runtime.getRuntime().addShutdownHook(new Thread() {
-//					public void run() { 
-//						releaseLock();
-//					}
-//				});
-//				dir.deleteOnExit();
-//				child.deleteOnExit();
-//			}
-//		}
-//		
-//		if (lockFile == null) {
-//			log.error("Could not get a lock on job-log: "+filename);
-//			System.exit(2);
-//		}
-	}
-
 	public static JobLog open(String filename) throws IOException {
 		if (instances.containsKey(filename)) {
 			return instances.get(filename);
@@ -249,7 +144,6 @@ public class JobLog {
 	}
 
 	public void close() {
-		releaseLock();
 		instances.remove(filename);
 	}
 
@@ -262,11 +156,8 @@ public class JobLog {
 			return;
 		}
 
-		if (CGPipe.getFilename().equals("-")) {
-			ps.println(rec.getJobId()+"\tPIPELINE\t<stdin>");
-		} else {
-			ps.println(rec.getJobId()+"\tPIPELINE\t"+new File(CGPipe.getFilename()).getName());
-		}
+		ps.println(rec.getJobId()+"\tPIPELINE\t"+rec.getPipeline());
+		ps.println(rec.getJobId()+"\tWORKINGDIR\t"+rec.getWorkingDirectory());
 
 		if (rec.getName()!=null) {
 			ps.println(rec.getJobId()+"\tNAME\t"+rec.getName());
@@ -349,27 +240,4 @@ public class JobLog {
 		ps.close();
 		
 	}
-
-	public static final String UPPER="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	public static final String LOWER="abcdefghijklmnopqrstuvwxyz";
-	public static final String NUM="0123456789";
-	
-	public static final String generateRandomString() {
-		return generateRandomString(24, UPPER+LOWER+NUM);
-	}
-	
-	public static final String generateRandomString(int length, String pool) {
-		
-	    SecureRandom rand = new SecureRandom();
-	
-	    String s = "";
-	    
-	    while (s.length() < length) {
-	    	int next = rand.nextInt(pool.length());
-	    	s += pool.charAt(next);
-	    }
-	    
-		return s;
-	}
-
 }
