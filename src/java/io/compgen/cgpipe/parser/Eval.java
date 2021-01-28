@@ -3,7 +3,6 @@ package io.compgen.cgpipe.parser;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -316,6 +315,12 @@ public class Eval {
 				}
 				
 				log.trace("obj: " + obj + "/"+obj.getClass().getName());
+				log.trace("evalobj: " + obj + "/"+obj.getClass().getName());
+				
+				if (obj.getClass().equals(VarString.class)) {
+					obj = new VarString(evalString(obj.toString(), context, tokens.getLine()));
+				}
+				
 				log.trace("method: " + method);
 				log.trace("argv: [" + StringUtils.join(",",argv) +"]");
 				log.trace("left: " + StringUtils.join(",",left));
