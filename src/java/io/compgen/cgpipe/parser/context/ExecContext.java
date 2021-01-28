@@ -1,6 +1,7 @@
 package io.compgen.cgpipe.parser.context;
 
 import java.io.FileNotFoundException;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +45,18 @@ public class ExecContext {
 	
 	public VarValue get(String name) {
 		// Read-only values
-		if (name.equals("cgpipe.filename")) {
+		//
+		// Note: Some read-only variables are set in the Eval loop too (pipeline/runtime dependent)
+		//
+		
+		if (name.equals("cgpipe.sys.scriptname")) {
+			if (System.getProperty("io.compgen.cgpipe.scriptname")!=null) {
+				return new VarString(System.getProperty("io.compgen.cgpipe.scriptname"));
+			}
+			return new VarString("");
+		} else if (name.equals("cgpipe.sys.cwd")) {
+			return new VarString(Paths.get("").toAbsolutePath().toString());
+		} else if (name.equals("cgpipe.filename")) {
 			return new VarString(CGPipe.getFilename());
 		} else if (name.equals("cgpipe.dryrun")) {
 			return CGPipe.isDryRun() ?  VarBool.TRUE : VarBool.FALSE;
@@ -94,10 +106,12 @@ public class ExecContext {
 			return;
 		} else if (name.equals("cgpipe.dryrun")) {
 			if (val.toBoolean()) {
-				CGPipe.setDryRun(); // this can be set once... once you're in dry-run mode, you're always in dry-run mode
+				CGPipe.setDryRun(); // this can be set once... once you're in dry-run mode, you're always in dry-run mode (no take-backs)
 			}
 			return;
 		} else if (name.equals("cgpipe.procs")) {
+			return;
+		} else if (name.startsWith("cgpipe.sys.")) {
 			return;
 		}
 		

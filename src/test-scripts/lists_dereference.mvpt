@@ -1,0 +1,36 @@
+l = []
+l += "foo bar baz"
+l += "one two three"
+
+for i in l
+    print i
+done
+
+print l[0]
+
+for i in l[0].split(" ")
+    print i
+done
+
+print l[1]
+
+for i in l[1].split(" ")
+    print i
+done
+
+
+print l[1].split(" ")
+
+print "foo bar baz".sub(" ", ".").upper()
+print "foo bar baz".split(" ")[1].upper()
+
+tmp = "foo bar baz".sub(" ", ".").upper()
+print tmp
+
+one="foo"
+two="FOOBARBAZ"
+tmp = two.sub(one.upper(),"xxx")
+print tmp
+
+tmp = l[1].split(" ")
+print tmp[0]

@@ -38,6 +38,10 @@ else
         CGPIPE_HOME=test/run $1 > test/.testout 2> test/.testerr
     fi
 
+    if [ "$VERBOSE" = "-vvv" ]; then
+        cat test/.testerr
+    fi
+
     TEST=$(cat test/.testout | grep -v '^#' | grep -v '^$' | sed -e 's/^[[:blank:]]*//g' | sed -e 's/CGPIPE ERROR.*/CGPIPE ERROR/g' | $MD)
     GOOD=$(cat $1.good | grep -v '^#' | grep -v '^$' |sed -e 's/^[[:blank:]]*//g' | $MD)
     if [ "$TEST" != "$GOOD" ]; then

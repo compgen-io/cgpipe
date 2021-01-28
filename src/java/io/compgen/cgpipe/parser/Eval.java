@@ -39,7 +39,7 @@ public class Eval {
 	private static Log log = LogFactory.getLog(Eval.class);
 
 	public static VarValue evalTokenExpression(TokenList tokens, ExecContext context) throws ASTExecException {
-//		log.trace("TOKENS: " + tokens);
+//		System.err.println("TOKENS: " + tokens);
 		if (tokens.size() == 0) {
 			return null;
 		}
@@ -55,13 +55,6 @@ public class Eval {
 					return new VarString(tokens.getLine().getPipeline().getName());
 				} else if (tokens.get(0).getStr().equals("cgpipe.sys.curhash")) {
 					return new VarString(tokens.getLine().getPipeline().getHashDigest());
-				} else if (tokens.get(0).getStr().equals("cgpipe.sys.scriptname")) {
-					if (System.getProperty("io.compgen.cgpipe.scriptname")!=null) {
-						return new VarString(System.getProperty("io.compgen.cgpipe.scriptname"));
-					}
-					return new VarString("");
-				} else if (tokens.get(0).getStr().equals("cgpipe.sys.cwd")) {
-					return new VarString(Paths.get("").toAbsolutePath().toString());
 				}
 				
 				return context.get(tokens.get(0).getStr());
@@ -211,13 +204,27 @@ public class Eval {
 				
 				if (methodToken.getStr().charAt(0) == '.') {
 					// this is a method on an existing value... calc that first.
-//					System.err.println("left tokens: " + StringUtils.join(",",left));
-//					System.err.println("method     : " + methodToken.getStr());
+//					System.err.println("left tokens : " + StringUtils.join(",",left));
+//					System.err.println("method      : " + methodToken.getStr());
+//					System.err.println("left.get(-1): " + left.get(left.size()-1));
+//					System.err.println(".isValue()  : " + left.get(left.size()-1).isValue());
 
 					if (left.get(left.size()-1).isValue()) {
+						// left is a plain value... easy.
+//						System.err.println("1");
 						Token t = left.remove(left.size()-1);
 						obj = t.getValue();
-					} else if (left.get(left.size()-1).isParenClose()) {
+
+					  } else if (left.get(left.size()-1).isParenClose()) {
+//	                    THIS ISN'T USED??? The method is already dereferenced?
+//
+						// left is a method call, evaluate first.
+						//
+						// something like  var.sub(".gz", "").sub(".bed","")
+						//
+						// 
+						
+						System.err.println("IAMHERE????");
 						List<Token> methodBuf = new ArrayList<Token>();
 						int level = 1;
 						Token t = left.remove(left.size()-1);
@@ -235,25 +242,59 @@ public class Eval {
 						
 						obj = evalTokenExpression(new TokenList(methodBuf, tokens.getLine()), context);
 					} else if (left.get(left.size()-1).isSliceClose()) {
+						// left is a something else (like a variable, or operator!!)
+						// 
+						//
+						// We we need to find the varvalue that the method is called on.
+						// then we need to evaluate that expression
+						// 
+						// then plug that into the rest of the line.
+						//
+						// Example: "foo bar baz".split()[1].upper() 
+						//
+						
+//						System.err.println("3");
 						List<Token> methodBuf = new ArrayList<Token>();
-						int level = 1;
-						Token t = left.remove(left.size()-1);
-						methodBuf.add(0, t);
-						while (level > 0) {
+						int level = 0;
+						Token t = null;
+						while (level > 0 || methodBuf.size() == 0) {
+//							System.err.println("3 - loop; level="+level);
+
+							t = left.remove(left.size()-1);
+							methodBuf.add(0, t);
+
+//							System.err.println("LEFT      => " + StringUtils.join(";", left));
+//							System.err.println("CUR_TOKEN => " + t);
+//							System.err.println("METHODBUF => " + StringUtils.join(";", methodBuf));
+
 							if (t.isSliceClose()) {
+//								System.err.println("Token: " + t + " is slice close");
 								level++;
 							} else if (t.isSliceOpen()) {
+//								System.err.println("Token: " + t + " is slice open");
 								level--;
+//							} else {
+//								System.err.println("Token: " + t + " ???");
 							}
-							methodBuf.add(0, t);
+							
+//							if (level > 10) {
+//								System.err.println("BREAKOUT!");
+//								System.exit(1);
+//							}
 						}
+						// pull whatever was immediately to the left of the slice
 						t = left.remove(left.size()-1);
 						methodBuf.add(0, t);
-						
+//						System.err.println("3a");
+//						
+//						System.err.println("EVALUATING => " + StringUtils.join(";", methodBuf));
 						obj = evalTokenExpression(new TokenList(methodBuf, tokens.getLine()), context);
+//						System.err.println("3b");
 					} else {
+//						System.err.println("4");
 						throw new ASTExecException("Error trying to call method: "+methodToken);
 					}
+//					System.err.println("5");
 					
 					//					Token t = left.remove(left.size()-1);
 //					if (!t.isValue()) {
