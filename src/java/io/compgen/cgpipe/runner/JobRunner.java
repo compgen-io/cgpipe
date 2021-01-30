@@ -337,16 +337,22 @@ public abstract class JobRunner {
 	private long markSkippable(BuildTarget target, RootContext context, String outputName) throws RunnerException {
 		long lastModified = 0;
 		String lastModifiedDep = "";
+		
+		log.debug("MARKING SKIPPABLE FOR: "+ target);
+		
 		for (String dep: target.getDepends().keySet()) {
 			long depLastMod = markSkippable(target.getDepends().get(dep), context, dep);
-			log.debug("Checking dep: " + dep + " lastmod: "+depLastMod);
+			log.debug("  Checking dep: " + dep + " lastmod: "+depLastMod);
 			if (depLastMod == -1) {
 				lastModified = -1;
-			} else if (depLastMod > lastModified) {
+			} else if (depLastMod > lastModified && lastModified > -1) {
 				lastModified = depLastMod;
 				lastModifiedDep = dep;
 			}
 		}
+		
+		log.debug("LAST MODIFIED: "+ target + " => " + lastModified);
+
 		
 		long retval = 0;
 		if (lastModified > -1) {
@@ -356,13 +362,13 @@ public abstract class JobRunner {
 				File outputFile = new File(allout);
 				if (outputFile.exists()) {
 					if (outputFile.lastModified() >= lastModified) {
-						log.debug("Marking output-target as skippable: "+allout);
+						log.debug("  Marking output-target as skippable: "+allout);
 						target.setSkippable(allout);
 						if (retval != -1 && outputFile.lastModified() > retval) {
 							retval = outputFile.lastModified();
 						}
 					} else {
-						log.debug("Marking output-target as not skippable: " + allout + " is older than " + lastModifiedDep + " (" + outputFile.lastModified() + " vs " + lastModified + ")");
+						log.debug("  Marking output-target as not skippable: " + allout + " is older than " + lastModifiedDep + " (" + outputFile.lastModified() + " vs " + lastModified + ")");
 						retval = -1;
 					}
 				} else {
@@ -370,15 +376,16 @@ public abstract class JobRunner {
 						log.debug(outputFile + " is a tmp file -- we can skip this (assuming downstream files are older than: "+lastModified+")");
 						return lastModified;
 					} else {
-						log.debug("Marking output-target as not skippable: " + allout + " doesn't exist! (" + outputFile.getAbsolutePath()+")");
+						log.debug("  Marking output-target as not skippable: " + allout + " doesn't exist! (" + outputFile.getAbsolutePath()+")");
 						retval = -1;
 					}
 				}
 			}
 		} else {
-			log.debug("Marking output-target as not skippable: "+outputName + " a dependency will be built");
+			log.debug("  Marking output-target as not skippable: "+outputName + " a dependency will be built");
 			retval = -1;
 		}
+		log.debug("DONE: "+ target + " => " + retval);
 		return retval;
 	}
 
