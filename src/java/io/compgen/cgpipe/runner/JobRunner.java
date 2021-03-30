@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.file.AccessMode;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -360,6 +362,8 @@ public abstract class JobRunner {
 			// Note: this could also be used to look for remote resources (S3, etc), but not implemented
 			for (String allout: target.getOutputs()) {
 				File outputFile = new File(allout);
+
+				// TODO: This can fail for NFS mounted folders -- Add an extra check here for IOExceptions? outputFile.toPath().checkAccess()??
 				if (outputFile.exists()) {
 					if (outputFile.lastModified() >= lastModified) {
 						log.debug("  Marking output-target as skippable: "+allout);
