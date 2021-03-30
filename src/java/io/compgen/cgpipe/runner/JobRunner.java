@@ -4,8 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.nio.file.AccessMode;
-import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -336,6 +335,29 @@ public abstract class JobRunner {
 		}
 		
 	}
+	
+	private boolean doesFileExist(File f) {
+		
+		for (int i=0; i<3; i++) {
+		
+			if (f.exists()) {
+				return true;
+			}
+	
+			try {
+				f.toPath().getFileSystem().provider().checkAccess(f.toPath());
+			} catch (NoSuchFileException e) {
+				return false;
+			} catch (IOException e) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e1) {
+				}
+			}
+		}
+		return false;		
+	}
+	
 	private long markSkippable(BuildTarget target, RootContext context, String outputName) throws RunnerException {
 		long lastModified = 0;
 		String lastModifiedDep = "";
@@ -363,8 +385,10 @@ public abstract class JobRunner {
 			for (String allout: target.getOutputs()) {
 				File outputFile = new File(allout);
 
-				// TODO: This can fail for NFS mounted folders -- Add an extra check here for IOExceptions? outputFile.toPath().checkAccess()??
-				if (outputFile.exists()) {
+				// Note: This can fail for NFS mounted folders
+				//       Hence the extra checks...
+				//		
+				if (doesFileExist(outputFile)) {
 					if (outputFile.lastModified() >= lastModified) {
 						log.debug("  Marking output-target as skippable: "+allout);
 						target.setSkippable(allout);
