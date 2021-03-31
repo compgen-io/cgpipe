@@ -337,18 +337,23 @@ public abstract class JobRunner {
 	}
 	
 	private boolean doesFileExist(File f) {
-		
+		boolean failed = false;
 		for (int i=0; i<3; i++) {
-		
 			if (f.exists()) {
+				if (failed) {
+					log.debug("doesFileExist "+f.getAbsolutePath()+" => exists");
+				}
 				return true;
 			}
 	
 			try {
 				f.toPath().getFileSystem().provider().checkAccess(f.toPath());
 			} catch (NoSuchFileException e) {
+				log.debug("doesFileExist "+f.getAbsolutePath()+" => NoSuchFileException: "+ e);
 				return false;
 			} catch (IOException e) {
+				log.debug("doesFileExist "+f.getAbsolutePath()+" => IOException: "+ e);
+				failed = true;
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e1) {
