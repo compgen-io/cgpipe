@@ -1,0 +1,5 @@
+print "19"
+print "19.0"
+print "19..0"
+print "19A"
+print "19D"

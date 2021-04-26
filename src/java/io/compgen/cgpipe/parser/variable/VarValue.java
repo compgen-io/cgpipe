@@ -116,20 +116,85 @@ public abstract class VarValue {
 			return VarBool.FALSE;
 		}
 
-		try {
-			long l = Long.parseLong(val);
-			return new VarInt(l);
-		} catch (NumberFormatException e) {
-			// ignore
-		}
+		/*
+		 * The java parseDouble allows for a character at the end, which is strange.
+		 * 
+		 * For example, 19D => 19.0
+		 * 
+		 * This isn't what we want, so let's just be explicit.
+		 * 
+		 * Numbers can only be:
+		 * 
+		 * [+/-][0-9]+
+		 * [+/-][0-9]*.?[0-9]*
+		 * 
+		 */
+		
+		boolean isInt = true;
+		boolean isDouble = true;
+		boolean dots = false;
+		for (int i=0; i<val.length() && (isInt || isDouble); i++) {
+			char c = val.charAt(i);
 			
-		try {
-			double d = Double.parseDouble(val);
-			return new VarFloat(d);
-		} catch (NumberFormatException e) {
-			// ignore
+			if (i != 0) {
+				// plus/minus allowed at the first character
+				if (c == '-' || c == '+') {
+					isInt = false;
+					isDouble = false;
+					break;
+				}
+			}
+			
+			if (c == '.') {
+				// only one decimal is allowed, but only for ints.
+				if (dots) {
+					isInt = false;
+					isDouble = false;
+					break;
+				}
+				isInt = false;
+				dots = true;
+				continue;
+			}
+			
+			switch(c) {
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+					// numbers are allowed
+					continue;
+				default:
+					// everything else fails.
+					isInt = false;
+					isDouble = false;
+			}
 		}
-				
+
+		if (isInt) {
+			try {
+				long l = Long.parseLong(val);
+				return new VarInt(l);
+			} catch (NumberFormatException e) {
+				// ignore
+			}
+		} 
+		
+		if (isDouble) {
+			try {
+				double d = Double.parseDouble(val);
+				return new VarFloat(d);
+			} catch (NumberFormatException e) {
+				// ignore
+			}
+		}
+		
 		if (val.equals("[]")) {
 			return new VarList();
 		}
