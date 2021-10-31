@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.LogFactory;
+
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
@@ -58,7 +60,7 @@ public class BuildTarget {
 	}
 
 	public String toString() {
-		return "<build-target> " + StringUtils.join(" ", outputs) + " : " + StringUtils.join(" ", inputs);
+		return "<build-target> " + StringUtils.join(";", outputs) + " : " + StringUtils.join(";", inputs);
 	}
 
 	public List<String> getInputs() {
@@ -129,18 +131,21 @@ public class BuildTarget {
 	}
 
 	public boolean isSkippable() {
+		boolean canSkip = true;
 		for (String out: outputs) {
 			if (!skippable.contains(out)) {
-//				LogFactory.getLog(BuildTarget.class).debug("++++++++++++ Skippable in build-target? no " + StringUtils.join(",", outputs) + " ? " + this.hashCode());
-				return false;
+				LogFactory.getLog(BuildTarget.class).trace("++++++++++++ Skippable in build-target? NO => " + this + " (missing:" + out+")");
+				canSkip = false;
 			}
 		}
 //		LogFactory.getLog(BuildTarget.class).debug("++++++++++++ Skippable in build-target? yes " + StringUtils.join(",", outputs) + " ? " + this.hashCode());
 
-		return true;
+		return canSkip;
 	}
 
 	public void setSkippable(String output) {
+		LogFactory.getLog(BuildTarget.class).debug(this + " setting output as skippable: " + output);
+		
 		this.skippable.add(output);
 	}
 

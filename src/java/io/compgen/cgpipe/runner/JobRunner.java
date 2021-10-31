@@ -291,7 +291,7 @@ public abstract class JobRunner {
 	public void submitAll(BuildTarget initialTarget, RootContext context) throws RunnerException {
 		if (initialTarget.getOutputs() != null && initialTarget.getOutputs().size() > 0) {
 			setup(context);
-			markSkippable(initialTarget, context, initialTarget.getOutputs().get(0));
+			markSkippable(initialTarget, context, initialTarget.getOutputs().get(0), "");
 			submitTargets(initialTarget, context, initialTarget.getOutputs().get(0), true);
 		}
 		runOpportunistic(context);
@@ -337,12 +337,12 @@ public abstract class JobRunner {
 	}
 	
 	private boolean doesFileExist(File f) {
-		boolean failed = false;
+//		boolean failed = false;
 		for (int i=0; i<3; i++) {
 			if (f.exists()) {
-				if (failed) {
+//				if (failed) {
 					log.debug("doesFileExist "+f.getAbsolutePath()+" => exists");
-				}
+//				}
 				return true;
 			}
 	
@@ -353,25 +353,28 @@ public abstract class JobRunner {
 				return false;
 			} catch (IOException e) {
 				log.debug("doesFileExist "+f.getAbsolutePath()+" => IOException: "+ e);
-				failed = true;
+//				failed = true;
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e1) {
 				}
 			}
 		}
+		log.debug("doesFileExist "+f.getAbsolutePath()+" => does not exist (or has bad permissions)");
 		return false;		
 	}
 	
-	private long markSkippable(BuildTarget target, RootContext context, String outputName) throws RunnerException {
+	private long markSkippable(BuildTarget target, RootContext context, String outputName, String tree) throws RunnerException {
 		long lastModified = 0;
 		String lastModifiedDep = "";
 		
-		log.debug("MARKING SKIPPABLE FOR: "+ target);
+		tree="";
+		
+		log.debug(tree + " => MARKING SKIPPABLE FOR: "+ target);
 		
 		for (String dep: target.getDepends().keySet()) {
-			long depLastMod = markSkippable(target.getDepends().get(dep), context, dep);
-			log.debug("  Checking dep: " + dep + " lastmod: "+depLastMod);
+			long depLastMod = markSkippable(target.getDepends().get(dep), context, dep, tree+">"+outputName);
+			log.debug(tree + " =>   Checking dep: " + dep + " lastmod: "+depLastMod);
 			if (depLastMod == -1) {
 				lastModified = -1;
 			} else if (depLastMod > lastModified && lastModified > -1) {
@@ -380,7 +383,7 @@ public abstract class JobRunner {
 			}
 		}
 		
-		log.debug("LAST MODIFIED: "+ target + " => " + lastModified);
+		log.debug(tree + " => LAST MODIFIED: "+ target + " => " + lastModified);
 
 		
 		long retval = 0;
@@ -392,33 +395,37 @@ public abstract class JobRunner {
 
 				// Note: This can fail for NFS mounted folders
 				//       Hence the extra checks...
-				//		
+				
 				if (doesFileExist(outputFile)) {
 					if (outputFile.lastModified() >= lastModified) {
-						log.debug("  Marking output-target as skippable: "+allout);
+						log.debug(tree + " =>   Marking output-target as skippable: "+allout);
 						target.setSkippable(allout);
 						if (retval != -1 && outputFile.lastModified() > retval) {
 							retval = outputFile.lastModified();
 						}
 					} else {
-						log.debug("  Marking output-target as not skippable: " + allout + " is older than " + lastModifiedDep + " (" + outputFile.lastModified() + " vs " + lastModified + ")");
+						log.debug(tree + " =>   Marking output-target as not skippable: " + allout + " is older than " + lastModifiedDep + " (" + outputFile.lastModified() + " vs " + lastModified + ")");
 						retval = -1;
 					}
 				} else {
 					if (target.getTempOutputs().contains(allout)) {
-						log.debug(outputFile + " is a tmp file -- we can skip this (assuming downstream files are older than: "+lastModified+")");
-						return lastModified;
+						log.debug(tree + " => " + outputFile + " is a tmp file -- we can skip this (assuming downstream files are older than: "+lastModified+")");
+						/// this output is a tmp file, so we assume the output is the same as any of it's dependencies.
+						target.setSkippable(allout);
+						if (lastModified > retval) {
+							retval = lastModified;
+						}
 					} else {
-						log.debug("  Marking output-target as not skippable: " + allout + " doesn't exist! (" + outputFile.getAbsolutePath()+")");
+						log.debug(tree + " =>   Marking output-target as not skippable: " + allout + " doesn't exist! (" + outputFile.getAbsolutePath()+")");
 						retval = -1;
 					}
 				}
 			}
 		} else {
-			log.debug("  Marking output-target as not skippable: "+outputName + " a dependency will be built");
+			log.debug(tree + " =>   Marking output-target as not skippable: "+outputName + " a dependency will be built");
 			retval = -1;
 		}
-		log.debug("DONE: "+ target + " => " + retval);
+		log.debug(tree + " => DONE: "+ target + " => " + retval);
 		return retval;
 	}
 
