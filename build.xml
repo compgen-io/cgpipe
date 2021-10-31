@@ -1,5 +1,5 @@
 <project name="cgpipe" default="jar">
-   <property name="version" value="0.5.8"/>
+   <property name="version" value="0.5.9"/>
     <property name="lib.dir" value="lib"/>
     <property name="blib.dir" value="blib"/>
     <property name="build.dir" value="build"/>
