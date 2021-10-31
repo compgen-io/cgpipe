@@ -302,10 +302,12 @@ public abstract class JobRunner {
 	private void runOpportunistic(RootContext context) throws RunnerException {
 		List<BuildTarget> opp = context.getOpportunistic();
 
-		boolean foundAll = true;
 		for (BuildTarget tgt: opp) {
+			boolean foundAll = true;
+			log.debug("Checking opportunistic: "+tgt);
+			List<String> missing = new ArrayList<String>();
 			for (String k: tgt.getDepends().keySet()) {
-				
+				log.debug("Checking opportunistic dep: "+k);
 				// if the file doesn't exist on disk
 				if (!doesFileExist(new File(k))) {
 					// if we haven't submitted the job
@@ -313,17 +315,28 @@ public abstract class JobRunner {
 						// if the job hasn't been previously scheduled
 						if (findJobProviding(k) == null) {
 							// we can't run this opportunistic job
+							log.debug("Checking opportunistic: "+k + " => failed");
+							missing.add(k);
 							foundAll = false;
 							continue;
+						} else {
+							log.debug("Checking opportunistic: "+k + " => exists in job-log");
 						}
+					} else {
+						log.debug("Checking opportunistic: "+k + " => submitted job");
 					}
+				} else {
+					log.debug("Checking opportunistic: "+k + " => file exists on disk");
 				}
 			}
 
 			if (!foundAll) {
+				log.debug("Missing a required input to opportunistic job... "+StringUtils.join(",", missing));
 				continue;
 			}
 			
+			log.debug("Submitting opportunistic job");
+					
 			try {
 				JobDef job = tgt.eval(null,  null, context);
 				if (job.getSettingBool("job.shexec", false)) {
@@ -411,6 +424,7 @@ public abstract class JobRunner {
 			// Check to see if the outputName file exists on disk.
 			// Note: this could also be used to look for remote resources (S3, etc), but not implemented
 			for (String allout: target.getOutputs()) {
+				log.debug(tree + "     => CHECKING OUTPUT: "+ allout);
 				File outputFile = new File(allout);
 
 				// Note: This can fail for NFS mounted folders
