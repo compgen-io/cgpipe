@@ -65,6 +65,8 @@ public abstract class JobRunner {
 	protected List<NumberedLine> postlines=null;
 //	private List<NumberedLine> postSubmitLines=null;
 	
+	protected Map<String, Boolean> fileExistsCache = new HashMap<String, Boolean>();
+	
 	protected List<String> outputFilesSubmitted = new ArrayList<String>();
 	protected List<String> tempOutputFilesSubmitted = new ArrayList<String>();
 	
@@ -304,8 +306,8 @@ public abstract class JobRunner {
 		for (BuildTarget tgt: opp) {
 			for (String k: tgt.getDepends().keySet()) {
 				
-				// if the file isn't skippable (exists on disk)
-				if (!tgt.getDepends().get(k).isSkippable()) {
+				// if the file doesn't exist on disk
+				if (!doesFileExist(new File(k))) {
 					// if we haven't submitted the job
 					if (tgt.getDepends().get(k).getJobDep() == null) {
 						// if the job hasn't been previously scheduled
@@ -337,12 +339,17 @@ public abstract class JobRunner {
 	}
 	
 	private boolean doesFileExist(File f) {
+		if (fileExistsCache.containsKey(f.getAbsolutePath())) {
+			log.debug("doesFileExist "+f.getAbsolutePath()+" => cached: " + fileExistsCache.get(f.getAbsolutePath()));
+			return fileExistsCache.get(f.getAbsolutePath());
+		}
 //		boolean failed = false;
 		for (int i=0; i<3; i++) {
 			if (f.exists()) {
 //				if (failed) {
 					log.debug("doesFileExist "+f.getAbsolutePath()+" => exists");
 //				}
+				fileExistsCache.put(f.getAbsolutePath(), true);
 				return true;
 			}
 	
@@ -350,6 +357,7 @@ public abstract class JobRunner {
 				f.toPath().getFileSystem().provider().checkAccess(f.toPath());
 			} catch (NoSuchFileException e) {
 				log.debug("doesFileExist "+f.getAbsolutePath()+" => NoSuchFileException: "+ e);
+				fileExistsCache.put(f.getAbsolutePath(), false);
 				return false;
 			} catch (IOException e) {
 				log.debug("doesFileExist "+f.getAbsolutePath()+" => IOException: "+ e);
@@ -361,10 +369,16 @@ public abstract class JobRunner {
 			}
 		}
 		log.debug("doesFileExist "+f.getAbsolutePath()+" => does not exist (or has bad permissions)");
+		fileExistsCache.put(f.getAbsolutePath(), false);
 		return false;		
 	}
 	
 	private long markSkippable(BuildTarget target, RootContext context, String outputName, String tree) throws RunnerException {
+		if (target.getEffectiveLastModified() > -2) {
+			log.debug(tree + " => LAST MODIFIED: (CACHED) "+ target + " => " + target.getEffectiveLastModified());
+			return target.getEffectiveLastModified();
+		}
+
 		long lastModified = 0;
 		String lastModifiedDep = "";
 		
@@ -388,6 +402,12 @@ public abstract class JobRunner {
 		
 		long retval = 0;
 		if (lastModified > -1) {
+			
+			// if the dependencies return a lastModified > -1, then this target is potentially skip-able.
+			// look for the output on disk, or it might be a transient file.
+			// if lastModified == -1, then this target MUST be built (missing file, or the output is older than a dependency, etc).
+			
+			
 			// Check to see if the outputName file exists on disk.
 			// Note: this could also be used to look for remote resources (S3, etc), but not implemented
 			for (String allout: target.getOutputs()) {
@@ -426,6 +446,8 @@ public abstract class JobRunner {
 			retval = -1;
 		}
 		log.debug(tree + " => DONE: "+ target + " => " + retval);
+		target.setEffectiveLastModified(retval);
+		
 		return retval;
 	}
 
@@ -438,7 +460,7 @@ public abstract class JobRunner {
 			return null;
 		}
 		
-		// Has it already been submitted in another part of the tree?
+		// Has it already been submitted in another part of the tree? (in this run)
 		if (target.getJobDep() != null) {
 			log.trace("Skipping target (already submitted): "+outputName);
 			return target.getJobDep();

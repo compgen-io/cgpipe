@@ -32,6 +32,8 @@ public class BuildTarget {
 	final private List<NumberedLine> lines;
 	
 	private Set<String> skippable = new HashSet<String>();
+	private long effectiveLastModified = -2; // -2 means we haven't been calculated yet. -1 means the job must be run.
+	
 	private JobDependency submittedJobDep=null;
 
 	private Map<String, BuildTarget> deps = new HashMap<String, BuildTarget>();
@@ -155,6 +157,14 @@ public class BuildTarget {
 
 	public JobDependency getJobDep() {
 		return this.submittedJobDep;
+	}
+
+	public long getEffectiveLastModified() {
+		return effectiveLastModified;
+	}
+
+	public void setEffectiveLastModified(long effectiveLastModified) {
+		this.effectiveLastModified = effectiveLastModified;
 	}
 
 }
