@@ -293,7 +293,7 @@ public abstract class JobRunner {
 	public void submitAll(BuildTarget initialTarget, RootContext context) throws RunnerException {
 		if (initialTarget.getOutputs() != null && initialTarget.getOutputs().size() > 0) {
 			setup(context);
-			markSkippable(initialTarget, context, initialTarget.getOutputs().get(0), "");
+			markSkippable(initialTarget, context, initialTarget.getOutputs().get(0), "", null);
 			submitTargets(initialTarget, context, initialTarget.getOutputs().get(0), true);
 		}
 		runOpportunistic(context);
@@ -386,7 +386,7 @@ public abstract class JobRunner {
 		return false;		
 	}
 	
-	private long markSkippable(BuildTarget target, RootContext context, String outputName, String tree) throws RunnerException {
+	private long markSkippable(BuildTarget target, RootContext context, String outputName, String tree, BuildTarget parentTarget) throws RunnerException {
 		if (target.getEffectiveLastModified() > -2) {
 			log.debug(tree + " => LAST MODIFIED: (CACHED) "+ target + " => " + target.getEffectiveLastModified());
 			return target.getEffectiveLastModified();
@@ -400,7 +400,7 @@ public abstract class JobRunner {
 		log.debug(tree + " => MARKING SKIPPABLE FOR: "+ target);
 		
 		for (String dep: target.getDepends().keySet()) {
-			long depLastMod = markSkippable(target.getDepends().get(dep), context, dep, tree+">"+outputName);
+			long depLastMod = markSkippable(target.getDepends().get(dep), context, dep, tree+">"+outputName, target);
 			log.debug(tree + " =>   Checking dep: " + dep + " lastmod: "+depLastMod);
 			if (depLastMod == -1) {
 				lastModified = -1;
@@ -445,7 +445,7 @@ public abstract class JobRunner {
 					if (target.getTempOutputs().contains(allout)) {
 						log.debug(tree + " => " + outputFile + " is a tmp file -- we can skip this (assuming downstream files are older than: "+lastModified+")");
 						/// this output is a tmp file, so we assume the output is the same as any of it's dependencies.
-						target.setSkippable(allout);
+						target.setSkippable(allout, parentTarget);
 						if (lastModified > retval) {
 							retval = lastModified;
 						}

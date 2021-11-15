@@ -3,10 +3,8 @@ package io.compgen.cgpipe.parser.target;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.LogFactory;
 
@@ -31,7 +29,7 @@ public class BuildTarget {
 	final private Map<String, VarValue> capturedContext;
 	final private List<NumberedLine> lines;
 	
-	private Set<String> skippable = new HashSet<String>();
+	private Map<String, BuildTarget> skippable = new HashMap<String, BuildTarget>();
 	private long effectiveLastModified = -2; // -2 means we haven't been calculated yet. -1 means the job must be run.
 	
 	private JobDependency submittedJobDep=null;
@@ -135,8 +133,11 @@ public class BuildTarget {
 	public boolean isSkippable() {
 		boolean canSkip = true;
 		for (String out: outputs) {
-			if (!skippable.contains(out)) {
+			if (!skippable.containsKey(out)) {
 				LogFactory.getLog(BuildTarget.class).trace("++++++++++++ Skippable in build-target? NO => " + this + " (missing:" + out+")");
+				canSkip = false;
+			} else if (skippable.get(out) != null && !skippable.get(out).isSkippable()) {
+				LogFactory.getLog(BuildTarget.class).trace("++++++++++++ Skippable in build-target? NO => " + this + " (parent is required: + "+skippable.get(out)+")");
 				canSkip = false;
 			}
 		}
@@ -148,7 +149,13 @@ public class BuildTarget {
 	public void setSkippable(String output) {
 		LogFactory.getLog(BuildTarget.class).debug(this + " setting output as skippable: " + output);
 		
-		this.skippable.add(output);
+		this.skippable.put(output, null);
+	}
+
+	public void setSkippable(String output, BuildTarget parent) {
+		LogFactory.getLog(BuildTarget.class).debug(this + " setting output as skippable: " + output + " (depends on target: " + parent+ ")");
+		
+		this.skippable.put(output, parent);
 	}
 
 	public void setSubmittedJobDep(JobDependency jobDep) {
