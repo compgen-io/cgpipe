@@ -369,14 +369,20 @@ public abstract class JobRunner {
 			try {
 				f.toPath().getFileSystem().provider().checkAccess(f.toPath());
 			} catch (NoSuchFileException e) {
+				// force a directory read (this can be an issue on network shares)
 				log.debug("doesFileExist "+f.getAbsolutePath()+" => NoSuchFileException: "+ e);
-				fileExistsCache.put(f.getAbsolutePath(), false);
-				return false;
+				f.getParentFile().list();
+//				fileExistsCache.put(f.getAbsolutePath(), false);
+//				return false;
+				try {
+					Thread.sleep(100*(i+1));
+				} catch (InterruptedException e1) {
+				}
 			} catch (IOException e) {
 				log.debug("doesFileExist "+f.getAbsolutePath()+" => IOException: "+ e);
 //				failed = true;
 				try {
-					Thread.sleep(100);
+					Thread.sleep(100*(i+1));
 				} catch (InterruptedException e1) {
 				}
 			}
@@ -420,37 +426,36 @@ public abstract class JobRunner {
 			// look for the output on disk, or it might be a transient file.
 			// if lastModified == -1, then this target MUST be built (missing file, or the output is older than a dependency, etc).
 			
-			
 			// Check to see if the outputName file exists on disk.
 			// Note: this could also be used to look for remote resources (S3, etc), but not implemented
-			for (String allout: target.getOutputs()) {
-				log.debug(tree + "     => CHECKING OUTPUT: "+ allout);
-				File outputFile = new File(allout);
+			for (String targetOutputFilename: target.getOutputs()) {
+				log.debug(tree + "     => CHECKING OUTPUT: "+ targetOutputFilename);
+				File targetOutputFile = new File(targetOutputFilename);
 
 				// Note: This can fail for NFS mounted folders
 				//       Hence the extra checks...
 				
-				if (doesFileExist(outputFile)) {
-					if (outputFile.lastModified() >= lastModified) {
-						log.debug(tree + " =>   Marking output-target as skippable: "+allout);
-						target.setSkippable(allout);
-						if (retval != -1 && outputFile.lastModified() > retval) {
-							retval = outputFile.lastModified();
+				if (doesFileExist(targetOutputFile)) {
+					if (targetOutputFile.lastModified() >= lastModified) {
+						log.debug(tree + " =>   Marking output-target as skippable: "+targetOutputFilename);
+						target.setSkippable(targetOutputFilename);
+						if (retval != -1 && targetOutputFile.lastModified() > retval) {
+							retval = targetOutputFile.lastModified();
 						}
 					} else {
-						log.debug(tree + " =>   Marking output-target as not skippable: " + allout + " is older than " + lastModifiedDep + " (" + outputFile.lastModified() + " vs " + lastModified + ")");
+						log.debug(tree + " =>   Marking output-target as not skippable: " + targetOutputFilename + " is older than " + lastModifiedDep + " (" + targetOutputFile.lastModified() + " vs " + lastModified + ")");
 						retval = -1;
 					}
 				} else {
-					if (target.getTempOutputs().contains(allout)) {
-						log.debug(tree + " => " + outputFile + " is a tmp file -- we can skip this (assuming downstream files are older than: "+lastModified+")");
+					if (target.getTempOutputs().contains(targetOutputFilename)) {
+						log.debug(tree + " => " + targetOutputFile + " is a tmp file -- we can skip this (assuming downstream files are older than: "+lastModified+")");
 						/// this output is a tmp file, so we assume the output is the same as any of it's dependencies.
-						target.setSkippable(allout, parentTarget);
+						target.setSkippable(targetOutputFilename, parentTarget);
 						if (lastModified > retval) {
 							retval = lastModified;
 						}
 					} else {
-						log.debug(tree + " =>   Marking output-target as not skippable: " + allout + " doesn't exist! (" + outputFile.getAbsolutePath()+")");
+						log.debug(tree + " =>   Marking output-target as not skippable: " + targetOutputFilename + " doesn't exist! (" + targetOutputFile.getAbsolutePath()+")");
 						retval = -1;
 					}
 				}
@@ -469,7 +474,7 @@ public abstract class JobRunner {
 		log.trace("Submitting target: "+outputName);
 
 		// Can we skip this target (file exists)
-		if (target.isSkippable()) {
+		if (target.isSkippable(outputName)) {
 			log.trace("Skipping target: "+outputName);
 			return null;
 		}
