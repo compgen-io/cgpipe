@@ -14,12 +14,12 @@ public class UpdateJobStart extends AbstractCommand {
 	private String jobLogFilename = null;
 	private String jobId = null;
 
-	@Option(charName = "f", desc = "Job log file", required = true)
+	@Option(charName = "f", name="file", desc = "Job log file", required = true)
 	public void setJobLogFilename(final String jobLogFilename) {
 		this.jobLogFilename = jobLogFilename;
 	}
 
-	@Option(charName = "j", desc = "Job ID", required = true)
+	@Option(charName = "j", name="job", desc = "Job ID", required = true)
 	public void setJobId(final String jobId) {
 		this.jobId = jobId;
 	}

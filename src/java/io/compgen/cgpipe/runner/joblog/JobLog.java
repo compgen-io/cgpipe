@@ -1,16 +1,20 @@
 package io.compgen.cgpipe.runner.joblog;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -115,8 +119,6 @@ public class JobLog {
 			jobfile.getParentFile().mkdirs();
 			jobfile.createNewFile();
 		}
-		
-		
 	}
 
 	public static JobLog open(String filename) throws IOException {
@@ -238,4 +240,60 @@ public class JobLog {
 		ps.close();
 		
 	}
+
+	public static void vaccuum(String filename) throws IOException {
+		File jobfile = new File(filename);
+		
+		if (jobfile.exists()) {
+			// first pass, find valid jobs
+			Map<String, String> outputJobID = new HashMap<String, String>();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
+			String line;
+			
+			while ((line = reader.readLine()) != null) {
+				String[] cols = line.split("\t", 3);
+
+				String jobid = cols[0];
+				String key = cols[1];
+				String arg1 = cols[2];
+
+				if (key.equals("OUTPUT")) {
+					log.debug("Existing output/job: " + arg1 + " => " + jobid);
+					outputJobID.put(arg1, jobid);
+				}
+			}
+			reader.close();
+
+			Set<String> validJobIDs = new HashSet<String>();
+			for (String k: outputJobID.keySet()) {
+				validJobIDs.add(outputJobID.get(k));
+			}
+			
+			// second pass, write valid jobs to tmp file
+		    File tmp = File.createTempFile("temp", null);
+		    System.err.println("Temp file: " + tmp.getAbsolutePath());
+			BufferedReader reader2 = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tmp)));
+			
+			
+			while ((line = reader2.readLine()) != null) {
+				String[] cols = line.split("\t", 3);
+
+				String jobid = cols[0];
+				if (validJobIDs.contains(jobid)) {
+					writer.write(line+"\n");
+				}
+			}
+
+			reader2.close();
+			writer.close();
+
+			// last step -- move the tmp file to the original filename
+		
+		} else if (jobfile.getParentFile() != null && !jobfile.getParentFile().exists()) {
+			jobfile.getParentFile().mkdirs();
+			jobfile.createNewFile();
+		}
+	}
+
 }

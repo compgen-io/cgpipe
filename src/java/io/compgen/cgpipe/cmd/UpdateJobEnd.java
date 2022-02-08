@@ -15,17 +15,17 @@ public class UpdateJobEnd extends AbstractCommand {
 	private String jobId = null;
 	private Integer retcode = null;
 
-	@Option(charName = "r", desc = "Return code", required = true)
+	@Option(charName = "r", name="retcode", desc = "Return code", required = true)
 	public void setReturnCode(final Integer retcode) {
 		this.retcode = retcode;
 	}
 
-	@Option(charName = "f", desc = "Job log file", required = true)
+	@Option(charName = "f", name="file", desc = "Job log file", required = true)
 	public void setJobLogFilename(final String jobLogFilename) {
 		this.jobLogFilename = jobLogFilename;
 	}
 
-	@Option(charName = "j", desc = "Job ID", required = true)
+	@Option(charName = "j", name="job", desc = "Job ID", required = true)
 	public void setJobId(final String jobId) {
 		this.jobId = jobId;
 	}
