@@ -118,7 +118,9 @@ public class JobLogRecord {
 		if (inputs == null) {
 			inputs = new ArrayList<String>();
 		}
-		inputs.add(inp);
+		if (inp != null && !inp.equals("")) {
+			inputs.add(inp);
+		}
 	}
 
 	public void addSrcLine(String s) {
