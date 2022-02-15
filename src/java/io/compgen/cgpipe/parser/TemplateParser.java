@@ -1,5 +1,13 @@
 package io.compgen.cgpipe.parser;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.loader.NumberedLine;
@@ -9,14 +17,6 @@ import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.node.ASTNode;
 import io.compgen.cgpipe.parser.node.JobNoOpNode;
 import io.compgen.common.StringUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class TemplateParser {
 	static private Log log = LogFactory.getLog(TemplateParser.class);
@@ -29,6 +29,9 @@ public class TemplateParser {
 	private boolean processedPre = false;
 	private boolean inScript = false;
 	private boolean firstScript = true;
+
+//	private boolean inSingleLine = false; 
+//	private boolean lastSingleLine = false; 
 	
 	private TemplateParser(List<NumberedLine> pre, List<NumberedLine> post) {
 		this.pre = pre;
@@ -39,14 +42,27 @@ public class TemplateParser {
 		curNode = curNode.parseLine(line);
 	}
 
-	private void addBodyLine(String body, NumberedLine line) throws ASTParseException {
-		curNode = curNode.parseBody(body, line);
+	private void addBodyLine(String body, NumberedLine line, boolean endOfLine) throws ASTParseException {
+//		if (inSingleLine) {
+//			if (!lastSingleLine) {
+//				curNode = new StartBodyNode(curNode);
+//			}
+//			lastSingleLine = true;
+//		} else if (lastSingleLine) {
+//			lastSingleLine = false;
+//			curNode = new EndBodyNode(curNode);
+//		}
+//
+		curNode = curNode.parseBody(body, line, endOfLine);
 	}
 
 	
 	public void parseLine(NumberedLine line) throws ASTParseException {
 		String l = line.getLine();
 		String buf = "";
+		boolean inSingleLine = false;
+//		curNode = new StartBodyNode(curNode);
+
 		while (l.length() > 0) {
 			if (!inScript && l.startsWith("\\\\<%")) {
 				buf += "\\";
@@ -56,14 +72,15 @@ public class TemplateParser {
 					l = l.substring(3);
 			} else if (!inScript && l.startsWith("<%")) {
 				if (!buf.equals("")) {
-					parseString(buf, line);
+					parseString(buf, line, inSingleLine);
 					buf = "";
 				}
+				inSingleLine = true;
 				inScript = true;
 				l = l.substring(2);
 			} else if (inScript && l.startsWith("%>")) {
 				if (!buf.equals("")) {
-					parseString(buf, line);
+					parseString(buf, line, inSingleLine);
 					buf = "";
 				}
 				firstScript = false;
@@ -75,11 +92,12 @@ public class TemplateParser {
 			}
 		}
 		if (!buf.equals("")) {
-			parseString(buf, line);
+			parseString(buf, line, inSingleLine);
 		}
+//		curNode = new EndBodyNode(curNode);
 	}
 	
-	private void parseString(String s, NumberedLine line) throws ASTParseException {
+	private void parseString(String s, NumberedLine line, boolean endOfLine) throws ASTParseException {
 		if (!firstScript || !inScript) {
 			processPre();
 		}
@@ -87,7 +105,7 @@ public class TemplateParser {
 			addScriptLine(new NumberedLine(s, line));
 		} else {
 			if (StringUtils.strip(s).length() > 0) {
-				addBodyLine(s, line);
+				addBodyLine(s, line, endOfLine);
 			}
 		}
 	}
@@ -127,6 +145,7 @@ public class TemplateParser {
 	public void exec(RootContext context) throws ASTExecException {
 		// any print statements should add to the template body...
 		context.setOutputStream(null);
+//		headNode.dump();
 		ASTNode current = headNode;
 		while (current != null) {
 			current = current.exec(context);

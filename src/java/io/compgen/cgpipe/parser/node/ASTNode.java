@@ -84,11 +84,16 @@ public abstract class ASTNode {
 		return next;
 	}
 
-	public ASTNode parseBody(String l, NumberedLine line) {
-		this.next = new BodyNode(this, l, line);
+	public ASTNode parseBody(String l, NumberedLine line, boolean sameLine) {
+		
+//		System.err.println(">>> " + dumpString());
+		
+		this.next = new BodyNode(this, l, line, sameLine);
+//		System.err.println(">>> " + this.next.dumpString());
 		return next;
 	}
 
+	
 	abstract public ASTNode exec(ExecContext context) throws ASTExecException;
 	abstract protected String dumpString();
 
@@ -99,7 +104,7 @@ public abstract class ASTNode {
 	public void dump(int indent) {
 		System.err.println(StringUtils.repeat("  ", indent)+dumpString());
 		if (next != null) {
-			next.dump(indent);
+			next.dump(indent+1);
 		}
 	}
 

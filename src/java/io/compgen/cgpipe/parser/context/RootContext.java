@@ -1,15 +1,5 @@
 package io.compgen.cgpipe.parser.context;
 
-import io.compgen.cgpipe.parser.target.BuildTarget;
-import io.compgen.cgpipe.parser.target.BuildTargetTemplate;
-import io.compgen.cgpipe.parser.target.ExistingJobBuildTarget;
-import io.compgen.cgpipe.parser.target.FileExistsBuildTarget;
-import io.compgen.cgpipe.parser.variable.VarNull;
-import io.compgen.cgpipe.parser.variable.VarString;
-import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.cgpipe.runner.JobRunner;
-import io.compgen.common.StringUtils;
-
 import java.io.File;
 import java.io.PrintStream;
 import java.nio.file.Paths;
@@ -21,6 +11,16 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import io.compgen.cgpipe.parser.target.BuildTarget;
+import io.compgen.cgpipe.parser.target.BuildTargetTemplate;
+import io.compgen.cgpipe.parser.target.ExistingJobBuildTarget;
+import io.compgen.cgpipe.parser.target.FileExistsBuildTarget;
+import io.compgen.cgpipe.parser.variable.VarNull;
+import io.compgen.cgpipe.parser.variable.VarString;
+import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.cgpipe.runner.JobRunner;
+import io.compgen.common.StringUtils;
 
 
 public class RootContext extends ExecContext {
@@ -348,7 +348,19 @@ public class RootContext extends ExecContext {
 	}
 
 	public void addBodyLine(String body) {
-		this.body += body+"\n";
+		addBodyLine(body, false);
+	}
+
+	public void addBodyLine(String body, boolean sameLine) {
+		
+//		System.err.println("CURRENT BODY: " + this.body);
+//		System.err.println("ADDING " + sameLine + ": " + body);
+//		
+		if (sameLine && this.body.endsWith("\n")) {
+			this.body = this.body.substring(0, this.body.length()-1);
+		}
+		
+		this.body += body + "\n";
 	}
 	
 	public String getBody() {
