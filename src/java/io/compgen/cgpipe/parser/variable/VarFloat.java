@@ -18,12 +18,81 @@ public class VarFloat extends VarValue {
 		return true;
 	}
 
+	public static String doubleToString(double d) {
+		if (d == Double.NaN) {
+			return "NaN";
+		}
+		
+		if (Double.isInfinite(d)) {
+			return "Infinity";
+		}
+
+		if (d == Double.POSITIVE_INFINITY) {
+			return "Infinity";
+		}
+
+		if (d == Double.NEGATIVE_INFINITY) {
+			return "-Infinity";
+		}
+
+		String s = Double.toString(d);
+		
+		if (s.contains("E")) {
+			String[] spl = s.split("E");
+			
+			String buf = spl[0];
+			int exp = Integer.parseInt(spl[1]);
+			
+			if (exp > 0) {
+				while (buf.length()-2 < exp) {
+					buf = buf + "0";
+				}
+				char[] b = buf.toCharArray();
+				for (int i=1; i<=exp; i++) {
+					if (b[i] != '.') {
+						throw new RuntimeException("Don't know how to format number: "+d);
+					}
+					b[i] = b[i+1];
+					b[i+1] = '.';
+				}
+				s = String.valueOf(b);
+			} else {
+				while (buf.length()-2 <= -exp) {
+					buf = "0" + buf;
+				}
+				char[] b = buf.toCharArray();
+				for (int i=1; i<=-exp; i++) {
+					if (b[b.length-i-1] != '.') {
+						throw new RuntimeException("Don't know how to format number: "+d);
+					}
+					
+					b[b.length-i-1] = b[b.length-i-2];
+					b[b.length-i-2] = '.';
+				}
+				s = String.valueOf(b);
+				while (s.endsWith("0")) {
+					s = s.substring(0, s.length()-1);
+				}
+			}
+		}
+		
+		if (s.endsWith(".0")) {
+			return s.substring(0, s.length()-2);
+		} else if (s.endsWith(".")) {
+			return s.substring(0, s.length()-1);
+		}
+		
+		return s;
+	}
+	
+	
 	public String toString() {
 		String s = obj.toString();
 		if (s.endsWith(".0")) {
 			return s.substring(0, s.length()-2);
 		}
-		return s;
+		
+		return doubleToString((Double)obj);
 	}
 	
 	public VarValue lt(VarValue val) throws VarTypeException {
