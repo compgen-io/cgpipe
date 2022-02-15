@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -271,7 +273,7 @@ public class JobLog {
 			
 			// second pass, write valid jobs to tmp file
 		    File tmp = File.createTempFile("temp", null);
-		    System.err.println("Temp file: " + tmp.getAbsolutePath());
+		    //System.err.println("Temp file: " + tmp.getAbsolutePath());
 			BufferedReader reader2 = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tmp)));
 			
@@ -289,6 +291,8 @@ public class JobLog {
 			writer.close();
 
 			// last step -- move the tmp file to the original filename
+			Files.move(tmp.toPath(), jobfile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			//tmp.renameTo(jobfile);
 		
 		} else if (jobfile.getParentFile() != null && !jobfile.getParentFile().exists()) {
 			jobfile.getParentFile().mkdirs();
