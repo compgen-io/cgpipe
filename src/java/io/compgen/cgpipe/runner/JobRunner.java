@@ -371,7 +371,9 @@ public abstract class JobRunner {
 			} catch (NoSuchFileException e) {
 				// force a directory read (this can be an issue on network shares)
 				log.debug("doesFileExist "+f.getAbsolutePath()+" => NoSuchFileException: "+ e);
-				f.getParentFile().list();
+				if (f.getParentFile() != null) {
+					f.getParentFile().list();
+				}
 //				fileExistsCache.put(f.getAbsolutePath(), false);
 //				return false;
 				try {
