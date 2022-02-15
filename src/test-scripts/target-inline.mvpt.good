@@ -2,6 +2,7 @@ cgpfunc_1() {
 JOB_ID="cgpfunc_1"
 echo bar
 echo "Hello world"
+echo "Hello "
 	echo 1
 	echo 2
 	echo 3

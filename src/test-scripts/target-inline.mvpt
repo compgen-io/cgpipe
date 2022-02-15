@@ -3,6 +3,7 @@ foo="bar"
 all:
     echo ${foo}
     echo "Hello <% if true %>world<% endif %>"
+    echo "Hello <% if false %>world<% endif %>"
     <% for i in 1..3 %>
         echo ${i}
     <% done %>
