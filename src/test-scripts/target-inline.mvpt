@@ -1,0 +1,9 @@
+foo="bar"
+
+all:
+    echo ${foo}
+    echo "Hello <% if true %>world<% endif %>"
+    <% for i in 1..3 %>
+        echo ${i}
+    <% done %>
+    echo ${foo}
