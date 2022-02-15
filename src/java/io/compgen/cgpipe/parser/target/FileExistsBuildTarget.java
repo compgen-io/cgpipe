@@ -25,7 +25,7 @@ public class FileExistsBuildTarget extends BuildTarget {
 	}
 
 	@Override
-	public boolean isSkippable() {
+	public boolean isSkippable(String out) {
 		return true;
 	}
 	

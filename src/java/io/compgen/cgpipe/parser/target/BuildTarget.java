@@ -130,18 +130,31 @@ public class BuildTarget {
 		return new JobDef(jobRoot.getBody(), jobRoot.cloneValues(), outputs, inputs);
 	}
 
-	public boolean isSkippable() {
+	public boolean isSkippable(String out) {
+		if (!this.outputs.contains(out)) {
+			return true;
+		}
+		
+		for (String k : skippable.keySet()) {
+			LogFactory.getLog(BuildTarget.class).trace("++++++++++++ skip: " + k + " => " + skippable.get(k));			
+		}
+		
 		boolean canSkip = true;
-		for (String out: outputs) {
-			if (!skippable.containsKey(out)) {
-				LogFactory.getLog(BuildTarget.class).trace("++++++++++++ Skippable in build-target? NO => " + this + " (missing:" + out+")");
-				canSkip = false;
-			} else if (skippable.get(out) != null && !skippable.get(out).isSkippable()) {
-				LogFactory.getLog(BuildTarget.class).trace("++++++++++++ Skippable in build-target? NO => " + this + " (parent is required: + "+skippable.get(out)+")");
-				canSkip = false;
+		if (!skippable.containsKey(out)) {
+			LogFactory.getLog(BuildTarget.class).trace("++++++++++++ Skippable in build-target? NO =>  " + this + " (missing:" + out+")");
+			canSkip = false;
+		} else if (skippable.get(out) != null) {
+			BuildTarget tgt = skippable.get(out);
+			
+			for (String inp: inputs) {
+				if (!tgt.isSkippable(inp)) {
+					LogFactory.getLog(BuildTarget.class).trace("++++++++++++ Skippable in build-target? NO =>  " + this + " (missing: "+ out +" and input is required: "+inp+")");
+					canSkip = false;
+				}
 			}
 		}
-//		LogFactory.getLog(BuildTarget.class).debug("++++++++++++ Skippable in build-target? yes " + StringUtils.join(",", outputs) + " ? " + this.hashCode());
+
+		//		LogFactory.getLog(BuildTarget.class).debug("++++++++++++ Skippable in build-target? yes " + StringUtils.join(",", outputs) + " ? " + this.hashCode());
 
 		return canSkip;
 	}
@@ -153,7 +166,7 @@ public class BuildTarget {
 	}
 
 	public void setSkippable(String output, BuildTarget parent) {
-		LogFactory.getLog(BuildTarget.class).debug(this + " setting output as skippable: " + output + " (depends on target: " + parent+ ")");
+		LogFactory.getLog(BuildTarget.class).debug(this + " setting output as skippable: " + output + " (depends on target: "+ parent+ ")");
 		
 		this.skippable.put(output, parent);
 	}
