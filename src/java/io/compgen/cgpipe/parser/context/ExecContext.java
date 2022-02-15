@@ -20,6 +20,7 @@ import io.compgen.cgpipe.support.SimpleFileLoggerImpl.Level;
 
 public class ExecContext {
 	protected final ExecContext parent;
+	public boolean sameBodyLine = false;
 
 	protected ExecContext() {
 		this.parent = null;
