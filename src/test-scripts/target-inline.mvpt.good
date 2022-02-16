@@ -7,6 +7,8 @@ echo "Hello "
 	echo 2
 	echo 3
 echo bar
+echo "one"
+echo "two"
 }
 if [ ! -e "all" ]; then
 cgpfunc_1 || exit $?
