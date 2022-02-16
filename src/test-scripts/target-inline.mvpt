@@ -8,3 +8,9 @@ all:
         echo ${i}
     <% done %>
     echo ${foo}
+    echo "one"
+    <% if false %> echo "false" <% endif %>
+    echo "two"
+    echo "three"
+    <% if true %>echo "baz"<% endif %>
+    echo "four"

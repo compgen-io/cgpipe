@@ -72,10 +72,10 @@ public class TemplateParser {
 					l = l.substring(3);
 			} else if (!inScript && l.startsWith("<%")) {
 				if (!buf.equals("")) {
-					parseString(buf, line, inSingleLine);
+					// only force the single line if we wrote something before this <% block %>
+					inSingleLine = parseString(buf, line, inSingleLine);
 					buf = "";
 				}
-				inSingleLine = true;
 				inScript = true;
 				l = l.substring(2);
 			} else if (inScript && l.startsWith("%>")) {
@@ -97,17 +97,20 @@ public class TemplateParser {
 //		curNode = new EndBodyNode(curNode);
 	}
 	
-	private void parseString(String s, NumberedLine line, boolean endOfLine) throws ASTParseException {
+	private boolean parseString(String s, NumberedLine line, boolean endOfLine) throws ASTParseException {
 		if (!firstScript || !inScript) {
 			processPre();
 		}
 		if (inScript) {
 			addScriptLine(new NumberedLine(s, line));
+			return true;
 		} else {
 			if (StringUtils.strip(s).length() > 0) {
 				addBodyLine(s, line, endOfLine);
+				return true;
 			}
 		}
+		return false;
 	}
 
 	private void processPre() throws ASTParseException {
