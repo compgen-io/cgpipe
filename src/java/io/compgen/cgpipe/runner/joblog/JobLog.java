@@ -182,7 +182,9 @@ public class JobLog {
 
 		if (rec.getDeps() != null) {
 			for (String dep: rec.getDeps()) {
-				ps.println(rec.getJobId()+"\tDEP\t"+dep);
+				if (dep!=null) {
+					ps.println(rec.getJobId()+"\tDEP\t"+dep);
+				}
 			}
 		}
 		if (rec.getOutputs() != null) {
