@@ -201,7 +201,11 @@ public abstract class TemplateRunner extends JobRunner {
 				IterUtils.zip(jobids, jobOutputs, new EachPair<String, String>() {
 					@Override
 					public void each(String jobid, String outputs) {
-						System.out.println(jobid+" "+outputs);
+						if (outputs == null || outputs.equals("")) {
+							System.out.println(jobid+" (no-output-files)");
+						} else {
+							System.out.println(jobid+" "+outputs);
+						}
 					}});
 				
 			} else {
