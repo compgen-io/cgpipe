@@ -11,6 +11,9 @@ public class FileUtils {
 	private static Map<String, FileUtils> fileCache = new HashMap<String, FileUtils>();
 	private static Map<String, Boolean> existsCache = new HashMap<String, Boolean>();
 	public static boolean doesFileExist(String raw) {
+		if (raw == null) {
+			return false;
+		}
 		String filename = getAbsolutePath(raw);
 		if (existsCache.containsKey(filename)) {
 			return existsCache.get(filename);
@@ -45,6 +48,9 @@ public class FileUtils {
 	}
 
 	public static String getAbsolutePath(String filename) {
+		if (filename == null) {
+			return null;
+		}
 		return Paths.get(filename).toAbsolutePath().toString();
 	}
 	
