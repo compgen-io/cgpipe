@@ -255,7 +255,7 @@ public class RootContext extends ExecContext {
 			}
 		}
 		
-		if (FileUtils.doesFileExist(output)) {
+		if (output!=null && FileUtils.doesFileExist(output)) {
 			// these are files that don't have a build-target (the base inputs that are expected to be on disk)
 			return cachedFileExistsBuildTarget(output);
 		}
