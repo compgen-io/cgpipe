@@ -120,6 +120,15 @@ include logic and flow-control.
 * [SGETemplateRunner.template.cgp](https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/SGETemplateRunner.template.cgp)
 * [SLURMTemplateRunner.template.cgp](https://github.com/compgen-io/cgpipe/blob/master/src/java/io/compgen/cgpipe/runner/SLURMTemplateRunner.template.cgp)
 
+
+#### Template Runner options
+
+Template-based job runners (above) will by default write out the job ids for the submitted 
+jobs. They can also write out the filenames associated with the jobs by setting the option:
+`cgpipe.runner.include_output_filenames=true`.
+
+
+
 ### Shell script export
 
 Shell scripts will write a single script that contains all of the tasks for a

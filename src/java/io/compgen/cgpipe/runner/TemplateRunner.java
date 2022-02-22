@@ -23,6 +23,8 @@ import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.common.IterUtils;
+import io.compgen.common.IterUtils.EachPair;
 import io.compgen.common.StringUtils;
 
 public abstract class TemplateRunner extends JobRunner {
@@ -34,6 +36,7 @@ public abstract class TemplateRunner extends JobRunner {
 
 	private int dryRunJobCount = 0;
 	private List<String> jobids = new ArrayList<String>();
+	private List<String> jobOutputs = new ArrayList<String>();
 	private List<String> globalHolds = new ArrayList<String>();
 
 	public abstract String getConfigPrefix();
@@ -110,6 +113,7 @@ public abstract class TemplateRunner extends JobRunner {
 		String jobid = submitScript(src, globalHoldSet);
 		jobdef.setJobId(jobid);
 		jobids.add(jobid);
+		jobOutputs.add(StringUtils.join(",", jobdef.getOutputs()));
 
 		log.info("SUBMIT JOB: "+jobid);
 		for (String line: src.split("\n")) {
@@ -192,7 +196,17 @@ public abstract class TemplateRunner extends JobRunner {
 	public void runnerDone() throws RunnerException {
 		if (jobids.size() > 0) {
 			log.info("submitted jobs: "+StringUtils.join(",", jobids));
-			System.out.println(StringUtils.join("\n", jobids));
+			
+			if (rootContext.get("cgpipe.runner.include_output_filenames").toBoolean()) {
+				IterUtils.zip(jobids, jobOutputs, new EachPair<String, String>() {
+					@Override
+					public void each(String jobid, String outputs) {
+						System.out.println(jobid+" "+outputs);
+					}});
+				
+			} else {
+				System.out.println(StringUtils.join("\n", jobids));
+			}
 			
 			if (!dryrun && globalHold) {
 				//System.out.println("Releasing hold on: " + StringUtils.join(",", globalHolds));
