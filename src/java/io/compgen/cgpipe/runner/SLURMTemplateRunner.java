@@ -1,19 +1,21 @@
 package io.compgen.cgpipe.runner;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.compgen.cgpipe.exceptions.RunnerException;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.common.StringUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 public class SLURMTemplateRunner extends TemplateRunner {
 	private String account=null;
-	private Boolean cachedValid = null;
+	private Map<String, Boolean> cachedValid = new HashMap<String, Boolean>();
 
 	@Override
 	public String[] getSubCommand(boolean forceHold) {
@@ -35,41 +37,41 @@ public class SLURMTemplateRunner extends TemplateRunner {
 
 	@Override
 	public boolean isJobIdValid(String jobId) throws RunnerException {
-		if (cachedValid!=null) {
-			return cachedValid;
-		}
-		try {
-			Process proc = Runtime.getRuntime().exec(new String[] {"scontrol", "-o", "show", "job", jobId});
-			int retcode = proc.waitFor();
-			if (retcode == 0) {
-				InputStream is = proc.getInputStream();
-				String stdout = StringUtils.readInputStream(is);
-				String[] ar = stdout.split(" ");
-				
-				boolean validState = false;
-				boolean validDep = true;
-				
-				for (String el: ar) {
-					String[] kv = el.split("=");
-					if (kv.length == 2 && kv[0].equals("JobState")) {
-						if (kv[1].equals("PENDING") || kv[1].equals("RUNNING")) {
-							validState = true;
-						}
-					} else if (kv.length == 2 && kv[0].equals("Reason")) {
-						if (kv[1].equals("DependencyNeverSatisfied")) {
-							validDep = false;
+		if (!cachedValid.containsKey(jobId)) {
+			try {
+				Process proc = Runtime.getRuntime().exec(new String[] {"scontrol", "-o", "show", "job", jobId});
+				int retcode = proc.waitFor();
+				if (retcode == 0) {
+					InputStream is = proc.getInputStream();
+					String stdout = StringUtils.readInputStream(is);
+					String[] ar = stdout.split(" ");
+					
+					boolean validState = false;
+					boolean validDep = true;
+					
+					for (String el: ar) {
+						String[] kv = el.split("=");
+						if (kv.length == 2 && kv[0].equals("JobState")) {
+							if (kv[1].equals("PENDING") || kv[1].equals("RUNNING")) {
+								validState = true;
+							}
+						} else if (kv.length == 2 && kv[0].equals("Reason")) {
+							if (kv[1].equals("DependencyNeverSatisfied")) {
+								validDep = false;
+							}
 						}
 					}
+									
+					cachedValid.put(jobId, validState && validDep);
+				} else {
+					cachedValid.put(jobId, false);
 				}
-				
-				this.cachedValid = validState && validDep;				
-				return validState && validDep;
-				
+			} catch (IOException | InterruptedException e) {
+				cachedValid.put(jobId, false);
 			}
-		} catch (IOException | InterruptedException e) {
 		}
-		this.cachedValid = false;
-		return false;
+
+		return cachedValid.get(jobId);
 	}
 
 	protected void updateTemplateContext(ExecContext cxt, JobDef jobdef) {
