@@ -1,14 +1,21 @@
 cgpfunc_1() {
 JOB_ID="cgpfunc_1"
-touch test/run/output2
+touch test/run/output1
 }
 cgpfunc_2() {
 JOB_ID="cgpfunc_2"
+touch test/run/output2
+}
+cgpfunc_3() {
+JOB_ID="cgpfunc_3"
 touch test/run/output3
 }
-if [ ! -e "test/run/output2" ]; then
+if [ ! -e "test/run/output1" ]; then
 cgpfunc_1 || exit $?
 fi
-if [ ! -e "test/run/output3" ]; then
+if [ ! -e "test/run/output2" ]; then
 cgpfunc_2 || exit $?
+fi
+if [ ! -e "test/run/output3" ]; then
+cgpfunc_3 || exit $?
 fi

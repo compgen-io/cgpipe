@@ -1,5 +1,7 @@
 package io.compgen.cgpipe.parser.target;
 
+import java.util.List;
+
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.RunnerException;
@@ -8,8 +10,6 @@ import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.runner.JobDef;
 import io.compgen.cgpipe.runner.JobRunner;
 import io.compgen.common.ListBuilder;
-
-import java.util.List;
 
 public class ExistingJobBuildTarget extends BuildTarget {
 	final private String jobId;
@@ -27,7 +27,7 @@ public class ExistingJobBuildTarget extends BuildTarget {
 			return false;
 		}
 	}
-		
+	
 	@Override
 	public JobDef eval(List<NumberedLine> pre, List<NumberedLine> post, RootContext globalRoot) throws ASTParseException, ASTExecException {
 		return null;
@@ -36,6 +36,7 @@ public class ExistingJobBuildTarget extends BuildTarget {
 	public String getJobId() {
 		return jobId;
 	}
+
 }
 
 

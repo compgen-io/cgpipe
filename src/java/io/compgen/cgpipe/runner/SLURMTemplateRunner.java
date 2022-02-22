@@ -13,6 +13,7 @@ import java.util.List;
 
 public class SLURMTemplateRunner extends TemplateRunner {
 	private String account=null;
+	private Boolean cachedValid = null;
 
 	@Override
 	public String[] getSubCommand(boolean forceHold) {
@@ -34,6 +35,9 @@ public class SLURMTemplateRunner extends TemplateRunner {
 
 	@Override
 	public boolean isJobIdValid(String jobId) throws RunnerException {
+		if (cachedValid!=null) {
+			return cachedValid;
+		}
 		try {
 			Process proc = Runtime.getRuntime().exec(new String[] {"scontrol", "-o", "show", "job", jobId});
 			int retcode = proc.waitFor();
@@ -58,11 +62,13 @@ public class SLURMTemplateRunner extends TemplateRunner {
 					}
 				}
 				
+				this.cachedValid = validState && validDep;				
 				return validState && validDep;
 				
 			}
 		} catch (IOException | InterruptedException e) {
 		}
+		this.cachedValid = false;
 		return false;
 	}
 

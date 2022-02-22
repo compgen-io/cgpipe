@@ -1,8 +1,8 @@
 #!/bin/sh
 #
 # Primary output already exists, and one of the dependencies do not.
-# The dependencies are marked as temp files, but because one of the dependencies exists,
-# this should trigger a re-run.
+# The intermediate step is marked as temp, but because the parent dependencies exists (and is newer),
+# this should trigger a re-run for the intermediate/temp job and the final job.
 #
 touch test/run/final_out1
 sleep 1
@@ -16,7 +16,7 @@ test/run/final_out1: test/run/bar-output2
 ^test/run/bar-output2: test/run/bar-output1
     touch test/run/bar-output2
 
-^test/run/bar-output1:
+test/run/bar-output1:
     touch test/run/bar-output1
       
 EOF

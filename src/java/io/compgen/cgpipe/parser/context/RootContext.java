@@ -1,8 +1,6 @@
 package io.compgen.cgpipe.parser.context;
 
-import java.io.File;
 import java.io.PrintStream;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,6 +18,7 @@ import io.compgen.cgpipe.parser.variable.VarNull;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.cgpipe.runner.JobRunner;
+import io.compgen.cgpipe.support.FileUtils;
 import io.compgen.common.StringUtils;
 
 
@@ -39,7 +38,7 @@ public class RootContext extends ExecContext {
 	private Log log = LogFactory.getLog(getClass());
 
 	// File.exists() lookups are expensive (and slow on NFS), so let's cache these requests.
-	private Map<String, Boolean> fileCache = new HashMap<String, Boolean>();
+//	private Map<String, Boolean> fileCache = new HashMap<String, Boolean>();
 	private Map<String, BuildTarget> buildTargetCache = new HashMap<String, BuildTarget>();
 	
 	public RootContext() {
@@ -84,29 +83,24 @@ public class RootContext extends ExecContext {
 		return build(output, false);
 	}
 	
+	/**
+	 * These come from the JobLog (JobRunner.load)
+	 * @param output
+	 * @param jobId
+	 * @param runner
+	 */
 	public void addPendingJobOutput(String output, String jobId, JobRunner runner) {
 		submittedOutputs.put(output, new ExistingJobBuildTarget(output, jobId, runner));
 	}
-	
-	private boolean cachedFileExists(String fname) {
-		if (fname == null) {
-			return false;
-		}
-		if (!fileCache.containsKey(fname)) {
-			if (new File(fname).exists()) {
-				fileCache.put(fname, true);
-			} else {
-				fileCache.put(fname, false);
-			}
-		}
-		return fileCache.get(fname);
-	}
-	
-	public String getAbsolutePath(String filename) {
-		// done in a method so that we can swap in/out other endpoints (S3, etc)
-		return Paths.get(filename).toAbsolutePath().toString();
-	}
-	
+
+	/**
+	 * This function tries to find a build-path in the job-tree to build this particular output
+	 * 
+	 * @param tgt
+	 * @param output
+	 * @param allowMissing
+	 * @return
+	 */
 	public BuildTarget buildDependencies(BuildTarget tgt, String output, boolean allowMissing) {
 		
 		Map<String, BuildTarget> deps = new HashMap<String, BuildTarget>();
@@ -157,7 +151,7 @@ public class RootContext extends ExecContext {
 				log.debug("Looking for opportunistic inputs: " + StringUtils.join(",", tgt.getInputs()));
 				
 				for (String input: tgt.getInputs()) {
-					if (cachedFileExists(input)) {
+					if (FileUtils.doesFileExist(input)) {
 						log.debug("found: "+ input + " -- file exists");
 						deps.put(input, cachedFileExistsBuildTarget(input));
 					} else if (buildTargetCache.containsKey(input)) {
@@ -259,19 +253,10 @@ public class RootContext extends ExecContext {
 			if (t2 != null) {
 				return t2;
 			}
-
 		}
 		
-		if (cachedFileExists(output)) {
-//			if (output!=null && new File(output).exists()) {
-
-			// If any of the inputs required for this output are missing --
-			// it will be captured above and we need to submit this job.
-			//
-			// But -- if the inputs are all present *and* this output exists
-			// on disk, then we can just cache the output here.
-			
-			log.debug("File exists on disk: " + output);
+		if (FileUtils.doesFileExist(output)) {
+			// these are files that don't have a build-target (the base inputs that are expected to be on disk)
 			return cachedFileExistsBuildTarget(output);
 		}
 		
@@ -282,7 +267,7 @@ public class RootContext extends ExecContext {
 			//
 			// Check the submit log.
 			
-			String absOutput = getAbsolutePath(output);
+			String absOutput = FileUtils.getAbsolutePath(output);
 			log.debug("Looking for build-target: " + output + " ("+absOutput+")");
 			if (submittedOutputs.containsKey(absOutput)) {
 				if (submittedOutputs.get(absOutput).isJobValid()) {
@@ -327,7 +312,7 @@ public class RootContext extends ExecContext {
 			if (tgt != null) {
 				String foundOutput = null;
 				for (String o: tgt.getOutputs()) {
-					if (o.equals(input) || o.equals(getAbsolutePath(input))) {
+					if (o.equals(input) || o.equals(FileUtils.getAbsolutePath(input))) {
 						foundOutput = o;
 					}
 					buildTargetCache.put(o, tgt);

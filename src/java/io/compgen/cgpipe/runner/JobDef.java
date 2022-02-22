@@ -187,4 +187,44 @@ public class JobDef implements JobDependency {
 	public List<JobDependency> getDependencies() {
 		return this.depends;
 	}
+//
+//	@Override
+//	public long getAge() {
+//		// Return the minimum age of:
+//		//     any dependencies (which likely aren't available yet),
+//		//     any output files
+//		//     -1
+//		
+//		long minAge = -2;
+//		
+//		for (JobDependency dep: depends) {
+//			if (minAge == -2 || dep.getAge() < minAge) {
+//				minAge = dep.getAge();
+//			}
+//		}
+//		
+//		for (String out: outputs) {
+//			long fileAge = JobFile.find(out).getLastModifiedTime();
+//			if (minAge == -2 || fileAge < minAge) {
+//				minAge = fileAge;
+//			}
+//		}
+//		
+//		if (minAge == -2) {
+//			return -1;
+//		}
+//		
+//		return minAge;
+//	}
+//
+//	@Override
+//	public boolean isSkippable() {
+//		for (JobDependency dep: depends) {
+//			if (!dep.isSkippable()) {
+//				return false;
+//			}
+//		}
+//		
+//		return false;
+//	}
 }

@@ -14,19 +14,22 @@ import io.compgen.common.ListBuilder;
 
 public class FileExistsBuildTarget extends BuildTarget {
 	static protected Log log = LogFactory.getLog(FileExistsBuildTarget.class);
+//	private final String filename;
 
 	public FileExistsBuildTarget(String output) {
 		super(new ListBuilder<String>().add(output).list(), null, null, null, null);
+//		this.filename = output;
 	}
-	
+
 	@Override
 	public JobDef eval(List<NumberedLine> pre, List<NumberedLine> post, RootContext globalRoot) throws ASTParseException, ASTExecException {
 		return null;
 	}
 
-	@Override
-	public boolean isSkippable(String out) {
-		return true;
-	}
+	
+//	@Override
+//	public boolean isSkippable(String out) {
+//		return true;
+//	}
 	
 }

@@ -1,13 +1,23 @@
+#
+# There is a final output (test/file1) that is created using a temporary input file (missing1, which also depends on missing2).
+#
+# However, only the output file (test/file1) exists.
+#
+# There is an opportunistic job also defined, which requires file1, missing1, and missing2.
+#
+# In this scenario, the opportunistic job should not run and no jobs should be submitted.
+#
+
 all: test/file1
 
 # this file exists during the test
 test/file1: missing1
-    echo "foo"
+    echo "file1"
 
 ^missing1: missing2
-    echo "nothing"
+    echo "missing1"
 ^missing2:
-    echo "nothing2"
+    echo "missing2"
 
 :test/file1 missing1 missing2
     echo "opp1"
