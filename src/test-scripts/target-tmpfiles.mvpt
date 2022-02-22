@@ -1,10 +1,15 @@
+#
+# A build tree that has multiple temporary steps, with array expansion in one step.
+# Because the final output doesn't exist, this should rebuild everything.
+#
+
 __setup__:
     echo "setting up..."
 
 __teardown__:
     echo "??"
-    echo "${cgpipe.tmpfiles}"
-    echo "${cgpipe.outputfiles}"
+    echo "temp: ${cgpipe.tmpfiles}"
+    echo "output: ${cgpipe.outputfiles}"
     <% for f in cgpipe.tmpfiles %>
     rm ${f}
     <% done %>

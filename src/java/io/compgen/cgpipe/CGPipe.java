@@ -322,7 +322,7 @@ public class CGPipe {
 				BuildTarget initTarget = root.build();
 				if (initTarget != null) {
 					runner.submitAll(initTarget, root);
-					// Leave this commented out - it should be allowed to run cgpipe scripts w/o a target defined (testing)
+					// Leave this commented out - it should be allowed to run cgpipe scripts w/o a target defined (for testing)
 //				} else {
 //					System.out.println("CGPIPE ERROR: Unable to find default target");
 				}

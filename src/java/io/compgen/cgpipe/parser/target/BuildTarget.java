@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.LogFactory;
-
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
@@ -18,6 +16,7 @@ import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.cgpipe.runner.JobDef;
 import io.compgen.cgpipe.runner.JobDependency;
+import io.compgen.cgpipe.support.FileUtils;
 import io.compgen.common.StringUtils;
 
 public class BuildTarget {
@@ -29,11 +28,12 @@ public class BuildTarget {
 	final private Map<String, VarValue> capturedContext;
 	final private List<NumberedLine> lines;
 	
-	private Map<String, BuildTarget> skippable = new HashMap<String, BuildTarget>();
-	private long effectiveLastModified = -2; // -2 means we haven't been calculated yet. -1 means the job must be run.
+//	private Map<String, BuildTarget> skippable = new HashMap<String, BuildTarget>();
+//	private long effectiveLastModified = -2; // -2 means we haven't been calculated yet. -1 means the job must be run.
 	
-	private JobDependency submittedJobDep=null;
+	private Map<String, JobDependency> submittedJobDep=new HashMap<String, JobDependency>();
 
+	// for each input (string), what is the target that builds it
 	private Map<String, BuildTarget> deps = new HashMap<String, BuildTarget>();
 	
 	public BuildTarget(List<String> outputs, List<String> inputs, String wildcard, Map<String, VarValue> capturedContext, List<NumberedLine> lines) {
@@ -42,6 +42,7 @@ public class BuildTarget {
 		
 		if (outputs != null) {
 			for (String o: outputs) {
+//				System.out.println(" >>> " + o);
 				if (o.startsWith("^")) {
 					this.outputs.add(o.substring(1));
 					this.tempOutputs.add(o.substring(1));
@@ -91,6 +92,10 @@ public class BuildTarget {
 		this.deps.putAll(deps);
 	}
 
+//	public JobDependency getExisting(String outputName) {
+//		return null;
+//	}
+	
 	public JobDef eval(List<NumberedLine> pre, List<NumberedLine> post, RootContext globalRoot) throws ASTParseException, ASTExecException {
 		return eval(pre, post, globalRoot, null);
 	}
@@ -129,62 +134,95 @@ public class BuildTarget {
 
 		return new JobDef(jobRoot.getBody(), jobRoot.cloneValues(), outputs, inputs);
 	}
+//
+//	public boolean isSkippable(String out) {
+//		if (!this.outputs.contains(out)) {
+//			return true;
+//		}
+//		
+//		for (String k : skippable.keySet()) {
+//			LogFactory.getLog(BuildTarget.class).trace("++++++++++++ skip: " + k + " => " + skippable.get(k));			
+//		}
+//		
+//		boolean canSkip = true;
+//		if (!skippable.containsKey(out)) {
+//			LogFactory.getLog(BuildTarget.class).trace("++++++++++++ Skippable in build-target? NO =>  " + this + " (missing:" + out+")");
+//			canSkip = false;
+//		} else if (skippable.get(out) != null) {
+//			BuildTarget tgt = skippable.get(out);
+//			
+//			for (String inp: inputs) {
+//				if (!tgt.isSkippable(inp)) {
+//					LogFactory.getLog(BuildTarget.class).trace("++++++++++++ Skippable in build-target? NO =>  " + this + " (missing: "+ out +" and input is required: "+inp+")");
+//					canSkip = false;
+//				}
+//			}
+//		}
+//
+//		//		LogFactory.getLog(BuildTarget.class).debug("++++++++++++ Skippable in build-target? yes " + StringUtils.join(",", outputs) + " ? " + this.hashCode());
+//
+//		return canSkip;
+//	}
 
-	public boolean isSkippable(String out) {
-		if (!this.outputs.contains(out)) {
-			return true;
+//	public void setSkippable(String output) {
+//		LogFactory.getLog(BuildTarget.class).debug(this + " setting output as skippable: " + output);
+//		
+//		this.skippable.put(output, null);
+//	}
+//
+//	public void setSkippable(String output, BuildTarget parent) {
+//		LogFactory.getLog(BuildTarget.class).debug(this + " setting output as skippable: " + output + " (depends on target: "+ parent+ ")");
+//		
+//		this.skippable.put(output, parent);
+//	}
+
+	public void setSubmittedJobDep(JobDependency jobDep, List<String> outputs) {
+		for (String output: outputs) {
+			this.submittedJobDep.put(output,  jobDep);
 		}
+	}
+
+	public JobDependency getJobDep(String output) {
+		return this.submittedJobDep.get(output);
+	}
+
+	public long getEffectiveLastModified(String output) {
+		long age = -2;
 		
-		for (String k : skippable.keySet()) {
-			LogFactory.getLog(BuildTarget.class).trace("++++++++++++ skip: " + k + " => " + skippable.get(k));			
-		}
-		
-		boolean canSkip = true;
-		if (!skippable.containsKey(out)) {
-			LogFactory.getLog(BuildTarget.class).trace("++++++++++++ Skippable in build-target? NO =>  " + this + " (missing:" + out+")");
-			canSkip = false;
-		} else if (skippable.get(out) != null) {
-			BuildTarget tgt = skippable.get(out);
-			
-			for (String inp: inputs) {
-				if (!tgt.isSkippable(inp)) {
-					LogFactory.getLog(BuildTarget.class).trace("++++++++++++ Skippable in build-target? NO =>  " + this + " (missing: "+ out +" and input is required: "+inp+")");
-					canSkip = false;
-				}
+		for (String input: deps.keySet()) {
+			long depAge = deps.get(input).getEffectiveLastModified(input);
+			if (age == -2 || depAge > age) {
+				age = depAge;
 			}
 		}
 
-		//		LogFactory.getLog(BuildTarget.class).debug("++++++++++++ Skippable in build-target? yes " + StringUtils.join(",", outputs) + " ? " + this.hashCode());
-
-		return canSkip;
-	}
-
-	public void setSkippable(String output) {
-		LogFactory.getLog(BuildTarget.class).debug(this + " setting output as skippable: " + output);
+		if (!tempOutputs.contains(output)) {
+			long fileAge = FileUtils.find(output).getLastModifiedTime();
+			if (age == -2 || fileAge > age) {
+				age = fileAge;
+			}
+		}
 		
-		this.skippable.put(output, null);
-	}
+//		System.out.println("getEffectiveLastModified("+output+")="+age);
 
-	public void setSkippable(String output, BuildTarget parent) {
-		LogFactory.getLog(BuildTarget.class).debug(this + " setting output as skippable: " + output + " (depends on target: "+ parent+ ")");
+	
+		if (age == -2) {
+			return age = -1;
+		}
 		
-		this.skippable.put(output, parent);
+		return age;
+		
 	}
 
-	public void setSubmittedJobDep(JobDependency jobDep) {
-		this.submittedJobDep = jobDep;
-	}
+	public boolean isTempOutput(String output) {
+//		System.out.println("Is temp? " + output + " ? " + tempOutputs.contains(output));
+//		System.out.println("Temps:" + StringUtils.join(",",tempOutputs) );
+		return tempOutputs.contains(output);
 
-	public JobDependency getJobDep() {
-		return this.submittedJobDep;
 	}
-
-	public long getEffectiveLastModified() {
-		return effectiveLastModified;
-	}
-
-	public void setEffectiveLastModified(long effectiveLastModified) {
-		this.effectiveLastModified = effectiveLastModified;
-	}
-
+	
+//	public void setEffectiveLastModified(long effectiveLastModified) {
+//		this.effectiveLastModified = effectiveLastModified;
+//	}
+//
 }
