@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# In this workflow, there are three files. final_out1 depends on input2, and input2 depends on input1.
+#
+# However, input2 is a temporary file that isn't needed after this job is done. 
+#
+# final_out1 and input1 both exist (and input1 is older than final_out1).
+#
+# In this scenario, no jobs should be sumbmitted, as the final exists (and is older than input1).
+#
+touch test/run/input1
+sleep 1
+touch test/run/final_out1
+sleep 1
+
+dist/cgpipe -v -f - <<EOF
+
+test/run/final_out1: test/run/input3
+    touch test/run/final_out1
+
+^test/run/input3 : test/run/input2
+    touch test/run/input3
+
+^test/run/input2 : test/run/input1
+    touch test/run/input2
+
+test/run/input1 :
+    touch test/run/input1
+      
+EOF
