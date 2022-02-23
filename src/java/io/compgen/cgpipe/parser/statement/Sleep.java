@@ -2,11 +2,11 @@ package io.compgen.cgpipe.parser.statement;
 
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
+import io.compgen.cgpipe.parser.Eval;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.node.ASTNode;
 import io.compgen.cgpipe.parser.tokens.TokenList;
 import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.cgpipe.parser.Eval;
 
 public class Sleep implements Statement {
 

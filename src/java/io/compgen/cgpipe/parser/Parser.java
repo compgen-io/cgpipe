@@ -1,5 +1,11 @@
 package io.compgen.cgpipe.parser;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.loader.NumberedLine;
@@ -8,12 +14,6 @@ import io.compgen.cgpipe.loader.SourceLoader;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.node.ASTNode;
 import io.compgen.cgpipe.parser.node.NoOpNode;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class Parser {
 	private boolean readOnly = false;

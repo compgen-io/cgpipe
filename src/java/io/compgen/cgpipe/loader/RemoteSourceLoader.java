@@ -1,7 +1,5 @@
 package io.compgen.cgpipe.loader;
 
-import io.compgen.common.codec.Base64;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -9,6 +7,8 @@ import java.net.URL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import io.compgen.common.codec.Base64;
 
 public class RemoteSourceLoader extends SourceLoader {
 	private String baseUrl;

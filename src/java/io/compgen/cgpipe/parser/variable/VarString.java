@@ -1,11 +1,11 @@
 package io.compgen.cgpipe.parser.variable;
 
+import java.io.File;
+
 import io.compgen.cgpipe.exceptions.MethodCallException;
 import io.compgen.cgpipe.exceptions.MethodNotFoundException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
 import io.compgen.common.StringUtils;
-
-import java.io.File;
 
 public class VarString extends VarValue {
 	public VarString(String val) {

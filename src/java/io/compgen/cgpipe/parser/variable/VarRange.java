@@ -1,11 +1,11 @@
 package io.compgen.cgpipe.parser.variable;
 
+import java.util.Iterator;
+
 import io.compgen.cgpipe.exceptions.MethodCallException;
 import io.compgen.cgpipe.exceptions.MethodNotFoundException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
 import io.compgen.common.StringUtils;
-
-import java.util.Iterator;
 
 public class VarRange extends VarValue {
 	final private long start;

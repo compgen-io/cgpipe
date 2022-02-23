@@ -1,13 +1,13 @@
 package io.compgen.cgpipe.parser.variable;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import io.compgen.cgpipe.exceptions.MethodCallException;
 import io.compgen.cgpipe.exceptions.MethodNotFoundException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
 import io.compgen.common.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class VarList extends VarValue {
 	protected List<VarValue> vals = new ArrayList<VarValue>();

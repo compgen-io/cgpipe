@@ -1,11 +1,11 @@
 package io.compgen.cgpipe.parser.tokens;
 
-import io.compgen.cgpipe.loader.NumberedLine;
-import io.compgen.common.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import io.compgen.cgpipe.loader.NumberedLine;
+import io.compgen.common.StringUtils;
 
 public class TokenList implements Iterable<Token> {
 	final private List<Token> tokens;

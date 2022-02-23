@@ -1,5 +1,12 @@
 package io.compgen.cgpipe.parser.target;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.loader.NumberedLine;
 import io.compgen.cgpipe.parser.Eval;
@@ -7,13 +14,6 @@ import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.tokens.TokenList;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.common.StringUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class BuildTargetTemplate {
 	final private List<String> outputs = new ArrayList<String>();

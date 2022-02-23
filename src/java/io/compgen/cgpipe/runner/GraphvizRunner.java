@@ -1,8 +1,5 @@
 package io.compgen.cgpipe.runner;
 
-import io.compgen.cgpipe.exceptions.RunnerException;
-import io.compgen.cgpipe.parser.variable.VarValue;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +7,9 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import io.compgen.cgpipe.exceptions.RunnerException;
+import io.compgen.cgpipe.parser.variable.VarValue;
 
 public class GraphvizRunner extends JobRunner {
 	protected Log log = LogFactory.getLog(GraphvizRunner.class);

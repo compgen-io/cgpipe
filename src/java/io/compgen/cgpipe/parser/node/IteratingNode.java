@@ -1,5 +1,9 @@
 package io.compgen.cgpipe.parser.node;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.loader.NumberedLine;
@@ -11,10 +15,6 @@ import io.compgen.cgpipe.parser.tokens.TokenList;
 import io.compgen.cgpipe.parser.variable.VarNull;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.common.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 
 public class IteratingNode extends ASTNode {

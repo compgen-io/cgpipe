@@ -1,8 +1,24 @@
 package io.compgen.cgpipe;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import io.compgen.cgpipe.cmd.UpdateJobEnd;
 import io.compgen.cgpipe.cmd.UpdateJobStart;
 import io.compgen.cgpipe.cmd.Vaccuum;
-import io.compgen.cgpipe.cmd.UpdateJobEnd;
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.ExitException;
@@ -20,22 +36,6 @@ import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.cgpipe.runner.JobRunner;
 import io.compgen.cgpipe.support.SimpleFileLoggerImpl;
 import io.compgen.cgpipe.support.SimpleFileLoggerImpl.Level;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class CGPipe {
 	

@@ -1,9 +1,5 @@
 package io.compgen.cgpipe.runner;
 
-import io.compgen.cgpipe.exceptions.RunnerException;
-import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.common.StringUtils;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,6 +12,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import io.compgen.cgpipe.exceptions.RunnerException;
+import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.common.StringUtils;
 
 public class ShellScriptRunner extends JobRunner {
 	protected Log log = LogFactory.getLog(ShellScriptRunner.class);

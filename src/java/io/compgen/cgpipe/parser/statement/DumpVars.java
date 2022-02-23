@@ -1,14 +1,14 @@
 package io.compgen.cgpipe.parser.statement;
 
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.node.ASTNode;
 import io.compgen.cgpipe.parser.tokens.TokenList;
 import io.compgen.cgpipe.parser.variable.VarValue;
-
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 public class DumpVars implements Statement {
 

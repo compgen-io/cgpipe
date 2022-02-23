@@ -1,10 +1,5 @@
 package io.compgen.cgpipe.loader;
 
-import io.compgen.cgpipe.CGPipe;
-import io.compgen.cgpipe.exceptions.ASTParseException;
-import io.compgen.common.StringUtils;
-import io.compgen.common.codec.Hex;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,6 +14,11 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import io.compgen.cgpipe.CGPipe;
+import io.compgen.cgpipe.exceptions.ASTParseException;
+import io.compgen.common.StringUtils;
+import io.compgen.common.codec.Hex;
 
 public class SourceLoader {
 	private static final SourceLoader defaultPipelineLoader = new SourceLoader();

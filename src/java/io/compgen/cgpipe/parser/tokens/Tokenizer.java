@@ -1,5 +1,12 @@
 package io.compgen.cgpipe.parser.tokens;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.exceptions.VarTypeException;
 import io.compgen.cgpipe.loader.NumberedLine;
@@ -9,13 +16,6 @@ import io.compgen.cgpipe.parser.variable.VarFloat;
 import io.compgen.cgpipe.parser.variable.VarInt;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.common.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class Tokenizer {
 	private static Log log = LogFactory.getLog(Tokenizer.class);

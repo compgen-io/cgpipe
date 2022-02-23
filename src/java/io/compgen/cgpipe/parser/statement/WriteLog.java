@@ -1,5 +1,8 @@
 package io.compgen.cgpipe.parser.statement;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import io.compgen.cgpipe.exceptions.ASTExecException;
 import io.compgen.cgpipe.exceptions.ASTParseException;
 import io.compgen.cgpipe.parser.Eval;
@@ -7,9 +10,6 @@ import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.node.ASTNode;
 import io.compgen.cgpipe.parser.tokens.TokenList;
 import io.compgen.cgpipe.parser.variable.VarValue;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class WriteLog implements Statement {
 	Log log  = LogFactory.getLog(WriteLog.class);

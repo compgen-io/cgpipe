@@ -1,14 +1,14 @@
 package io.compgen.cgpipe.runner;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.compgen.cgpipe.exceptions.RunnerException;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
 import io.compgen.common.StringUtils;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SGETemplateRunner extends TemplateRunner {
 	private boolean hvmemIsTotal = false;

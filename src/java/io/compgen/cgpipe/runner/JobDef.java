@@ -1,15 +1,15 @@
 package io.compgen.cgpipe.runner;
 
-import io.compgen.cgpipe.parser.variable.VarInt;
-import io.compgen.cgpipe.parser.variable.VarValue;
-import io.compgen.common.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import io.compgen.cgpipe.parser.variable.VarInt;
+import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.common.StringUtils;
 
 public class JobDef implements JobDependency {
 	private final String body;

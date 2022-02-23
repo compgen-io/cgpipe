@@ -1,12 +1,12 @@
 package io.compgen.cgpipe.parser.variable;
 
-import io.compgen.cgpipe.exceptions.MethodCallException;
-import io.compgen.cgpipe.exceptions.MethodNotFoundException;
-import io.compgen.cgpipe.exceptions.VarTypeException;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import io.compgen.cgpipe.exceptions.MethodCallException;
+import io.compgen.cgpipe.exceptions.MethodNotFoundException;
+import io.compgen.cgpipe.exceptions.VarTypeException;
 
 public abstract class VarValue {
 	final protected Object obj;
