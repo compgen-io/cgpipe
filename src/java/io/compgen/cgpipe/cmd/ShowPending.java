@@ -64,6 +64,6 @@ public class ShowPending extends AbstractCommand {
 	}
 
 	public static void main(final String[] args) throws Exception {
-		new MainBuilder().runClass(CancelPending.class, args);
+		new MainBuilder().runClass(ShowPending.class, args);
 	}
 }
