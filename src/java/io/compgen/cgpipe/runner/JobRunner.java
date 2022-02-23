@@ -815,4 +815,6 @@ public abstract class JobRunner {
 		}
 	
 	}
+	abstract public boolean cancelJob(String jobId);
+
 }

@@ -232,10 +232,18 @@ public abstract class TemplateRunner extends JobRunner {
 	@Override
 	public void abort() {
 		for (String jobid: jobids) {
-			try {
-				Runtime.getRuntime().exec(getDelCommand(jobid)).waitFor();
-			} catch (InterruptedException | IOException e) {
-			}
+			cancelJob(jobid);
 		}
+	}
+	
+	@Override
+	public boolean cancelJob(String jobid) {
+		try {
+			Process proc = Runtime.getRuntime().exec(getDelCommand(jobid));
+			int ret = proc.waitFor();
+			return ret == 0;
+		} catch (InterruptedException | IOException e) {
+		}
+		return false;
 	}
 }

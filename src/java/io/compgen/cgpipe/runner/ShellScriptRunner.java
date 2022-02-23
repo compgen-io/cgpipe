@@ -212,4 +212,9 @@ public class ShellScriptRunner extends JobRunner {
 
 		return false;
 	}
+
+	@Override
+	public boolean cancelJob(String jobId) {
+		return false;
+	}
 }
