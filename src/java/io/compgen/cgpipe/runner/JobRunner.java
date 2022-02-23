@@ -469,7 +469,7 @@ public abstract class JobRunner {
 //	}
 
 	private JobDependency submitTargets(BuildTarget target, RootContext context, String outputName) throws RunnerException {
-		return submitTargets(target, context, outputName, true, true);
+		return submitTargets(target, context, outputName, true, true, -1);
 	}
 
 	
@@ -486,9 +486,9 @@ public abstract class JobRunner {
 	 * @return
 	 * @throws RunnerException
 	 */
-	private JobDependency submitTargets(BuildTarget target, RootContext context, String outputName, boolean isRoot, boolean isParentSkippable) throws RunnerException {
+	private JobDependency submitTargets(BuildTarget target, RootContext context, String outputName, boolean isRoot, boolean isParentSkippable, long parentAge) throws RunnerException {
 //		System.out.println("Submitting target: "+outputName+ " isParentSkippable? "+ isParentSkippable + " isRoot? " + isRoot);
-		log.trace("Submitting target: "+outputName);
+		log.info("Submitting target: "+outputName);
 
 //		// Can we skip this target (file exists)
 //		if (target.isSkippable(outputName)) {
@@ -540,13 +540,20 @@ public abstract class JobRunner {
 	
 				// try to submit dependencies...
 				for (String input: target.getDepends().keySet()) {
-					log.info("Submitting dependency: "+input);
-					
 					// is this input a "temp" file?
-//					System.out.println("Submitting dependency: "+input+ "  isTemp?" + isTemp+ ", outputAge="+outputAge+", blankRoot?" + blankRoot);
+					log.debug("Submitting dependency: "+input+ "  isTemp?" + isTemp+ ", outputAge="+outputAge+", blankRoot?" + blankRoot);
+
+					long effectiveAge = outputAge;
+					
+					if (isTemp) {
+						if (outputAge == -1) {
+							// if I'm a temp file, and I don't exist, then my "age" should be that of the parent file.
+							effectiveAge = parentAge;
+						}
+					}
 					
 					// I am skippable *if* I exist (outputAge > -1), or if I am a temp file, or if I am a blank root (no body, no file)
-					JobDependency dep = submitTargets(target.getDepends().get(input), context, input, blankRoot, isParentSkippable && (outputAge > -1 || isTemp || (outputAge==-1 && blankRoot)));
+					JobDependency dep = submitTargets(target.getDepends().get(input), context, input, blankRoot, isParentSkippable && (outputAge > -1 || isTemp || (outputAge==-1 && blankRoot)), effectiveAge);
 					if (dep != null) {
 						deps.add(dep);
 					} else {
@@ -571,20 +578,25 @@ public abstract class JobRunner {
 					skip = false;
 				} else {
 					skip = target.getEffectiveLastModified(outputName) <= outputAge && outputAge > -1;
-//					System.out.println("Is skippable? " + outputName);
-//					System.out.println("  My age: "+ outputAge);
-//					System.out.println("  target.getEffectiveLastModified: "+ target.getEffectiveLastModified(outputName));
-//					System.out.println("  skip ? " + skip);
+
+					log.debug("Is skippable? " + outputName);
+					log.debug("  My age: "+ outputAge);
+					log.debug("  Parent age: "+ parentAge);
+					log.debug("  isParentSkippable: "+ isParentSkippable);
+					log.debug("  target.getEffectiveLastModified: "+ target.getEffectiveLastModified(outputName));
+					log.debug("  target.isTempOutput: "+ target.isTempOutput(outputName));
+					log.debug("  skip ? " + skip);
 					
-					if (target.getEffectiveLastModified(outputName) == -1 && target.isTempOutput(outputName)) {
+					if (target.isTempOutput(outputName) && target.getEffectiveLastModified(outputName) <= parentAge && parentAge > -1) {
 						// I don't exist on disk, but I'm also a temp output, so, I'm skippable -- unless a dependency has been submitted
 //						System.out.println("Temp output: "+outputName);
-						if (isParentSkippable) {
+//						if (isParentSkippable) {
 							skip = true;
-						}
+//						}
+						log.debug("  temp skip ? " + skip);
 //						System.out.println("  skip ? " + skip);
 					}
-					
+
 				}
 				
 				if (!blankRoot && !skip) {
@@ -616,7 +628,7 @@ public abstract class JobRunner {
 					}
 				} else {
 //					System.out.println("Skipping: "+outputName);
-					log.debug("Skipping empty target: "+target);
+					log.debug("Skipping empty/skippable target: "+target);
 					job.setJobId("");
 				}
 				
