@@ -16,6 +16,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import io.compgen.cgpipe.cmd.CancelPending;
 import io.compgen.cgpipe.cmd.UpdateJobEnd;
 import io.compgen.cgpipe.cmd.UpdateJobStart;
 import io.compgen.cgpipe.cmd.Vaccuum;
@@ -75,6 +76,15 @@ public class CGPipe {
 				newargs[i-1] = args[i];
 			}
 			Vaccuum.main(newargs);
+			return;
+		}
+		
+		if (args.length > 0 && args[0].equals("cancel-pending")) {
+			String [] newargs = new String[args.length-1];
+			for (int i=1; i< args.length; i++) {
+				newargs[i-1] = args[i];
+			}
+			CancelPending.main(newargs);
 			return;
 		}
 		
