@@ -58,7 +58,7 @@ public class ShowPending extends AbstractCommand {
 		
 		for (String jobid: jobs.keySet()) {
 			if (runner.isJobIdValid(jobid)) {
-				System.out.println(jobid + ": " + jobs.get(jobid));
+				System.out.println(jobid + " " + jobs.get(jobid));
 			}
 		}
 	}
