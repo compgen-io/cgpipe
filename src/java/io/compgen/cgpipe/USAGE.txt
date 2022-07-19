@@ -36,7 +36,8 @@ Note: If no target is specified, the first target in the file will be used
 
 
 Additional commands:
-	show-pending       Show pending/running jobs from a job-log
 	cancel-pending     Cancel pending jobs from a job-log
-	vaccuum            Clean up a job-log
+	show-pending       Show pending/running jobs from a job-log
+	status             Show the status for all output files
+	vaccuum            Clean up a job-log (keep only the newest record for any output)
 

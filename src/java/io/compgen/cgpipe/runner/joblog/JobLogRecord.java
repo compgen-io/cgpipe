@@ -17,14 +17,20 @@ public class JobLogRecord {
 	private Long submitTime = null;
 	private String user = null;
 	private List<String> outputs = null;
+	private List<String> tempOutputs = null;
 	private List<String> deps = null;
 	private List<String> inputs = null;
 	private List<String> srcLines = null;
 	private List<Pair<String, String>> settings = null;
+	private boolean isTemp = false;
 	
 	
 	public JobLogRecord(String jobId) {
 		this.jobId = jobId;
+	}
+
+	public List<String> getTempOutputs() {
+		return tempOutputs;
 	}
 
 	public List<String> getOutputs() {
@@ -114,6 +120,13 @@ public class JobLogRecord {
 		outputs.add(out);
 	}
 
+	public void addTempOutput(String tmp) {
+		if (tempOutputs == null) {
+			tempOutputs = new ArrayList<String>();
+		}
+		tempOutputs.add(tmp);
+	}
+
 	public void addInput(String inp) {
 		if (inputs == null) {
 			inputs = new ArrayList<String>();
@@ -149,6 +162,14 @@ public class JobLogRecord {
 	}
 	public void setWorkingDirectory(String workingDirectory) {
 		this.workingDirectory = workingDirectory;
+	}
+
+	public boolean isTemp() {
+		return isTemp;
+	}
+
+	public void setTemp(boolean isTemp) {
+		this.isTemp = isTemp;
 	}
 
 }
