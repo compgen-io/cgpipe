@@ -33,7 +33,7 @@ public class JobLog {
 //	private final String lockSecret = generateRandomString();
 	
 	// protected List<String> jobIds = new ArrayList<String>();
-	// protected Map<String, JobLogRecord> records = new HashMap<String,JobLogRecord>();
+    protected Map<String, JobLogRecord> records = new HashMap<String,JobLogRecord>(); // jobid, record
 	protected Map<String, String> outputs = new HashMap<String,String>(); // output, jobid
 	
 	protected JobLog(String filename) throws IOException {
@@ -56,64 +56,62 @@ public class JobLog {
 					outputs.put(arg1, jobid);
 				}
 
-				//////////////////
-				// THE REST OF THIS IS NOT NEEDED... when we read in the log, it is ONLY to look for the outputs/jobids. 
-				//////////////////
+				 String arg2 = null;
+				 if (key.equals("SETTING")) {
+				 	cols = line.split("\t", 4);
+				 	arg2 = cols[3];
 				
-				// String arg2 = null;
-				// if (key.equals("SETTING")) {
-				// 	cols = line.split("\t", 4);
-				// 	arg2 = cols[3];
-
-				// }
-
-				// if (!records.containsKey(jobid)) {
-				// 	records.put(jobid, new JobLogRecord(jobid));
-				// 	jobIds.add(jobid);
-				// }
-
-				// JobLogRecord rec = records.get(jobid);
-				// switch(key) {
-				// 	case "NAME":
-				// 		rec.setName(arg1);
-				// 		break;
-				// 	case "PIPELINE":
-				// 		rec.setPipeline(arg1);
-				// 		break;
-				// 	case "WORKINGDIR":
-				// 		rec.setWorkingDirectory(arg1);
-				// 		break;
-				// 	case "RETCODE":
-				// 		rec.setReturnCode(Integer.parseInt(arg1));
-				// 		break;
-				// 	case "SUBMIT":
-				// 		rec.setSubmitTime(Long.parseLong(arg1));
-				// 		break;
-				// 	case "START":
-				// 		rec.setStartTime(Long.parseLong(arg1));
-				// 		break;
-				// 	case "END":
-				// 		rec.setEndTime(Long.parseLong(arg1));
-				// 		break;
-				// 	case "SETTING":
-				// 		rec.addSetting(arg1, arg2);
-				// 		break;
-				// 	case "OUTPUT":
-				// 		outputs.put(arg1, jobid);
-				// 		rec.addOutput(arg1);
-				// 		break;
-				// 	case "INPUT":
-				// 		rec.addInput(arg1);
-				// 		break;
-				// 	case "DEP":
-				// 		rec.addDep(arg1);
-				// 		break;
-				// 	case "SRC":
-				// 		rec.addSrcLine(arg1);
-				// 		break;
-				// 	default:
-				// 		break;
-				// }
+				 }
+				
+				 if (!records.containsKey(jobid)) {
+				 	records.put(jobid, new JobLogRecord(jobid));
+				 }
+				
+				 JobLogRecord rec = records.get(jobid);
+				 switch(key) {
+				 	case "NAME":
+				 		rec.setName(arg1);
+				 		break;
+				 	case "PIPELINE":
+				 		rec.setPipeline(arg1);
+				 		break;
+				 	case "WORKINGDIR":
+				 		rec.setWorkingDirectory(arg1);
+				 		break;
+				 	case "RETCODE":
+				 		rec.setReturnCode(Integer.parseInt(arg1));
+				 		break;
+				 	case "SUBMIT":
+				 		rec.setSubmitTime(Long.parseLong(arg1));
+				 		break;
+				 	case "START":
+				 		rec.setStartTime(Long.parseLong(arg1));
+				 		break;
+				 	case "END":
+				 		rec.setEndTime(Long.parseLong(arg1));
+				 		break;
+				 	case "SETTING":
+				 		rec.addSetting(arg1, arg2);
+				 		break;
+				 	case "OUTPUT":
+				 		outputs.put(arg1, jobid);
+				 		rec.addOutput(arg1);
+				 		break;
+				 	case "INPUT":
+				 		rec.addInput(arg1);
+				 		break;
+				 	case "DEP":
+				 		rec.addDep(arg1);
+				 		break;
+				 	case "SRC":
+				 		rec.addSrcLine(arg1);
+				 		break;
+				 	case "TEMP":
+				 		rec.addTempOutput(arg1);
+				 		break;
+				 	default:
+				 		break;
+				 }
 
 			}
 			reader.close();
@@ -141,6 +139,11 @@ public class JobLog {
 		return null;
 	}
 
+	public JobLogRecord getJob(String jobid) {
+		return records.get(jobid);
+	}
+
+	
 	public Map<String, String> getOutputJobIds() {
 		return Collections.unmodifiableMap(outputs);
 	}
@@ -190,6 +193,11 @@ public class JobLog {
 		if (rec.getOutputs() != null) {
 			for (String out: rec.getOutputs()) {
 				ps.println(rec.getJobId()+"\tOUTPUT\t"+out);
+			}
+		}
+		if (rec.getTempOutputs() != null) {
+			for (String tmp: rec.getTempOutputs()) {
+				ps.println(rec.getJobId()+"\tTEMP\t"+tmp);
 			}
 		}
 		if (rec.getInputs() != null) {

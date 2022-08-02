@@ -131,8 +131,14 @@ public class BuildTarget {
 		}
 
 		TemplateParser.parseTemplate(lines, pre, post, jobRoot);
+		List<String> tempOutputs = new ArrayList<String>();
+		for (String output: outputs) {
+			if (isTempOutput(output)) {
+				tempOutputs.add(output);
+			}
+		}
 
-		return new JobDef(jobRoot.getBody(), jobRoot.cloneValues(), outputs, inputs);
+		return new JobDef(jobRoot.getBody(), jobRoot.cloneValues(), outputs, inputs, tempOutputs);
 	}
 //
 //	public boolean isSkippable(String out) {

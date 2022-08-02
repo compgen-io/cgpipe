@@ -15,16 +15,26 @@ public class JobDef implements JobDependency {
 	private final String body;
 	private final Map<String, VarValue> settings;
 	private final List<String> outputs;
+	private final List<String> tempOutputs;
 	private final List<String> inputs;
 	private String jobId = null;
 	private String name;
 	private List<JobDependency> depends = new ArrayList<JobDependency>();
 	
 	public JobDef(String body, Map<String, VarValue> settings, List<String> outputs, List<String> inputs) {
+		this(body, settings, outputs, inputs, null);
+	}
+	public JobDef(String body, Map<String, VarValue> settings, List<String> outputs, List<String> inputs, List<String> tempOutputs) {
 		this.body = body;
 		this.settings = settings;
 		this.outputs = Collections.unmodifiableList(new ArrayList<String>(outputs));
+		if (tempOutputs != null) {
+		this.tempOutputs = Collections.unmodifiableList(new ArrayList<String>(tempOutputs));
+		} else {
+			this.tempOutputs = new ArrayList<String>();
+		}
 
+	
 		// inputs could be null...
 		if (inputs == null) {
 			this.inputs = Collections.unmodifiableList(new ArrayList<String>(){
@@ -63,6 +73,10 @@ public class JobDef implements JobDependency {
 
 	public List<String> getOutputs() {
 		return outputs;
+	}
+
+	public List<String> getTempOutputs() {
+		return tempOutputs;
 	}
 
 	public Map<String, VarValue> getSettingsMap() {

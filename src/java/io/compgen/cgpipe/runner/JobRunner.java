@@ -528,6 +528,7 @@ public abstract class JobRunner {
 		try {
 			// build my job definition (script, etc...)
 			JobDef job = target.eval(prelines, postlines, context);
+			
 			if (job != null) {
 				// this is a potential submitted job 
 				boolean blankRoot = false;
@@ -768,7 +769,6 @@ public abstract class JobRunner {
 			rec.setSubmitTime(System.currentTimeMillis());
 			rec.setUser(System.getProperty("user.name"));
 			
-			
 			for (JobDependency dep:job.getDependencies()) {
 				if (job.getJobId()!=null && !job.getJobId().equals("")) {
 					rec.addDep(dep.getJobId());
@@ -776,6 +776,9 @@ public abstract class JobRunner {
 			}
 			for (String out:job.getOutputs()) {
 				rec.addOutput(out);
+			}
+			for (String tmp:job.getTempOutputs()) {
+				rec.addTempOutput(tmp);
 			}
 			for (String inp:job.getInputs()) {
 				rec.addInput(inp);
