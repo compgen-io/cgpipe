@@ -117,6 +117,21 @@ public class BuildTarget {
 			jobRoot.set("job.custom", l);
 			
 		}
+		if (!jobRoot.contains("job.setup") || !jobRoot.get("job.setup").isList()) {
+			
+			VarList l = new VarList();
+
+			if (jobRoot.contains("job.setup")) {
+				VarValue tmp = jobRoot.get("job.setup");
+				try {
+					l.add(tmp);
+				} catch (VarTypeException e) {
+					throw new ASTExecException(e);
+				}
+			}
+			jobRoot.set("job.setup", l);
+			
+		}
 
 		if (extraVals != null) {
 			for (String k: extraVals.keySet()) {

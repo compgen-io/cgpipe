@@ -792,6 +792,10 @@ public abstract class JobRunner {
 						for (String s: job.getSettings("job.custom")) {
 							rec.addSetting(k, s);
 						}
+					} else if (k.equals("job.setup")) {
+							for (String s: job.getSettings("job.setup")) {
+								rec.addSetting(k, s);
+							}
 					} else {
 						rec.addSetting(k, job.getSetting(k));
 					}

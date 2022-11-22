@@ -90,4 +90,11 @@ done
 set -eo pipefail
 JOB_ID=$PBS_JOBID
 
+<% for line in job.setup %>
+<% if line %>
+${line}
+<% endif %>
+<% done %>
+
+
 ${job._body}
