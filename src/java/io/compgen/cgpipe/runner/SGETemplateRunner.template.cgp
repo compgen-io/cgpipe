@@ -60,4 +60,10 @@ if job.procs > 1 && job.sge.parallelenv %>
 
 set -eo pipefail
 
+<% for line in job.setup %>
+<% if line %>
+${line}
+<% endif %>
+<% done %>
+
 ${job._body}

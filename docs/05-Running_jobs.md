@@ -61,13 +61,18 @@ works, you can set any of the variables below at the script or job level.
     job.shell         | Job-specific shell binary             |  [3]  |  X  |   X   |  X  |     |
     job.node.property | Property requirement for an exec node |       |     |       |  X  |     |
     job.node.hostname | Exact host to run job on              |       |     |       |  X  |     |
+    job.setup         | List of lines to add at the top of    |  [4]  |  X  |   X   |  X  |  X  |
+                      | the execution job script(s)           |       |     |       |     |     |
+    job.custom        | List of custom lines to add to setup  |       |  X  |   X   |  X  |  X  |
+                      | the batch submission script           |       |     |       |     |     |
+                      | (#SBATCH, #PBS, etc...)               |       |     |       |     |     |
 
      
     global setting    | description                           | shell | sge | slurm | pbs | sbs |
     ------------------+---------------------------------------+-------+-----+-------+-----+-----|
-    job.shexec(T/F)   | Exec job; don't submit job            |   X   |  X  |   X   |  x  |  X  |
-    job.nopre (T/F)   | Don't include global pre              |  [4]  |  X  |   X   |  x  |  X  |
-    job.nopost(T/F)   | Don't include global post             |  [4]  |  X  |   X   |  x  |  X  |
+    job.shexec(T/F)   | Exec job; don't submit job            |   X   |  X  |   X   |  X  |  X  |
+    job.nopre (T/F)   | Don't include global pre              |  [4]  |  X  |   X   |  X  |  X  |
+    job.nopost(T/F)   | Don't include global post             |  [4]  |  X  |   X   |  X  |  X  |
 
     * - Memory should be specified as the total amount required for the job, if
         required, CGPipe will re-calculate the per-processor required memory.

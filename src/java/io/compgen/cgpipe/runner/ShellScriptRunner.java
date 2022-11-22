@@ -84,6 +84,18 @@ public class ShellScriptRunner extends JobRunner {
 			if (!job.getBody().equals("")) {
 				if (preLines.size() == 0) {
 					preLines.add("#!"+shellPath);
+				
+					if (job.getSettings().contains("job.setup")) {
+						preLines.add("");
+						VarValue val = job.getSettingsMap().get("job.setup");
+						if (val.isList()) {
+							for (VarValue v: val.iterate()) {
+								preLines.add(v.toString());
+							}
+						} else {
+							preLines.add(val.toString());
+						}
+					}
 				}
 
 				preLines.add("");

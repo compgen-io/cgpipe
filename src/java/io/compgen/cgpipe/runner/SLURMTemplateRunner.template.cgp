@@ -66,4 +66,10 @@ if job.procs > 1
 set -eo pipefail
 JOB_ID=$SLURM_JOB_ID
 
+<% for line in job.setup %>
+<% if line %>
+${line}
+<% endif %>
+<% done %>
+
 ${job._body}

@@ -82,6 +82,14 @@ trap notify_kill SIGUSR2
     
 set -o pipefail
 
+
+<% for line in job.setup %>
+<% if line %>
+${line}
+<% endif %>
+<% done %>
+
+
 ${job._body}
 RETVAL=$?
 
