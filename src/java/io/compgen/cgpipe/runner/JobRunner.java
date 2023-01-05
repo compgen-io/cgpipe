@@ -497,8 +497,10 @@ public abstract class JobRunner {
 //		}
 //		
 		// Has t already been submitted in another part of the tree? (in this run)
-		if (target.getJobDep(outputName) != null) {
-			log.trace("Skipping target (already submitted): "+outputName);
+		if (target.getJobDep(outputName) != null && target.getJobDep(outputName).getJobId() != null && !target.getJobDep(outputName).getJobId().equals("")) {
+			// note: just because the jobdep is present doesn't mean it was submitted. We need to look for the 
+			//       jobId as well to make sure we actually submitted the job.
+			log.trace("Skipping target (already submitted): "+outputName + "(" + target.getJobDep(outputName).getJobId() +")");
 			return target.getJobDep(outputName);
 		}
 
