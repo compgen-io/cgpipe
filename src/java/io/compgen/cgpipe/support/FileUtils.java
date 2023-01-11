@@ -5,11 +5,15 @@ import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class FileUtils {
 	private static Map<String, FileUtils> fileCache = new HashMap<String, FileUtils>();
 	private static Map<String, Boolean> existsCache = new HashMap<String, Boolean>();
+	private static Set<String> listedDirs = new HashSet<String>();
+	
 	public static boolean doesFileExist(String raw) {
 		if (raw == null) {
 			return false;
@@ -19,8 +23,48 @@ public class FileUtils {
 			return existsCache.get(filename);
 		}
 		File f = new File(filename);
-		// Run this in an iteration in case network file-systems (Gluster) don't report back if files necessarily exist the first time.
-		for (int i=0; i<3; i++) {
+
+		if (f.getParentFile()!= null && !listedDirs.contains(f.getParentFile().getAbsolutePath())) {
+			listedDirs.add(f.getParentFile().getAbsolutePath());
+			
+			//
+			// On some network filesystems (*ahem* Gluster), a file might not appear
+			// until the metadata on the directory is refreshed. This happens with
+			// a fresh listing. However, this can be time consuming, so let's only try
+			// this trick once for each parent directory.
+			//
+			// By doing this once per parent directory, we can avoid the process if there
+			// are multiple missing files in a given directory.
+			//
+			// This can be a problem with "temporary" files that are used in a pipeline
+			// and then deleted. If we keep checking for missing files, it can make the 
+			// pipeline take forever. Instead, we can exhaustively check a directory
+			// once. This way, if there are more missing files in the directory, we only
+			// take the time hit once per directory, as opposed to once per file.
+
+			for (int i=0; i<3; i++) {
+				if (f.exists()) {
+					existsCache.put(filename, true);
+					return true;
+				}
+		
+				try {
+					f.toPath().getFileSystem().provider().checkAccess(f.toPath());
+				} catch (NoSuchFileException e) {
+					f.getParentFile().list();
+
+					try {
+						Thread.sleep(100*(i+1));
+					} catch (InterruptedException e1) {
+					}
+				} catch (IOException e) {
+					try {
+						Thread.sleep(100*(i+1));
+					} catch (InterruptedException e1) {
+					}
+				}
+			}
+		} else {
 			if (f.exists()) {
 				existsCache.put(filename, true);
 				return true;
@@ -28,19 +72,12 @@ public class FileUtils {
 	
 			try {
 				f.toPath().getFileSystem().provider().checkAccess(f.toPath());
-			} catch (NoSuchFileException e) {
-				if (f.getParentFile() != null) {
-					f.getParentFile().list();
-				}
-				try {
-					Thread.sleep(100*(i+1));
-				} catch (InterruptedException e1) {
+				if (f.exists()) {
+					existsCache.put(filename, true);
+					return true;
 				}
 			} catch (IOException e) {
-				try {
-					Thread.sleep(100*(i+1));
-				} catch (InterruptedException e1) {
-				}
+				// silent
 			}
 		}
 		existsCache.put(filename, false);
