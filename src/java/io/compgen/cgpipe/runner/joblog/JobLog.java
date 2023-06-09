@@ -115,8 +115,10 @@ public class JobLog {
 
 			}
 			reader.close();
-		} else if (jobfile.getParentFile() != null && !jobfile.getParentFile().exists()) {
-			jobfile.getParentFile().mkdirs();
+		} else {
+			if (jobfile.getParentFile() != null && !jobfile.getParentFile().exists()) {
+				jobfile.getParentFile().mkdirs();
+			}
 			jobfile.createNewFile();
 		}
 	}
@@ -304,8 +306,10 @@ public class JobLog {
 			Files.move(tmp.toPath(), jobfile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			//tmp.renameTo(jobfile);
 		
-		} else if (jobfile.getParentFile() != null && !jobfile.getParentFile().exists()) {
-			jobfile.getParentFile().mkdirs();
+		} else {
+			if (jobfile.getParentFile() != null && !jobfile.getParentFile().exists()) {
+				jobfile.getParentFile().mkdirs();
+			}
 			jobfile.createNewFile();
 		}
 	}

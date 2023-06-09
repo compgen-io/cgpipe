@@ -312,11 +312,12 @@ public class CGSub extends AbstractCommand{
 			root.setOutputStream(null);
 			root.update(confVals);
 
-			runner = JobRunner.load(root);
-
 			if (joblog != null) {
 				root.set("cgpipe.joblog", new VarString(joblog));
 			}
+
+			runner = JobRunner.load(root);
+
 			
 			if (jobSrc != null) {
 				root.set("job.src", new VarString(jobSrc));
