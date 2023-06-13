@@ -108,6 +108,8 @@ public abstract class JobRunner {
 			obj = new GraphvizRunner();
 			break;
 		default:
+			// we could have this load a new runner at run-time, however, this tool is best used as a single-executable JAR, so we should
+			// have all runners available at compile time.
 			throw new RunnerException("Can't load job runner: "+runner +" (valid options: shell, sge, slurm, pbs, sjq, graphviz)");
 		}
 		
