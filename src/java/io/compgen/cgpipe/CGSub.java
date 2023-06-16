@@ -135,10 +135,20 @@ public class CGSub extends AbstractCommand{
 	public void setProcs(int procs) {
 		this.procs = procs;
 	}
-	@Option(name="joblog", desc="Write to CGPipe job/audit log")
+	@Option(name="job-log", desc="Write to CGPipe job/audit log")
 	public void setJobLog(String joblog) {
 		this.joblog=joblog;
 	}
+
+	/* 
+	 * This is kept to let --job-log or --joblog be used as an argument, however --job-log
+	 * should be the method used.
+	 */
+	@Option(name="joblog", desc="Write to CGPipe job/audit log", hide=true)
+	public void setJobLogOld(String joblog) {
+		this.joblog=joblog;
+	}
+	
 	@Option(name="job-output", desc="Output file(s) to add to the audit log")
 	public void setJobLogOutputs(String jobLogOutputs) {
 		this.jobLogOutputs=jobLogOutputs;
