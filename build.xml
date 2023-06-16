@@ -1,5 +1,5 @@
 <project name="cgpipe" default="jar">
-   <property name="version" value="0.5.12"/>
+   <property name="version" value="0.5.13"/>
     <property name="lib.dir" value="lib"/>
     <property name="blib.dir" value="blib"/>
     <property name="build.dir" value="build"/>
@@ -66,7 +66,7 @@
             </manifest>
 	        <fileset dir="${build.dir}/classes"/>
             <zipfileset src="${lib.dir}/commons-logging-1.2.jar"/>
-            <zipfileset src="${lib.dir}/compgen-cmdline-0.4.1.jar"/>
+            <zipfileset src="${lib.dir}/compgen-cmdline-0.4.5.jar"/>
             <zipfileset src="${lib.dir}/compgen-common-0.2.jar"/>
             <zap pattern="*.java"/>
 	    </jarjar>
@@ -85,7 +85,7 @@
             </manifest>
             <fileset dir="${build.dir}/classes"/>
             <zipfileset src="${lib.dir}/commons-logging-1.2.jar"/>
-            <zipfileset src="${lib.dir}/compgen-cmdline-0.4.1.jar"/>
+            <zipfileset src="${lib.dir}/compgen-cmdline-0.4.5.jar"/>
             <zipfileset src="${lib.dir}/compgen-common-0.2.jar"/>
             <zap pattern="*.java"/>
         </jarjar>
