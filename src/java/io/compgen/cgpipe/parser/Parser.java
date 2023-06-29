@@ -2,6 +2,8 @@ package io.compgen.cgpipe.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,6 +16,7 @@ import io.compgen.cgpipe.loader.SourceLoader;
 import io.compgen.cgpipe.parser.context.ExecContext;
 import io.compgen.cgpipe.parser.node.ASTNode;
 import io.compgen.cgpipe.parser.node.NoOpNode;
+import io.compgen.common.StringUtils;
 
 public class Parser {
 	private boolean readOnly = false;
@@ -158,7 +161,7 @@ public class Parser {
 		System.out.println(getHelp(name));
 	}
 	public static String getHelp(String name) throws IOException {
-		String ret = "";
+		List<String> outlines = new ArrayList<String>();
 		boolean first = true;
 		Source pipe = SourceLoader.getDefaultLoader().loadPipeline(name);
 		if (pipe == null) {
@@ -174,8 +177,42 @@ public class Parser {
 			if (!line.getLine().startsWith("#")) {
 				break;
 			}
-			ret += line.getLine().substring(1) + "\n";
+			outlines.add(line.getLine().substring(1));
 		}
+		
+		int indent = -1;
+		for (String line:outlines) {
+			if (StringUtils.strip(line).length()>0) {
+				int lineIndent = 0;			
+				for (int i=0; i<line.length(); i++) {
+					if (line.charAt(i) == ' ') {
+						lineIndent++;
+					} else {
+						break;
+					}
+				}
+				if (indent == -1 || lineIndent < indent) {
+					indent = lineIndent;
+				}
+			}
+		}
+
+		String ret = "";
+
+		if (indent>0) {
+			for (String line:outlines) {
+				if (line.length()>indent) {
+					ret += line.substring(indent) + "\n";
+				} else {
+					ret += "" + "\n";
+				}
+			}
+		} else {
+			for (String line:outlines) {
+				ret += line + "\n";
+			}
+		}
+		
 		return ret;
 	}
 }
