@@ -155,6 +155,10 @@ public class Parser {
 	}
 
 	public static void showHelp(String name) throws IOException {
+		System.out.println(getHelp(name));
+	}
+	public static String getHelp(String name) throws IOException {
+		String ret = "";
 		boolean first = true;
 		Source pipe = SourceLoader.getDefaultLoader().loadPipeline(name);
 		if (pipe == null) {
@@ -170,7 +174,8 @@ public class Parser {
 			if (!line.getLine().startsWith("#")) {
 				break;
 			}
-			System.out.println(line.getLine().substring(1));
+			ret += line.getLine().substring(1) + "\n";
 		}
+		return ret;
 	}
 }

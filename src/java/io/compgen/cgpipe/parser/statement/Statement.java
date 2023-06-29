@@ -24,6 +24,7 @@ public interface Statement {
 	public static final Statement LOG = new WriteLog();
 	public static final Statement DUMPVARS = new DumpVars();
 	public static final Statement SLEEP = new Sleep();
+	public static final Statement SHOWHELP = new ShowHelp();
 	
 	public static final Statement[] statements = {
 		PRINT,
@@ -41,6 +42,7 @@ public interface Statement {
 		EXIT,
 		LOG,
 		DUMPVARS, 
-		SLEEP
+		SLEEP,
+		SHOWHELP
 	};
 }
