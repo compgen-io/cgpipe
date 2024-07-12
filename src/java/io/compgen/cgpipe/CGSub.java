@@ -82,6 +82,7 @@ public class CGSub extends AbstractCommand{
 	private String stackMem = null;
 	private String queue = null;
 	private String project = null;
+	private String account = null;
 	private String wd = null;
 	private String stdout = null;
 	private String stderr = null;
@@ -170,6 +171,11 @@ public class CGSub extends AbstractCommand{
 	@Option(name="nice",desc="Set the \"nice\" level for this job (SLURM or PBS)")
 	public void setNice(int nice) {
 		this.nice=nice;
+	}
+	
+	@Option(name="account", charName="A" ,desc="Account for job (SLURM)")
+	public void setAccount(String account) {
+		this.account = account;
 	}
 	
 	@Option(name="node-property", desc="Require a property for node (PBS)")
@@ -296,6 +302,9 @@ public class CGSub extends AbstractCommand{
 		}
 		if (nice != 0) {
 			confVals.put("job.nice", new VarInt(nice));
+		}
+		if (account != null) {
+			confVals.put("job.account", new VarString(account));
 		}
 		
 		if (resources != null) {
