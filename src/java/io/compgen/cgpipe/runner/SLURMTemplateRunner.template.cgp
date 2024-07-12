@@ -26,9 +26,6 @@ if job.procs > 1
 <% if job.qos %>
 #SBATCH --qos=${job.qos}
 <% endif %>
-<% if job.account %>
-#SBATCH -A ${job.account}
-<% endif %>
 <% if job.queue %>
 #SBATCH -p ${job.queue}
 <% endif %>
