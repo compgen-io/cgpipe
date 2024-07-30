@@ -1,3 +1,3 @@
 # default cgpiperc
 
-cgpipe.remote.compgen_io.baseurl = "https://raw.githubusercontent.com/compgen-io/cgpipe-pipelines/master/"
+cgpipe.remote.compgen_io.baseurl = "https://raw.githubusercontent.com/compgen-io/cgpipe-pipelines/main/"

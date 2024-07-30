@@ -2,6 +2,8 @@ package io.compgen.cgpipe;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -123,7 +125,15 @@ public class CGSub extends AbstractCommand{
 			}
 		}
 	}
-	
+	@Option(name="version", charName="V", desc="Show version and exit")
+	public void setVersion() {
+		try {
+			System.out.println(readFile("io/compgen/cgpipe/VERSION"));
+		} catch (IOException e) {
+		}
+		System.exit(1);
+	}
+
 	@Option(name="project", charName="P", desc="Project for job (SGE)")
 	public void setProject(String project) {
 		this.project = project;
@@ -475,4 +485,19 @@ public class CGSub extends AbstractCommand{
 	public static void main(String[] args) throws Exception {
 		new MainBuilder().runClass(CGSub.class, args);
 	}
+
+	private static String readFile(String fname) throws IOException {
+		String s = "";
+		InputStream is = CGSub.class.getClassLoader().getResourceAsStream(fname);
+		if (is == null) {
+			throw new IOException("Can't load file: "+fname);
+		}
+		int c;
+		while ((c = is.read()) > -1) {
+			s += (char) c;
+		}
+		is.close();	
+		return s;
+	}
+	
 }
