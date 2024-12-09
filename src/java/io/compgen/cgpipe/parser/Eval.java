@@ -427,20 +427,23 @@ public class Eval {
 							optional = true;
 							buf = buf.substring(0, buf.length()-1);
 						}
-						try {
-	 						TokenList tl = Tokenizer.tokenize(new NumberedLine(buf, line));
-							VarValue val = Eval.evalTokenExpression(tl, context);
-							for (String s: val.toString().split("\n")) {
-								out += evalString(s, context, line) + "\n";
-							}
-
-						} catch (ASTExecException e) {
-							if (!optional) {
-								throw e;
-							}
-						} catch (ASTParseException e) {
-							if (!optional) {
-								throw new ASTExecException(e, line);
+						
+						if (!buf.equals("")) {
+							try {
+		 						TokenList tl = Tokenizer.tokenize(new NumberedLine(buf, line));
+								VarValue val = Eval.evalTokenExpression(tl, context);
+								for (String s: val.toString().split("\n")) {
+									out += evalString(s, context, line) + "\n";
+								}
+	
+							} catch (ASTExecException e) {
+								if (!optional) {
+									throw e;
+								}
+							} catch (ASTParseException e) {
+								if (!optional) {
+									throw new ASTExecException(e, line);
+								}
 							}
 						}
 						
@@ -464,18 +467,19 @@ public class Eval {
 							optional = true;
 							buf = buf.substring(0, buf.length()-1);
 						}
-						
-						try {
-	 						TokenList tl = Tokenizer.tokenize(new NumberedLine(buf, line));
-							VarValue val = Eval.evalTokenExpression(tl, context);
-							out += val.toString();
-						} catch (ASTExecException e) {
-							if (!optional) {
-								throw e;
-							}
-						} catch (ASTParseException e) {
-							if (!optional) {
-								throw new ASTExecException(e, line);
+						if (!buf.equals("")) {
+							try {
+		 						TokenList tl = Tokenizer.tokenize(new NumberedLine(buf, line));
+								VarValue val = Eval.evalTokenExpression(tl, context);
+								out += val.toString();
+							} catch (ASTExecException e) {
+								if (!optional) {
+									throw e;
+								}
+							} catch (ASTParseException e) {
+								if (!optional) {
+									throw new ASTExecException(e, line);
+								}
 							}
 						}
 						
