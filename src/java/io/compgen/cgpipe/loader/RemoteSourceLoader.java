@@ -3,6 +3,7 @@ package io.compgen.cgpipe.loader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 
 import org.apache.commons.logging.Log;
@@ -51,7 +52,9 @@ public class RemoteSourceLoader extends SourceLoader {
 			throw new IOException("Missing baseUrl for remote loader!");
 		}
 		InputStream is = null;
-		URL url = new URL(baseUrl+filename);
+		URL url = URI.create(baseUrl+filename).toURL();
+//
+//		URL url = new URL(baseUrl+filename);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setUseCaches(false);
 		try{

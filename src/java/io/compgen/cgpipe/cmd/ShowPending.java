@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import io.compgen.cgpipe.CGPipe;
 import io.compgen.cgpipe.exceptions.ASTExecException;
