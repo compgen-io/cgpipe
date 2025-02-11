@@ -452,6 +452,8 @@ public class CGSub extends AbstractCommand{
 	}
 
 	protected String convertStringForInput(String str, String input) {
+		// If the user wants the string "{}" to appear in the output, it should be encoded as "{{}}"
+		str = str.replaceAll("\\{\\{\\}\\}", "________________1234________________CURLY_BRACKETS________________1234________________");
 		Pattern p = Pattern.compile("^(.*)\\{([\\^@].*)?\\}(.*)$");
 		Matcher m = p.matcher(str);
 		while (m.matches()) {
@@ -479,7 +481,7 @@ public class CGSub extends AbstractCommand{
 			m = p.matcher(str);
 		}
 		
-		return str;
+		return str.replaceAll("________________1234________________CURLY_BRACKETS________________1234________________", "{}");
 	}
 	
 	public static void main(String[] args) throws Exception {
