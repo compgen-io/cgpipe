@@ -103,6 +103,8 @@ public abstract class JobRunner {
 			break;
 		case "sbs":
 			obj = new SBSTemplateRunner();
+		case "batchq":
+			obj = new BatchQTemplateRunner();
 			break;
 		case "graphviz":
 			obj = new GraphvizRunner();
