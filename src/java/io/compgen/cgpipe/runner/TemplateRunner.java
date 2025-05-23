@@ -43,6 +43,10 @@ public abstract class TemplateRunner extends JobRunner {
 	public abstract String[] getSubCommand(boolean forceHold);
 	public abstract String[] getReleaseCommand(String jobId);
 	public abstract String[] getDelCommand(String jobId);
+	
+	public String[] getSubCommandEnv() {return null;}
+	public String[] getReleaseCommandEnv() {return null;}
+	public String[] getDelCommandEnv() {return null;}
 
 	public String loadTemplate() throws IOException {
 		InputStream is = getClass().getClassLoader().getResourceAsStream(templateFilename);
@@ -166,7 +170,7 @@ public abstract class TemplateRunner extends JobRunner {
 		}
 		
 		try {
-			Process proc = Runtime.getRuntime().exec(getSubCommand(forceHold));
+			Process proc = Runtime.getRuntime().exec(getSubCommand(forceHold), getSubCommandEnv());
 			proc.getOutputStream().write(src.getBytes(Charset.forName("UTF8")));
 			proc.getOutputStream().close();
 			
@@ -216,7 +220,7 @@ public abstract class TemplateRunner extends JobRunner {
 				//System.out.println("Releasing hold on: " + StringUtils.join(",", globalHolds));
 				for (String jobid: globalHolds) {
 					try {
-						int retcode = Runtime.getRuntime().exec(getReleaseCommand(jobid)).waitFor();
+						int retcode = Runtime.getRuntime().exec(getReleaseCommand(jobid), getReleaseCommandEnv()).waitFor();
 						if (retcode != 0) {
 							throw new RunnerException("Unable to release default user-hold");
 						}
@@ -239,7 +243,7 @@ public abstract class TemplateRunner extends JobRunner {
 	@Override
 	public boolean cancelJob(String jobid) {
 		try {
-			Process proc = Runtime.getRuntime().exec(getDelCommand(jobid));
+			Process proc = Runtime.getRuntime().exec(getDelCommand(jobid), getDelCommandEnv());
 			int ret = proc.waitFor();
 			return ret == 0;
 		} catch (InterruptedException | IOException e) {

@@ -1,0 +1,41 @@
+#!${job.shell}
+#BATCHQ -name ${job.name}
+<% if job.hold %>
+#BATCHQ -hold
+<% endif %>
+<% 
+job.procs ?= 1
+if job.procs > 1 %>
+#BATCHQ -procs ${job.procs}
+<% endif %>
+<% if job.mem %>
+#BATCHQ -mem ${job.mem}
+<% endif %>
+<% if job.sbs.depids %>
+#BATCHQ -afterok ${job.sbs.depids}
+<% endif %>
+<% if job.mail %>
+#BATCHQ -mail ${job.mail}
+<% endif %>
+<% if job.stdout %>
+#BATCHQ -stdout ${job.stdout}
+<% endif %>
+<% if job.stderr %>
+#BATCHQ -stderr ${job.stderr}
+<% endif %>
+<% for custom in job.custom %>
+<% if custom %>
+#BATCHQ ${custom}
+<% endif %>
+<% done %>
+#BATCHQ -wd .
+
+set -eo pipefail
+
+<% for line in job.setup %>
+<% if line %>
+${line}
+<% endif %>
+<% done %>
+
+${job._body}
