@@ -24,8 +24,20 @@ jobs:
     - name: Build with Ant
       run: ant -noinput -buildfile build.xml
 
-    - name: Upload linux_amd64 binary
+    - name: Upload cgpipe binary
       uses: actions/upload-artifact@v4
       with:
         name: cgpipe
         path: dist/cgpipe
+
+    - name: Upload cgsub binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: cgsub
+        path: dist/cgsub
+
+    - name: Upload cgpipe JAR
+      uses: actions/upload-artifact@v4
+      with:
+        name: cgpipe.jar
+        path: dist/cgpipe*.jar
