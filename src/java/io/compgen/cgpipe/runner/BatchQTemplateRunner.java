@@ -118,7 +118,7 @@ public class BatchQTemplateRunner extends TemplateRunner {
 	    }
 	    
 	    if (depids.size() > 0) {
-	    	cxt.set("job.batchq.depids", new VarString(StringUtils.join(":", depids).replaceAll("::", ":")));
+	    	cxt.set("job.batchq.depids", new VarString(StringUtils.join(",", depids).replaceAll(",,", ",")));
 	    }
 
 		super.updateTemplateContext(cxt, jobdef);
