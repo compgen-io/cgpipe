@@ -2,8 +2,8 @@ package io.compgen.cgpipe.runner;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import io.compgen.cgpipe.exceptions.RunnerException;
 import io.compgen.cgpipe.parser.context.ExecContext;
@@ -99,7 +99,7 @@ public class BatchQTemplateRunner extends TemplateRunner {
 
 	protected void updateTemplateContext(ExecContext cxt, JobDef jobdef) {
 		// set the dep list
-	    List<String> depids = new ArrayList<String>();
+	    Set<String> depids = new HashSet<String>();
 		if (jobdef.getDependencies().size() > 0) {
 		    
 		    for (JobDependency dep: jobdef.getDependencies()) {
