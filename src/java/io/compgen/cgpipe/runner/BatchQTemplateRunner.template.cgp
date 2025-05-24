@@ -11,8 +11,8 @@ if job.procs > 1 %>
 <% if job.mem %>
 #BATCHQ -mem ${job.mem}
 <% endif %>
-<% if job.sbs.depids %>
-#BATCHQ -afterok ${job.sbs.depids}
+<% if job.batchq.depids %>
+#BATCHQ -afterok ${job.batchq.depids}
 <% endif %>
 <% if job.mail %>
 #BATCHQ -mail ${job.mail}
@@ -29,6 +29,9 @@ if job.procs > 1 %>
 <% endif %>
 <% done %>
 #BATCHQ -wd .
+<% if job.env %>
+#BATCHQ -env
+<% endif %>
 
 set -eo pipefail
 
