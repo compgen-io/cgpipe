@@ -11,6 +11,9 @@ if job.procs > 1 %>
 <% if job.mem %>
 #BATCHQ -mem ${job.mem}
 <% endif %>
+<% if job.walltime %>
+#BATCHQ -walltime ${job.walltime}
+<% endif %>
 <% if job.batchq.depids %>
 #BATCHQ -afterok ${job.batchq.depids}
 <% endif %>
