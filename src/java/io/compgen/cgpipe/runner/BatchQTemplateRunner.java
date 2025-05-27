@@ -18,7 +18,7 @@ public class BatchQTemplateRunner extends TemplateRunner {
 	public String[] getDelCommandEnv() {
 		return getEnv();
 	}
-	public String[] getRekeaseCommandEnv() {
+	public String[] getReleaseCommandEnv() {
 		return getEnv();
 	}
 	public String[] getSubCommandEnv() {
@@ -34,11 +34,6 @@ public class BatchQTemplateRunner extends TemplateRunner {
 	
 	@Override
 	public String[] getSubCommand(boolean forceHold) {
-		if (batchqHome != null) {
-			if (forceHold) {
-				return new String[] {batchqPath, "-d", batchqHome, "submit", "--hold"};
-			}
-		}
 		if (forceHold) {
 			return new String[] {batchqPath, "submit", "--hold"};
 		}
@@ -47,17 +42,11 @@ public class BatchQTemplateRunner extends TemplateRunner {
 
 	@Override
 	public String[] getReleaseCommand(String jobId) {
-		if (batchqHome != null) {
-			return new String[] {batchqPath, "-d", batchqHome, "release", jobId };
-		}
 		return new String[] {batchqPath, "release", jobId };
 	}
 
 	@Override
 	public String[] getDelCommand(String jobId) {
-		if (batchqHome != null) {
-			return new String[] {batchqPath, "-d", batchqHome, "cancel", jobId};
-		}
 		return new String[] {batchqPath, "cancel", jobId};
 	}
 
@@ -65,11 +54,7 @@ public class BatchQTemplateRunner extends TemplateRunner {
 	public boolean isJobIdValid(String jobId) throws RunnerException {
 		try {
 			String[] cmd;
-			if (batchqHome!=null) {
-				cmd = new String[] {batchqPath, "-d", batchqHome, "status", jobId};
-			} else {
-				cmd = new String[] {batchqPath, "status", jobId};
-			}
+			cmd = new String[] {batchqPath, "status", jobId};
 			
 			Process proc = Runtime.getRuntime().exec(cmd, getEnv());
 			int retcode = proc.waitFor();
