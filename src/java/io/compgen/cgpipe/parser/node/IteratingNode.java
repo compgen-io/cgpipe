@@ -175,7 +175,7 @@ public class IteratingNode extends ASTNode {
 			// for test while loop
 			while (true) {
 				VarValue val = Eval.evalTokenExpression(iterTokens[0], context);
-//				System.out.println(" ==> evaluating: "+iterTokens[0]+" <== " + val + " | "+this);
+//				System.err.println(" ==> evaluating: "+iterTokens[0]+" <== " + val + " | "+this);
 				if (!val.toBoolean()) {
 					return next;
 				}				
