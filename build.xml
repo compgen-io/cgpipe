@@ -29,7 +29,7 @@
             includeantruntime="false"
             classpathref="classpath"
             debuglevel="lines,vars,source"
-            release="8"
+            release="11"
         >
                   <compilerarg value="-Xlint:deprecation"/>
         </javac>
