@@ -26,7 +26,7 @@ public class IteratingNode extends ASTNode {
 	
 	public IteratingNode(ASTNode parent, TokenList tokens) throws ASTParseException {
 		super(parent, tokens);
-		System.err.println("ITER: " + tokens);
+//		System.err.println("ITER: " + tokens);
 		
 		int preCount = 0;
 		int postCount = 0;
