@@ -68,7 +68,8 @@ public class BatchQTemplateRunner extends TemplateRunner {
 						if (spl[1].equals("QUEUED") || 
 							spl[1].equals("WAITING") || 
 							spl[1].equals("RUNNING") || 
-							spl[1].equals("USERHOLD") ) {
+							spl[1].equals("USERHOLD") ||
+							spl[1].equals("PROXYQUEUED") ) {
 							return true;
 						}
 					}
