@@ -1,0 +1,6 @@
+foo = "foobar"
+bar = foo[3:]
+
+print(foo)
+print(bar)
+print(foo[3:])
