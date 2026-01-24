@@ -57,8 +57,13 @@ public abstract class ASTNode {
 			return this.next;
 		}
 		
+		int sliceDepth = 0;
 		for (Token tok: tokens) {
-			if (tok.isColon()) {
+			if (tok.isSliceOpen()) {
+				sliceDepth++;
+			} else if (tok.isSliceClose() && sliceDepth > 0) {
+				sliceDepth--;
+			} else if (tok.isColon() && sliceDepth == 0) {
 				this.next = new TargetNode(this, tokens);
 				return this.next;
 			}
@@ -71,6 +76,7 @@ public abstract class ASTNode {
 //				System.err.println("Eval: " + StringUtils.join(",", tokens));
 				VarValue val = Eval.evalTokenExpression(tokens, context);
 				if (val == VarNull.NULL) {
+//					context.getRoot().dump();
 					throw new ASTExecException("Null expression: " + tokens);
 				}
 //				System.err.println("<<< " + val.toString());
@@ -112,4 +118,3 @@ public abstract class ASTNode {
 		return parent;
 	}
 }
-

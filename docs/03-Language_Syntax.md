@@ -248,6 +248,9 @@ Basic syntax:
        do something...
     done
 
+    for val
+       do something...    # while-style loop; runs while val is true
+
 
 ## Build target definitions
 Targets are the files that you want to create. They are defined on a single
@@ -475,4 +478,3 @@ a var:
 will result in this being added to the body:
 
     echo "target"
-
