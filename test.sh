@@ -16,8 +16,9 @@ fi
 
 if [ "$1" == "" ]; then
     rm -f test/err
-    find src/test-scripts -name '*.mvp' -exec $0 $VERBOSE \{\} \;
-    find src/test-scripts -name '*.mvpt' -exec $0 $VERBOSE \{\} \;
+    # Skip remote-dependent tests during bulk runs.
+    find src/test-scripts -name '*.mvp' ! -name 'help.mvp' -exec $0 $VERBOSE \{\} \;
+    find src/test-scripts -name '*.mvpt' ! -name 'remote.mvpt' -exec $0 $VERBOSE \{\} \;
 
     if [ -e test/err ]; then
         rm test/err
