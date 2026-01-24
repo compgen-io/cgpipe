@@ -4,3 +4,13 @@ bar = foo[3:]
 print(foo)
 print(bar)
 print(foo[3:])
+
+i=0
+
+for foo == "foobar" && i < 2
+	print(foo)
+	foo2 = foo[1:]
+	foo = foo2
+	i = i + 1
+	print(foo)
+done

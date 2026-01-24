@@ -61,6 +61,7 @@ public class Tokenizer {
 					if (!inSlice) {
 						throw new ASTParseException("Missing opening [");
 					}
+					inSlice = false;
 				}
 				if (!inSlice && tok.isColon()) {
 					foundColon = true;
