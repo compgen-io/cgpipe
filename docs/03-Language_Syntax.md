@@ -329,6 +329,102 @@ add the new job's info (and job-id) to a database.
 You can selectively disable `__pre__` and `__post__` for any job by setting
 the variable `job.nopre` and `job.nopost`.
 
+### Temporary outputs
+Temporary outputs are intermediate files that are only needed to produce
+downstream targets. They are defined by prefixing an output filename with a
+caret (`^`):
+
+    ^intermediate.txt: input.txt
+        process input.txt > intermediate.txt
+
+    final.txt: intermediate.txt
+        summarize intermediate.txt > final.txt
+
+The `^` is not part of the actual filename -- it is stripped internally and
+serves only as a marker that the output is temporary.
+
+Temporary outputs behave differently from regular outputs in several ways:
+
+* **Not required to exist on disk** -- if the downstream target is already
+  satisfied, the temporary job is skipped entirely, even if the temporary file
+  has been deleted.
+* **Not checked for file modification time** -- only non-temporary outputs are
+  compared against the filesystem when calculating whether a target is
+  up-to-date.
+* **Tracked separately** in the job log and shown as `TEMP` in pending job
+  status output.
+
+Temporary outputs are useful for pipeline steps that produce large intermediate
+files (e.g. an alignment file that is only needed to produce a final variant
+call). If the final output already exists and is current, cgpipe will not waste
+time recreating intermediates that are no longer needed.
+
+Wildcards and list expansions work with temporary outputs just like regular
+targets:
+
+    ^chr.%:
+        process $%
+
+    ^foo: chr.@{samples}
+        merge $< > $>
+
+    bar: foo
+        finalize $< > $>
+
+### Opportunistic jobs
+Opportunistic jobs are targets that have **no outputs** -- only inputs. They
+are defined with a leading colon and a list of input dependencies:
+
+    :input1.txt input2.txt
+        echo "both inputs are available"
+
+Opportunistic jobs run **after** the main pipeline has been submitted. Unlike
+regular targets, they will **not** cause their dependencies to be built. Instead,
+they only run if all of their inputs are already available -- either existing on
+disk, submitted by other jobs in the current run, or recorded in the job log
+from a previous run. If any input is missing and no job has been submitted to
+create it, the opportunistic job is silently skipped.
+
+This makes opportunistic jobs useful for optional post-processing steps that
+should run when certain files happen to be available, but should not force
+those files to be created.
+
+Example:
+
+    all: foo
+
+    foo: input.txt
+        process input.txt > foo
+
+    bar: foo
+        summarize foo > bar
+
+    input.txt:
+        generate > input.txt
+
+    :input.txt foo bar
+        echo "all three files are available -- run extra QC"
+
+In this example, the opportunistic job will run only if `input.txt`, `foo`, and
+`bar` are all available. It will not cause `bar` to be built if it was not
+already part of the pipeline.
+
+Opportunistic jobs can also be combined with temporary outputs. If a temporary
+intermediate has been skipped (because the downstream target is already
+satisfied), then an opportunistic job that depends on that intermediate will
+also be skipped, since the temporary file does not exist on disk:
+
+    all: final.txt
+
+    final.txt: intermediate.txt
+        summarize intermediate.txt > final.txt
+
+    ^intermediate.txt:
+        generate > intermediate.txt
+
+    :final.txt intermediate.txt
+        echo "only runs if both files exist"
+
 
 ## Including other files
 Other Pipeline files can be imported into the currently running Pipeline by
