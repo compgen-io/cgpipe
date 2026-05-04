@@ -1,0 +1,21 @@
+#
+# Test that opportunistic jobs add dependencies for inputs that are produced by other jobs.
+#
+# "all" depends on "foo", which depends on test/file1 (exists on disk).
+# "bar" depends on "foo" (produced by a job).
+#
+# The opportunistic job requires "foo" and "bar" as inputs.
+# Both are produced by jobs in the pipeline, so the opportunistic job should run
+# and should have those jobs as dependencies.
+#
+
+all: bar
+
+foo: test/file1
+    echo "foo"
+
+bar: foo
+    echo "bar"
+
+:foo bar
+    echo "opp-with-deps"

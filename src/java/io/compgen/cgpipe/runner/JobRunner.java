@@ -302,6 +302,7 @@ public abstract class JobRunner {
 			boolean foundAll = true;
 			log.debug("Checking opportunistic: "+tgt);
 			List<String> missing = new ArrayList<String>();
+			List<JobDependency> deps = new ArrayList<JobDependency>();
 			for (String k: tgt.getDepends().keySet()) {
 //				System.out.println("Checking opportunistic dep: "+k);
 				log.debug("Checking opportunistic dep: "+k);
@@ -310,7 +311,8 @@ public abstract class JobRunner {
 					// if we haven't submitted the job
 					if (tgt.getDepends().get(k).getJobDep(k) == null || tgt.getDepends().get(k).getJobDep(k).getJobId()==null || tgt.getDepends().get(k).getJobDep(k).getJobId().equals("")) {
 						// if the job hasn't been previously scheduled
-						if (findJobProviding(k) == null) {
+						JobDependency existingJob = findJobProviding(k);
+						if (existingJob == null) {
 							// we can't run this opportunistic job
 							log.debug("Checking opportunistic: "+k + " => failed");
 							missing.add(k);
@@ -318,10 +320,12 @@ public abstract class JobRunner {
 							continue;
 						} else {
 							log.debug("Checking opportunistic: "+k + " => exists in job-log");
+							deps.add(existingJob);
 //							System.out.println("Checking opportunistic: "+k + " => exists in job-log");
 						}
 					} else {
 						log.debug("Checking opportunistic: "+k + " => submitted job");
+						deps.add(tgt.getDepends().get(k).getJobDep(k));
 //						System.out.println("Checking opportunistic: "+k + " => submitted job jobid:\""+ tgt.getDepends().get(k).getJobDep(k).getJobId()+"\"");
 					}
 				} else {
@@ -334,12 +338,13 @@ public abstract class JobRunner {
 				log.debug("Missing a required input to opportunistic job... "+StringUtils.join(",", missing));
 				continue;
 			}
-			
+
 			log.debug("Submitting opportunistic job");
-					
+
 			try {
 				JobDef job = tgt.eval(null,  null, context);
-				if (job.getSettingBool("job.shexec", false)) {
+				job.addDependencies(deps);
+				if (job.getDependencies().size()==0 && job.getSettingBool("job.shexec", false)) {
 					shexec(job);
 				} else {
 					submit(job);
