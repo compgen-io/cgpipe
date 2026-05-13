@@ -1,0 +1,29 @@
+# VarList methods + operators not covered by lists.mvpt:
+#   .length()       — element count
+#   .join(sep)      — delimited string (list-side; complements "sep".join(list))
+#   list * int      — repeat operator
+#
+# NOTE: method calls on inline list literals (e.g. `[].length()` or
+# `[1,2,3].length()`) currently crash with IndexOutOfBoundsException in
+# Eval.evalTokenExpression. We exercise the methods via stored variables only.
+
+xs = ["a", "b", "c"]
+empty = []
+nums = [1, 2, 3, 4]
+
+print "=== length ==="
+print xs.length()
+print empty.length()
+print nums.length()
+
+print "=== join ==="
+print xs.join(",")
+print xs.join(" | ")
+print nums.join("-")
+print empty.join(",")
+
+print "=== repeat ==="
+print xs * 2
+twos = [0] * 5
+print twos
+print "${xs * 3}"
