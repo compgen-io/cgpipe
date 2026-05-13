@@ -1,0 +1,22 @@
+cgpfunc_1() {
+JOB_ID="cgpfunc_1"
+echo "stage:fastq out=sample.fastq"
+touch sample.fastq
+}
+cgpfunc_2() {
+JOB_ID="cgpfunc_2"
+echo "stage:bam out=sample.bam in=sample.fastq"
+}
+cgpfunc_3() {
+JOB_ID="cgpfunc_3"
+echo "stage:bai out=sample.bam.bai in=sample.bam"
+}
+if [ ! -e "sample.fastq" ]; then
+cgpfunc_1 || exit $?
+fi
+if [ ! -e "sample.bam" ]; then
+cgpfunc_2 || exit $?
+fi
+if [ ! -e "sample.bam.bai" ]; then
+cgpfunc_3 || exit $?
+fi
