@@ -1,0 +1,10 @@
+# 12-parallelenv: overriding cgpipe.runner.sge.parallelenv changes the
+# parallel-environment name in the `-pe` directive.
+
+cgpipe.runner.sge.parallelenv = "shm"
+
+output.txt:
+    <%
+    job.procs = 4
+    %>
+    echo hi > output.txt

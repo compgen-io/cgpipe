@@ -1,0 +1,7 @@
+# 05-hold-release: global_hold=true causes every submit to use `qsub -h u`
+# and `qrls <jobid>` to be called at end of pipeline.
+
+cgpipe.runner.sge.global_hold = true
+
+output.txt:
+    echo hi > output.txt

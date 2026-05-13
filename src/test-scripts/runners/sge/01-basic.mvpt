@@ -1,0 +1,11 @@
+# 01-basic: minimal SGE submission.
+# Verifies:
+#   - Submit command is `qsub`
+#   - Default template directives (`#$ -w e`, `#$ -terse`, `#$ -notify`)
+#   - `#$ -N <name>` derived from output filename
+#   - `#$ -wd <job.wd>` carries the pinned working directory
+#   - Body lines pass through verbatim
+#   - cgpipe stdout is the submitted jobid
+
+output.txt:
+    echo "hello world" > output.txt

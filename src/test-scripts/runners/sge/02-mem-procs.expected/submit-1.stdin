@@ -1,0 +1,11 @@
+#!/bin/bash
+#$ -w e
+#$ -terse
+#$ -N cgjob_output.txt
+#$ -pe smp 4
+#$ -l h_vmem=2.0G
+#$ -wd /cgpipe-test
+#$ -notify
+set -eo pipefail
+echo "hello" > output.txt
+

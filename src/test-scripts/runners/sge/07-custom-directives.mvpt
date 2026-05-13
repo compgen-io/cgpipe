@@ -1,0 +1,8 @@
+# 07-custom-directives: job.custom entries appear verbatim, each prefixed by
+# the scheduler-specific directive marker ("#$ " for SGE).
+
+output.txt:
+    <%
+    job.custom = ["-l gpu=1", "-l ram=4G"]
+    %>
+    echo hi > output.txt

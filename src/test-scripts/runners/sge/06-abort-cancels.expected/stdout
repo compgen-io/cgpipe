@@ -1,0 +1,14 @@
+CGPIPE ERROR Bad return code from submit: qsub  => (1) mock: forced failure on submit #2
+
+
+#!/bin/bash
+#$ -w e
+#$ -terse
+#$ -N cgjob_stage2.txt
+#$ -hold_jid 10001
+#$ -wd /cgpipe-test
+#$ -notify
+set -eo pipefail
+cat stage1.txt > stage2.txt
+
+

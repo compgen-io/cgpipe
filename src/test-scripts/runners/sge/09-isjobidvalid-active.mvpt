@@ -1,0 +1,7 @@
+# 09-isjobidvalid-active: a pre-seeded joblog says jobid 99999 is producing
+# output.txt. The qstat mock returns success for 99999 (responses/qstat/99999
+# exists), so cgpipe should skip resubmission. Expected: one status call,
+# zero submit calls, empty stdout.
+
+output.txt:
+    echo hi > output.txt
