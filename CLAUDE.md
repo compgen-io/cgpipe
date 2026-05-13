@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-CGPipe is a make-like pipeline orchestrator for HPC clusters. It uses a custom DSL (`.mvp`/`.mvpt` files) to define pipeline targets and dependencies, then submits jobs to batch schedulers (SGE, SLURM, PBS, SBS, BatchQ). Written in Java 11, built with Apache Ant.
+CGPipe is a make-like pipeline orchestrator for HPC clusters. It uses a custom DSL (`.mvp`/`.mvpt` files) to define pipeline targets and dependencies, then submits jobs to batch schedulers (SGE, SLURM, PBS, BatchQ). Written in Java 11, built with Apache Ant.
 
 ## Build & Test Commands
 
