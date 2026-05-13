@@ -143,8 +143,8 @@ public class PBSTemplateRunner extends TemplateRunner {
 	}
 	
 	@Override
-	protected String submitScript(String src) throws RunnerException {
-		String jobId = super.submitScript(src);
+	protected String submitScript(String src, boolean forceHold) throws RunnerException {
+		String jobId = super.submitScript(src, forceHold);
 		if (trimJobId) {
 			jobId = jobId.split("\\.")[0];
 		}
