@@ -116,12 +116,13 @@ mkdir -p "$workdir/capture"
     echo "cgpipe.runner = \"$scheduler\""
     echo 'job.wd = "/cgpipe-test"'
     echo 'job.shell = "/bin/bash"'
-    # BatchQ needs an absolute path to the mock when batchqhome is in play:
-    # Java's Runtime.exec(cmd, env) replaces env entirely (no PATH inherited)
-    # when getSubCommandEnv() returns non-null, so the binary lookup must not
-    # rely on PATH. Mocks set MOCK_NAME so the captured argv[0] stays as
-    # plain "batchq", keeping fixtures portable.
-    if [ "$scheduler" = "batchq" ]; then
+    # BatchQ needs an absolute path to the mock *only* when batchqhome is set,
+    # because Java's Runtime.exec(cmd, env) replaces env entirely (no PATH
+    # inherited) when getSubCommandEnv() returns non-null. For other batchq
+    # tests we leave the path as "batchq" so PATH inheritance handles it and
+    # cgpipe error messages (which echo argv[0] verbatim) stay machine-portable
+    # — otherwise the abs path leaks into stdout fixtures.
+    if [ "$scheduler" = "batchq" ] && grep -q 'batchqhome' "$test_file"; then
         echo "cgpipe.runner.batchq.path = \"$MOCKS_ROOT/batchq/batchq\""
     fi
 } > "$workdir/.cgpiperc"

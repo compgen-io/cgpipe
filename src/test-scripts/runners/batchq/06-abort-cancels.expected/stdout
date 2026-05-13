@@ -1,4 +1,4 @@
-CGPIPE ERROR Bad return code from submit: /home/mbreese/projects/cgpipe/src/test-scripts/runners/mocks/batchq/batchq submit  => (1) mock: forced failure on submit #2
+CGPIPE ERROR Bad return code from submit: batchq submit  => (1) mock: forced failure on submit #2
 
 
 #!/bin/bash
