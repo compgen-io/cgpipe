@@ -1,0 +1,12 @@
+# 11-trim-jobid: with trim_jobid=true the PBSTemplateRunner strips the dotted
+# cluster suffix from the qsub-returned id. The downstream target's depend
+# directive then references the trimmed jobid (e.g. "10001" not
+# "10001.cluster1"), and cgpipe's stdout lists the trimmed ids.
+
+cgpipe.runner.pbs.trim_jobid = true
+
+stage2.txt: stage1.txt
+    cat stage1.txt > stage2.txt
+
+stage1.txt:
+    echo upstream > stage1.txt

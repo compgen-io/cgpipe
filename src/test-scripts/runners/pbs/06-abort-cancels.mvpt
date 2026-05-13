@@ -1,0 +1,7 @@
+# 06-abort-cancels: failed mid-pipeline submit triggers `qdel <jobid>`.
+
+stage2.txt: stage1.txt
+    cat stage1.txt > stage2.txt
+
+stage1.txt:
+    echo upstream > stage1.txt

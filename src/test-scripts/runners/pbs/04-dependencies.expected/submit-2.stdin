@@ -1,0 +1,10 @@
+#!/bin/bash
+#PBS -N cgjob_stage2.txt
+#PBS -l nodes=1:ppn=1
+#PBS -W depend=afterok:10001.cluster1
+#PBS -d /cgpipe-test
+#
+set -eo pipefail
+JOB_ID=$PBS_JOBID
+cat stage1.txt > stage2.txt
+

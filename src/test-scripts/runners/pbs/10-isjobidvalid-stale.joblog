@@ -1,0 +1,4 @@
+99999.cluster1	OUTPUT	output.txt
+99999.cluster1	NAME	cgjob_output.txt
+99999.cluster1	PIPELINE	10-isjobidvalid-stale.mvpt
+99999.cluster1	WORKINGDIR	/cgpipe-test

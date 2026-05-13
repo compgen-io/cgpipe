@@ -1,0 +1,5 @@
+Job Id: 99999.cluster1
+    Job_Name = cgjob_output.txt
+    Job_Owner = test@cluster1
+    job_state = Q
+    queue = batch

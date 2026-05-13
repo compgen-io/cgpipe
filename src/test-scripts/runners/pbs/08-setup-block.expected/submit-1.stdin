@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -N cgjob_output.txt
+#PBS -l nodes=1:ppn=1
+#PBS -d /cgpipe-test
+#
+set -eo pipefail
+JOB_ID=$PBS_JOBID
+module load foo
+module load bar
+echo hi > output.txt
+

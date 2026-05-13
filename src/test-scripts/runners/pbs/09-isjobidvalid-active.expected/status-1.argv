@@ -1,0 +1,3 @@
+qstat
+-f
+99999.cluster1

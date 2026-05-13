@@ -1,0 +1,8 @@
+# 07-custom-directives: job.custom entries appear verbatim, each prefixed by
+# `#PBS `.
+
+output.txt:
+    <%
+    job.custom = ["-l gpus=1", "-l feature=avx512"]
+    %>
+    echo hi > output.txt
