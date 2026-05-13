@@ -25,6 +25,9 @@ jobs:
     - name: Build with Ant
       run: ant -noinput -buildfile build.xml
 
+    - name: Run tests
+      run: ./test.sh
+
     - name: Upload cgpipe binary
       uses: actions/upload-artifact@v4
       with:
