@@ -1,0 +1,22 @@
+=== exists ===
+true
+true
+false
+=== isfile ===
+true
+false
+false
+=== isdir ===
+false
+true
+false
+=== basename ===
+baz.txt
+bar
+single
+=== dirname ===
+/foo/bar
+/foo
+=== abspath ===
+/foo/bar/baz.txt
+/usr/bin/env
