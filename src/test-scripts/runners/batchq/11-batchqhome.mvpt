@@ -1,0 +1,9 @@
+# 11-batchqhome: setting batchqhome causes BATCHQ_HOME=<value> to be passed
+# in the env of every batchq subprocess (submit, release, cancel, status).
+# This test captures it during a submit + release cycle.
+
+cgpipe.runner.batchq.batchqhome = "/opt/batchq"
+cgpipe.runner.batchq.global_hold = true
+
+output.txt:
+    echo hi > output.txt

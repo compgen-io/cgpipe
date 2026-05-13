@@ -1,0 +1,8 @@
+# 04-dependencies: BatchQ joins dep ids with commas. A target's depend
+# directive references upstream jobids from the same run.
+
+stage2.txt: stage1.txt
+    cat stage1.txt > stage2.txt
+
+stage1.txt:
+    echo upstream > stage1.txt

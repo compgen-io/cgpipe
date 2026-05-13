@@ -1,0 +1,9 @@
+# 02-mem-procs: BatchQ passes job.mem through verbatim (no unit conversion)
+# and emits `#BATCHQ -procs <n>` when procs > 1.
+
+output.txt:
+    <%
+    job.mem = "8G"
+    job.procs = 4
+    %>
+    echo "hello" > output.txt

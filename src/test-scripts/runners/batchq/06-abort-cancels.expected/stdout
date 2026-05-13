@@ -1,0 +1,11 @@
+CGPIPE ERROR Bad return code from submit: /home/mbreese/projects/cgpipe/src/test-scripts/runners/mocks/batchq/batchq submit  => (1) mock: forced failure on submit #2
+
+
+#!/bin/bash
+#BATCHQ -name cgjob_stage2.txt
+#BATCHQ -afterok 10001
+#BATCHQ -wd .
+set -eo pipefail
+cat stage1.txt > stage2.txt
+
+

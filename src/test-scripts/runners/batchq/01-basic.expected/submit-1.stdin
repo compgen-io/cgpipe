@@ -1,0 +1,6 @@
+#!/bin/bash
+#BATCHQ -name cgjob_output.txt
+#BATCHQ -wd .
+set -eo pipefail
+echo "hello world" > output.txt
+

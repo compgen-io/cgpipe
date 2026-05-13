@@ -1,0 +1,7 @@
+# 05-hold-release: global_hold=true uses `batchq submit --hold` and emits
+# `batchq release <jobid>` after all submits succeed.
+
+cgpipe.runner.batchq.global_hold = true
+
+output.txt:
+    echo hi > output.txt

@@ -1,0 +1,8 @@
+# 07-custom-directives: job.custom entries appear verbatim, each prefixed by
+# `#BATCHQ `.
+
+output.txt:
+    <%
+    job.custom = ["-gpu 1", "-feature avx512"]
+    %>
+    echo hi > output.txt

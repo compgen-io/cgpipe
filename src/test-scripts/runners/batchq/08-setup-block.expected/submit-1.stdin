@@ -1,0 +1,8 @@
+#!/bin/bash
+#BATCHQ -name cgjob_output.txt
+#BATCHQ -wd .
+set -eo pipefail
+module load foo
+module load bar
+echo hi > output.txt
+
