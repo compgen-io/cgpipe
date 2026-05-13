@@ -1,0 +1,10 @@
+#!/bin/bash
+# Mock SGE qsub. Captures argv + the rendered submission script piped to stdin,
+# then prints a deterministic jobid (SGE uses -terse so the real qsub prints
+# just the numeric id).
+MOCK_NAME=qsub
+. "$(dirname "$0")/../lib.sh"
+capture_call submit "$@"
+maybe_fail submit "$LAST_SEQ"
+next_jobid
+echo

@@ -1,0 +1,32 @@
+#!/bin/bash
+# Mock BatchQ multi-tool. Dispatches on the subcommand. Captures BATCHQ_HOME
+# in the .env file so tests that exercise that env var can verify it.
+MOCK_NAME=batchq
+. "$(dirname "$0")/../lib.sh"
+
+case "${1:-}" in
+    submit)
+        capture_call submit "$@"
+        maybe_fail submit "$LAST_SEQ"
+        next_jobid
+        echo
+        ;;
+    release)
+        capture_call release "$@"
+        ;;
+    cancel)
+        capture_call cancel "$@"
+        ;;
+    status)
+        capture_call status "$@"
+        jobid="${2:-}"
+        if serve_response batchq "$jobid"; then
+            exit 0
+        fi
+        exit 1
+        ;;
+    *)
+        echo "mock-batchq: unknown subcommand: ${1:-}" >&2
+        exit 2
+        ;;
+esac

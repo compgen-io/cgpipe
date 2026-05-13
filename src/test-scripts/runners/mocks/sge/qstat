@@ -1,0 +1,21 @@
+#!/bin/bash
+# Mock SGE qstat. SGETemplateRunner.isJobIdValid calls `qstat -j <jobid>` and
+# only inspects the exit code (0 = job exists, non-zero = gone). We honor that
+# by checking for a canned response file keyed by jobid; presence = exit 0.
+MOCK_NAME=qstat
+. "$(dirname "$0")/../lib.sh"
+capture_call status "$@"
+
+# Extract jobid from argv: expect "-j <jobid>".
+jobid=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -j) jobid="$2"; shift 2 ;;
+        *)  shift ;;
+    esac
+done
+
+if serve_response qstat "$jobid"; then
+    exit 0
+fi
+exit 1

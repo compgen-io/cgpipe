@@ -1,0 +1,9 @@
+#!/bin/bash
+# Mock SLURM sbatch. SLURMTemplateRunner invokes `sbatch --parsable` so the
+# real sbatch prints just the bare numeric job id.
+MOCK_NAME=sbatch
+. "$(dirname "$0")/../lib.sh"
+capture_call submit "$@"
+maybe_fail submit "$LAST_SEQ"
+next_jobid
+echo
