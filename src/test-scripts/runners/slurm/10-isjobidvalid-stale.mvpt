@@ -1,0 +1,5 @@
+# 10-isjobidvalid-stale: scontrol fails (no response file for jobid 99999), so
+# cgpipe treats the job as gone and resubmits.
+
+output.txt:
+    echo hi > output.txt

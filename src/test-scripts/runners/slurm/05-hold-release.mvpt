@@ -1,0 +1,7 @@
+# 05-hold-release: global_hold=true uses `sbatch --parsable -H` and emits
+# `scontrol release <jobid>` after all submits succeed.
+
+cgpipe.runner.slurm.global_hold = true
+
+output.txt:
+    echo hi > output.txt

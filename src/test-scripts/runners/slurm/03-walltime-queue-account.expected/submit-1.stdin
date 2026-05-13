@@ -1,0 +1,11 @@
+#!/bin/bash
+#SBATCH -Q
+#SBATCH -J cgjob_output.txt
+#SBATCH -t 01:00:00
+#SBATCH -p longq
+#SBATCH -D /cgpipe-test
+#SBATCH -A proj-A
+set -eo pipefail
+JOB_ID=$SLURM_JOB_ID
+echo hi > output.txt
+

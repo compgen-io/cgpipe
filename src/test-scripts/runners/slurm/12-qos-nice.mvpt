@@ -1,0 +1,9 @@
+# 12-qos-nice: SLURM-specific qos and nice settings appear as
+# `#SBATCH --qos=` / `#SBATCH --nice=`.
+
+output.txt:
+    <%
+    job.qos = "high"
+    job.nice = 100
+    %>
+    echo hi > output.txt

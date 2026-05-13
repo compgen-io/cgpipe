@@ -1,0 +1,10 @@
+#!/bin/bash
+#SBATCH -Q
+#SBATCH -J cgjob_output.txt
+#SBATCH --qos=high
+#SBATCH -D /cgpipe-test
+#SBATCH --nice=100
+set -eo pipefail
+JOB_ID=$SLURM_JOB_ID
+echo hi > output.txt
+

@@ -1,0 +1,10 @@
+# 01-basic: minimal SLURM submission.
+# Verifies:
+#   - Submit command is `sbatch --parsable`
+#   - Default header lines (`#SBATCH -Q`, `#SBATCH -J <name>`)
+#   - `#SBATCH -D <job.wd>` carries the pinned working directory
+#   - Body lines pass through verbatim
+#   - cgpipe stdout is the submitted jobid
+
+output.txt:
+    echo "hello world" > output.txt

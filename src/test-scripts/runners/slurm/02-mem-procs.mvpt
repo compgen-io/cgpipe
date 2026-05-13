@@ -1,0 +1,9 @@
+# 02-mem-procs: SLURM converts "8G" -> "8000" (megabytes), and procs=4 turns
+# into `#SBATCH -c 4` + `#SBATCH -n 1` (cores within a single task).
+
+output.txt:
+    <%
+    job.mem = "8G"
+    job.procs = 4
+    %>
+    echo "hello" > output.txt
