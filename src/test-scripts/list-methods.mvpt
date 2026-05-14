@@ -2,10 +2,8 @@
 #   .length()       — element count
 #   .join(sep)      — delimited string (list-side; complements "sep".join(list))
 #   list * int      — repeat operator
-#
-# NOTE: method calls on inline list literals (e.g. `[].length()` or
-# `[1,2,3].length()`) currently crash with IndexOutOfBoundsException in
-# Eval.evalTokenExpression. We exercise the methods via stored variables only.
+# Methods are exercised against both stored-variable receivers and inline
+# list literals (e.g. `[].length()`).
 
 xs = ["a", "b", "c"]
 empty = []
@@ -15,12 +13,16 @@ print "=== length ==="
 print xs.length()
 print empty.length()
 print nums.length()
+print [].length()
+print [1, 2, 3, 4].length()
 
 print "=== join ==="
 print xs.join(",")
 print xs.join(" | ")
 print nums.join("-")
 print empty.join(",")
+print [1, 2, 3].join("-")
+print [].join(",")
 
 print "=== repeat ==="
 print xs * 2

@@ -281,9 +281,20 @@ public class Eval {
 //								System.exit(1);
 //							}
 						}
-						// pull whatever was immediately to the left of the slice
-						t = left.remove(left.size()-1);
-						methodBuf.add(0, t);
+						// Pull whatever was immediately to the left of the slice
+						// — but only if there's a value/variable there. For an
+						// inline list literal like `[].length()` or
+						// `[1,2,3].join(",")` the receiver is the bracket
+						// expression itself and there's nothing meaningful to
+						// the left; operators/parens belong to the enclosing
+						// expression, not the method's receiver.
+						if (!left.isEmpty()) {
+							Token prev = left.get(left.size() - 1);
+							if (prev.isValue() || prev.isVariable()) {
+								t = left.remove(left.size()-1);
+								methodBuf.add(0, t);
+							}
+						}
 //						System.err.println("3a");
 //						
 //						System.err.println("EVALUATING => " + StringUtils.join(";", methodBuf));
