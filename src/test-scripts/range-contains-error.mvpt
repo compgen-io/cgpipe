@@ -1,0 +1,3 @@
+# Range has no .contains() method.
+r = 1..5
+print r.contains(3)

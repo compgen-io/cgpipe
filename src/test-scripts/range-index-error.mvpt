@@ -1,0 +1,4 @@
+# Indexing a range errors. Pinned in a separate file so the error
+# normalization in test.sh works cleanly.
+r = 1..5
+print r[0]
