@@ -1,0 +1,6 @@
+# bool + non-string is invalid. Pinned in a dedicated file so the partial
+# output before the error can be matched cleanly via test.sh's
+# `CGPIPE ERROR.*` normalization.
+
+x = true
+print x + 1

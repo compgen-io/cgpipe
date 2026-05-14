@@ -1,0 +1,6 @@
+# Integer arithmetic uses Math.addExact / subtractExact / multiplyExact
+# (Java built-ins that throw on long overflow). cgpipe catches the
+# ArithmeticException and surfaces it as a CGPIPE ERROR rather than
+# silently wrapping. Pin the overflow path.
+
+print 9223372036854775807 + 1

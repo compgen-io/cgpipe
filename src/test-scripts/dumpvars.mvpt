@@ -1,0 +1,10 @@
+# dumpvars prints every variable currently in the root context, sorted by
+# name, one `key=value` line each. In the test harness, the set of defined
+# vars comes from:
+#   - cgpipe.loglevel (set from verbosity flag → 0 for -nolog)
+#   - bundled cgpiperc (cgpipe.remote.compgen_io.baseurl)
+#   - test/run/.cgpiperc (global_foo)
+#   - whatever this .mvpt sets
+
+foo = "myval"
+dumpvars

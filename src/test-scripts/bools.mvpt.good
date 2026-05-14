@@ -1,0 +1,13 @@
+=== print form ===
+true
+false
+=== interpolation ===
+true
+[false]
+=== bool + string ===
+trueX
+false_done
+Xtrue
+found: true
+=== bool + non-string is an error (separate file documents this) ===
+ok

@@ -1,0 +1,4 @@
+cgpipe.loglevel=0
+cgpipe.remote.compgen_io.baseurl=https://raw.githubusercontent.com/compgen-io/cgpipe-pipelines/main/
+foo=myval
+global_foo=bar

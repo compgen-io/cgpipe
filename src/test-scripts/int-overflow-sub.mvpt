@@ -1,0 +1,2 @@
+# Subtraction overflow path: LONG_MIN - 1 wraps. Pin the error.
+print -9223372036854775807 - 2
