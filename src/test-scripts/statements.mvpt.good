@@ -1,0 +1,10 @@
+=== sleep ===
+sleep returned
+=== log (silent with -nolog) ===
+log returned
+=== showhelp ===
+help: Pipeline test for the silent / show-output statements.
+: Verifies sleep, log, and showhelp parse and execute cleanly. The leading
+: comment block also doubles as the input for showhelp.
+
+after-showhelp
