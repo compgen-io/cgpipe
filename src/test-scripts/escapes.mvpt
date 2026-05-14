@@ -1,0 +1,23 @@
+# String-literal escape sequences.
+#
+# Supported (translated): \n  \t  \"  \\  \r
+# Everything else: the backslash is silently dropped, the following character
+# passes through verbatim. Notably, \$ does NOT escape interpolation — you
+# can't currently print a literal `${...}` from a quoted string.
+
+print "supported: a\nb"
+print "tab: a\tb"
+print "quote: a\"b"
+print "backslash: a\\b"
+print "cr: a\rb"
+
+# Unsupported escapes — backslash eaten, char passes through.
+print "backspace: a\bb"
+print "formfeed: a\fb"
+print "null: a\0b"
+print "hex-not-supported: a\x41b"
+
+# \$ does not escape interpolation. If x is defined, ${x} expands; if not,
+# it expands to empty. The backslash is just silently consumed either way.
+x = "VALUE"
+print "dollar-escape: \${x}"
