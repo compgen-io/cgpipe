@@ -1,0 +1,7 @@
+# exit <expr>: halts execution and propagates the value to cgpipe's exit code
+# (anything that doesn't coerce to int becomes -1). Statements after the exit
+# line do not run.
+
+print "before exit"
+exit 42
+print "after exit (should not appear)"

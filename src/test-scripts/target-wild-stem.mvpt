@@ -1,0 +1,21 @@
+# Wildcard stem matching and precedence:
+#   - `$%` inside a template-target body resolves to the captured stem
+#   - multi-dot stems: "chr1.var.vcf" via %.vcf → stem="chr1.var" (greedy
+#     left-side capture; the underlying regex is `(.*).vcf` anchored to the
+#     full filename)
+#   - explicit target wins over wildcard for the same output
+
+all: foo.txt bar.txt chr1.var.vcf
+
+# Explicit rule for foo.txt — should win over the wildcard below.
+foo.txt:
+    echo "explicit: foo"
+    touch $>
+
+%.txt:
+    echo "wild txt: out=$> stem=$%"
+    touch $>
+
+%.vcf:
+    echo "wild vcf: out=$> stem=$%"
+    touch $>

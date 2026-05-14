@@ -1,0 +1,34 @@
+# File-predicate and path-manipulation methods on VarString.
+# test.sh creates test/file1 and test/file2 (regular files) and the test/
+# directory itself before every test, so we can rely on those existing.
+
+print "=== exists ==="
+print "test/file1".exists()
+print "test".exists()
+print "test/does-not-exist".exists()
+
+print "=== isfile ==="
+print "test/file1".isfile()
+print "test".isfile()
+print "test/does-not-exist".isfile()
+
+print "=== isdir ==="
+print "test/file1".isdir()
+print "test".isdir()
+print "test/does-not-exist".isdir()
+
+# Path manipulation. Use absolute paths only — basename / dirname / abspath
+# resolve relative inputs against the JVM's CWD, so absolutes are the only
+# choice for a deterministic .good fixture.
+print "=== basename ==="
+print "/foo/bar/baz.txt".basename()
+print "/foo/bar/".basename()
+print "single".basename()
+
+print "=== dirname ==="
+print "/foo/bar/baz.txt".dirname()
+print "/foo/baz.txt".dirname()
+
+print "=== abspath ==="
+print "/foo/bar/baz.txt".abspath()
+print "/usr/bin/env".abspath()

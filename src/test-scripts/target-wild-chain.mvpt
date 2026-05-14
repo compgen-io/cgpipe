@@ -1,0 +1,18 @@
+# Multi-level wildcard chain: a single request for sample.bam.bai walks
+# %.bam.bai -> %.bam -> %.fastq, with the stem "sample" substituted into
+# inputs at each level. Verifies:
+#   - stem-substituted input wiring across multiple templates
+#   - $< / $> see the wildcard-resolved filenames inside the body
+#   - the chain assembles in the right order (deepest first)
+
+all: sample.bam.bai
+
+%.bam.bai: %.bam
+    echo "stage:bai out=$> in=$<"
+
+%.bam: %.fastq
+    echo "stage:bam out=$> in=$<"
+
+%.fastq:
+    echo "stage:fastq out=$>"
+    touch $>

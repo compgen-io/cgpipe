@@ -1,0 +1,24 @@
+cgpfunc_1() {
+JOB_ID="cgpfunc_1"
+echo "explicit: foo"
+touch foo.txt
+}
+cgpfunc_2() {
+JOB_ID="cgpfunc_2"
+echo "wild txt: out=bar.txt stem=bar"
+touch bar.txt
+}
+cgpfunc_3() {
+JOB_ID="cgpfunc_3"
+echo "wild vcf: out=chr1.var.vcf stem=chr1.var"
+touch chr1.var.vcf
+}
+if [ ! -e "foo.txt" ]; then
+cgpfunc_1 || exit $?
+fi
+if [ ! -e "bar.txt" ]; then
+cgpfunc_2 || exit $?
+fi
+if [ ! -e "chr1.var.vcf" ]; then
+cgpfunc_3 || exit $?
+fi

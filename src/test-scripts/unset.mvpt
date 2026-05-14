@@ -1,0 +1,15 @@
+# unset removes a previously-bound variable from scope. Subsequent reads of
+# the unset name silently resolve to empty — neither `print` nor `${...}`
+# interpolation raises an error, and execution continues. (Pin this so the
+# Go port can deliberately match or diverge.)
+
+foo = "hello"
+bar = "world"
+print foo
+print bar
+unset foo
+print bar
+print "--- after unset ---"
+print foo
+print "[${foo}]"
+print "this-line-still-reached"

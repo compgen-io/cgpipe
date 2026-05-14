@@ -1,0 +1,9 @@
+# `+1.5` is invalid syntax in cgpipe — there is no unary `+` operator. The
+# tokenizer emits a binary `+` with no left side, which the evaluator now
+# rejects cleanly with a "Operator '+' has no left operand" error rather than
+# crashing with a Java stack trace.
+#
+# test.sh normalizes "CGPIPE ERROR.*" to just "CGPIPE ERROR" before MD5, so
+# the .good file just pins the prefix.
+
+print +1.5

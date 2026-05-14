@@ -19,20 +19,20 @@ public class VarFloat extends VarValue {
 	}
 
 	public static String doubleToString(double d) {
-		if (d == Double.NaN) {
+		// NaN != NaN in IEEE, so the equality check is never true — use the
+		// dedicated predicate instead.
+		if (Double.isNaN(d)) {
 			return "NaN";
 		}
-		
-		if (Double.isInfinite(d)) {
-			return "Infinity";
-		}
 
-		if (d == Double.POSITIVE_INFINITY) {
-			return "Infinity";
-		}
-
+		// Order matters: check the negative case first, since Double.isInfinite
+		// is true for both signs and used to swallow -Infinity values.
 		if (d == Double.NEGATIVE_INFINITY) {
 			return "-Infinity";
+		}
+
+		if (Double.isInfinite(d)) {
+			return "Infinity";
 		}
 
 		String s = Double.toString(d);
