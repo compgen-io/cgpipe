@@ -11,9 +11,7 @@
 #   - print formatting strips a trailing ".0" (so 3.0 prints as "3" and 1.
 #     prints as "1")
 #   - int/int division truncates; int/float widens to float
-#   - 1.0 / 0.0 = Infinity (no exception); 0.0 / 0.0 = NaN
-#   - bug: -Infinity is printed as "Infinity" (VarFloat.doubleToString hits
-#     Double.isInfinite(d) before the d == NEGATIVE_INFINITY branch can fire)
+#   - 1.0 / 0.0 = Infinity (no exception); 0.0 / 0.0 = NaN; -1.0 / 0.0 = -Infinity
 
 print "=== literal parsing ==="
 print 1.5
