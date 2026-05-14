@@ -1,0 +1,11 @@
+# 02-mem-procs: memory + procs translation.
+# SGE divides h_vmem by procs when hvmem_total is false (the default), so
+# 8G / 4 = 2.0G per slot. Procs > 1 also activates the parallel-environment
+# directive ("-pe smp 4").
+
+output.txt:
+    <%
+    job.mem = "8G"
+    job.procs = 4
+    %>
+    echo "hello" > output.txt

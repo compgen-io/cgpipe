@@ -1,0 +1,9 @@
+#!/bin/bash
+#$ -w e
+#$ -terse
+#$ -N cgjob_stage1.txt
+#$ -wd /cgpipe-test
+#$ -notify
+set -eo pipefail
+echo upstream > stage1.txt
+

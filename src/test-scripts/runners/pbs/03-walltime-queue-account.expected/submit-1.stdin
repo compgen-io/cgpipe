@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -N cgjob_output.txt
+#PBS -l nodes=1:ppn=1,walltime=01:00:00
+#PBS -q longq
+#PBS -d /cgpipe-test
+#PBS -A proj-A
+#
+set -eo pipefail
+JOB_ID=$PBS_JOBID
+echo hi > output.txt
+

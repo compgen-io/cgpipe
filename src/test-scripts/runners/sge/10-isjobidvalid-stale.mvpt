@@ -1,0 +1,7 @@
+# 10-isjobidvalid-stale: pre-seeded joblog points at jobid 99999, but the
+# qstat mock has no response file for it so it exits non-zero. cgpipe should
+# recognize the job as gone and resubmit. Expected: one status call, one
+# submit call, stdout = newly-issued jobid.
+
+output.txt:
+    echo hi > output.txt

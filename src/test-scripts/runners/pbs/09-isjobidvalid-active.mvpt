@@ -1,0 +1,5 @@
+# 09-isjobidvalid-active: qstat -f returns "job_state = Q" so cgpipe skips
+# resubmission.
+
+output.txt:
+    echo hi > output.txt

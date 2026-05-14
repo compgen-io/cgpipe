@@ -1,0 +1,10 @@
+# 11-stdout-isdir: when job.stdout points at an existing directory, SLURM
+# template emits `#SBATCH -o <dir>/slurm-%j.out`. Otherwise it uses the path
+# verbatim. We use /tmp because it reliably exists and is a directory.
+
+output.txt:
+    <%
+    job.stdout = "/tmp"
+    job.stderr = "/tmp"
+    %>
+    echo hi > output.txt

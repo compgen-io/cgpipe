@@ -17,8 +17,15 @@ fi
 if [ "$1" == "" ]; then
     rm -f test/err
     # Skip remote-dependent tests during bulk runs.
-    find src/test-scripts -name '*.mvp' ! -name 'help.mvp' -exec $0 $VERBOSE \{\} \;
-    find src/test-scripts -name '*.mvpt' ! -name 'remote.mvpt' -exec $0 $VERBOSE \{\} \;
+    # Skip runners/ — those are driven by src/test-scripts/runners/runner-test.sh.
+    find src/test-scripts -name '*.mvp' ! -name 'help.mvp' ! -path '*/runners/*' -exec $0 $VERBOSE \{\} \;
+    find src/test-scripts -name '*.mvpt' ! -name 'remote.mvpt' ! -path '*/runners/*' -exec $0 $VERBOSE \{\} \;
+
+    # Drive the runner-test suite after language tests so a single ./test.sh
+    # exercises both. Verbose flag passes through.
+    if ! ./src/test-scripts/runners/runner-test.sh $VERBOSE; then
+        touch test/err
+    fi
 
     if [ -e test/err ]; then
         rm test/err

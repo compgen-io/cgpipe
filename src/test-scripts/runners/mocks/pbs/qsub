@@ -1,0 +1,11 @@
+#!/bin/bash
+# Mock PBS qsub. Real PBS qsub prints jobids like "12345.cluster1" so we emit
+# the same dotted form by default. Tests that set trim_jobid will see "12345"
+# end up in the joblog / dep ids after PBSTemplateRunner.submitScript strips it.
+MOCK_NAME=qsub
+MOCK_JOBID_FORMAT="%d.cluster1"
+. "$(dirname "$0")/../lib.sh"
+capture_call submit "$@"
+maybe_fail submit "$LAST_SEQ"
+next_jobid
+echo

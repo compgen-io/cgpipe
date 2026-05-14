@@ -1,0 +1,13 @@
+CGPIPE ERROR Bad return code from submit: sbatch --parsable  => (1) mock: forced failure on submit #2
+
+
+#!/bin/bash
+#SBATCH -Q
+#SBATCH -J cgjob_stage2.txt
+#SBATCH -d afterok:10001
+#SBATCH -D /cgpipe-test
+set -eo pipefail
+JOB_ID=$SLURM_JOB_ID
+cat stage1.txt > stage2.txt
+
+

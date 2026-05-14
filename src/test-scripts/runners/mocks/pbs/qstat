@@ -1,0 +1,20 @@
+#!/bin/bash
+# Mock PBS qstat. PBSTemplateRunner.isJobIdValid calls `qstat -f <jobid>` and
+# parses stdout for lines like "    job_state = Q". If retcode != 0 the job is
+# treated as gone.
+MOCK_NAME=qstat
+. "$(dirname "$0")/../lib.sh"
+capture_call status "$@"
+
+jobid=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -f) jobid="$2"; shift 2 ;;
+        *)  shift ;;
+    esac
+done
+
+if serve_response qstat "$jobid"; then
+    exit 0
+fi
+exit 1

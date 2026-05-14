@@ -1,0 +1,9 @@
+# 06-abort-cancels: when a submit fails mid-pipeline, the abort path issues
+# `qdel <jobid>` for every previously-submitted job. The mock fails the 2nd
+# submit (controlled via CGPIPE_MOCK_FAIL_SUBMIT_AT=2 in the harness driver).
+
+stage2.txt: stage1.txt
+    cat stage1.txt > stage2.txt
+
+stage1.txt:
+    echo upstream > stage1.txt

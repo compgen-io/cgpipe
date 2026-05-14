@@ -1,0 +1,9 @@
+#!/bin/bash
+#PBS -N cgjob_stage1.txt
+#PBS -l nodes=1:ppn=1
+#PBS -d /cgpipe-test
+#
+set -eo pipefail
+JOB_ID=$PBS_JOBID
+echo upstream > stage1.txt
+

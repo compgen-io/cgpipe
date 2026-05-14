@@ -1,0 +1,6 @@
+# 12-status-userhold: BatchQ recognises USERHOLD as a "still valid" state. Pre-
+# seeded joblog points at jobid 99999, the status mock returns USERHOLD, so
+# cgpipe should skip resubmission.
+
+output.txt:
+    echo hi > output.txt

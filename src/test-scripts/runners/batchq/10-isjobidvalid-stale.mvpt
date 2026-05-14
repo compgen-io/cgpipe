@@ -1,0 +1,4 @@
+# 10-isjobidvalid-stale: `batchq status` returns non-zero, cgpipe resubmits.
+
+output.txt:
+    echo hi > output.txt

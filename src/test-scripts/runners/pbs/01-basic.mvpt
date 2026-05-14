@@ -1,0 +1,4 @@
+# 01-basic: minimal PBS submission.
+
+output.txt:
+    echo "hello world" > output.txt

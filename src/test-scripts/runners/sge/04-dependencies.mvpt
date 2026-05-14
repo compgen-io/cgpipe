@@ -1,0 +1,8 @@
+# 04-dependencies: a target depending on another produces a `-hold_jid` line
+# referencing the upstream job-id. SGE uses comma-separated dep ids.
+
+stage2.txt: stage1.txt
+    cat stage1.txt > stage2.txt
+
+stage1.txt:
+    echo upstream > stage1.txt

@@ -1,0 +1,9 @@
+# 02-mem-procs: PBS appends "b" suffix to job.mem ("8G" -> "8gb") and embeds
+# procs in `nodes=1:ppn=<procs>`.
+
+output.txt:
+    <%
+    job.mem = "8G"
+    job.procs = 4
+    %>
+    echo "hello" > output.txt

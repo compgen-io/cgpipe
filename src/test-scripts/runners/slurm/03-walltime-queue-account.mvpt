@@ -1,0 +1,9 @@
+# 03-walltime-queue-account: scheduler-resource directives pass through.
+
+output.txt:
+    <%
+    job.walltime = "01:00:00"
+    job.queue = "longq"
+    job.account = "proj-A"
+    %>
+    echo hi > output.txt

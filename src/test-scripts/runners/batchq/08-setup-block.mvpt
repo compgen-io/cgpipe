@@ -1,0 +1,7 @@
+# 08-setup-block: job.setup lines run before the body.
+
+output.txt:
+    <%
+    job.setup = ["module load foo", "module load bar"]
+    %>
+    echo hi > output.txt

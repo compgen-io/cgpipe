@@ -1,0 +1,11 @@
+# 11-hvmem-total: when hvmem_total=true, job.mem is passed through unchanged
+# (no per-slot division), even with procs > 1.
+
+cgpipe.runner.sge.hvmem_total = true
+
+output.txt:
+    <%
+    job.mem = "8G"
+    job.procs = 4
+    %>
+    echo hi > output.txt

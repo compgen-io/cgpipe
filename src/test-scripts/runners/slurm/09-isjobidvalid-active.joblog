@@ -1,0 +1,4 @@
+99999	OUTPUT	output.txt
+99999	NAME	cgjob_output.txt
+99999	PIPELINE	09-isjobidvalid-active.mvpt
+99999	WORKINGDIR	/cgpipe-test

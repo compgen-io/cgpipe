@@ -1,0 +1,11 @@
+#!/bin/bash
+#$ -w e
+#$ -terse
+#$ -N cgjob_output.txt
+#$ -wd /cgpipe-test
+#$ -notify
+set -eo pipefail
+module load foo
+module load bar
+echo hi > output.txt
+

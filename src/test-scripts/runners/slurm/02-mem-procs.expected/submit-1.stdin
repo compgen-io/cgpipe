@@ -1,0 +1,11 @@
+#!/bin/bash
+#SBATCH -Q
+#SBATCH -J cgjob_output.txt
+#SBATCH -c 4
+#SBATCH -n 1
+#SBATCH --mem=8000
+#SBATCH -D /cgpipe-test
+set -eo pipefail
+JOB_ID=$SLURM_JOB_ID
+echo "hello" > output.txt
+

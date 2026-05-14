@@ -1,0 +1,10 @@
+#!/bin/bash
+#SBATCH -Q
+#SBATCH -J cgjob_output.txt
+#SBATCH -D /cgpipe-test
+set -eo pipefail
+JOB_ID=$SLURM_JOB_ID
+module load foo
+module load bar
+echo hi > output.txt
+

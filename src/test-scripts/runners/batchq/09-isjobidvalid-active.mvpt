@@ -1,0 +1,5 @@
+# 09-isjobidvalid-active: pre-seeded joblog plus a `batchq status` response of
+# "99999 QUEUED ..." → cgpipe skips resubmission.
+
+output.txt:
+    echo hi > output.txt

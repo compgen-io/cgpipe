@@ -1,0 +1,5 @@
+# 09-isjobidvalid-active: pre-seeded joblog points at jobid 99999, scontrol
+# mock returns `JobState=PENDING` so cgpipe skips resubmission.
+
+output.txt:
+    echo hi > output.txt

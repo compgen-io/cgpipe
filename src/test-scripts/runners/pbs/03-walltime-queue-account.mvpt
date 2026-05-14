@@ -1,0 +1,10 @@
+# 03-walltime-queue-account: walltime joins the `-l` resource list; queue and
+# account get their own directives.
+
+output.txt:
+    <%
+    job.walltime = "01:00:00"
+    job.queue = "longq"
+    job.account = "proj-A"
+    %>
+    echo hi > output.txt

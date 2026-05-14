@@ -1,0 +1,8 @@
+# 04-dependencies: PBS uses `#PBS -W depend=afterok:<id1>[:<id2>...]`. Without
+# trim_jobid, the dep ids include the cluster suffix from the mock.
+
+stage2.txt: stage1.txt
+    cat stage1.txt > stage2.txt
+
+stage1.txt:
+    echo upstream > stage1.txt

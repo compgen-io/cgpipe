@@ -1,0 +1,8 @@
+#!/bin/bash
+#SBATCH -Q
+#SBATCH -J cgjob_stage1.txt
+#SBATCH -D /cgpipe-test
+set -eo pipefail
+JOB_ID=$SLURM_JOB_ID
+echo upstream > stage1.txt
+

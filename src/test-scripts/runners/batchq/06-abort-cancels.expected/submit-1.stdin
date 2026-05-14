@@ -1,0 +1,6 @@
+#!/bin/bash
+#BATCHQ -name cgjob_stage1.txt
+#BATCHQ -wd .
+set -eo pipefail
+echo upstream > stage1.txt
+

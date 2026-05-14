@@ -1,0 +1,5 @@
+#!/bin/bash
+MOCK_NAME=qdel
+. "$(dirname "$0")/../lib.sh"
+capture_call cancel "$@"
+exit 0

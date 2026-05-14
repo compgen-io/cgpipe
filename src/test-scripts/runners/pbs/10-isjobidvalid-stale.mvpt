@@ -1,0 +1,4 @@
+# 10-isjobidvalid-stale: qstat fails (no response for jobid), cgpipe resubmits.
+
+output.txt:
+    echo hi > output.txt

@@ -1,0 +1,9 @@
+# 12-vmem: use_vmem=true makes the memory resource use vmem= instead of mem=.
+
+cgpipe.runner.pbs.use_vmem = true
+
+output.txt:
+    <%
+    job.mem = "8G"
+    %>
+    echo hi > output.txt

@@ -1,0 +1,10 @@
+# 03-walltime-mail: walltime + mail directives appear as `-walltime` / `-mail`.
+# (BatchQ template has no queue/account directives; those settings are silently
+# ignored.)
+
+output.txt:
+    <%
+    job.walltime = "01:00:00"
+    job.mail = "alice@example.com"
+    %>
+    echo hi > output.txt

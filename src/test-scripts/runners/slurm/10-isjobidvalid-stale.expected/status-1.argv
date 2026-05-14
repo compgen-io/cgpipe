@@ -1,0 +1,5 @@
+scontrol
+-o
+show
+job
+99999

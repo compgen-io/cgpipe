@@ -1,0 +1,36 @@
+#!/bin/bash
+# Mock SLURM scontrol. Used for two operations:
+#   scontrol -o show job <jobid>  -> isJobIdValid (parses JobState= and Reason=)
+#   scontrol release <jobid>      -> hold release
+MOCK_NAME=scontrol
+. "$(dirname "$0")/../lib.sh"
+
+# Dispatch on subcommand
+case "${1:-}" in
+    release)
+        capture_call release "$@"
+        exit 0
+        ;;
+    -o)
+        # scontrol -o show job <jobid>
+        capture_call status "$@"
+        jobid="${4:-}"
+        if serve_response scontrol "$jobid"; then
+            exit 0
+        fi
+        exit 1
+        ;;
+    show)
+        # scontrol show job <jobid>
+        capture_call status "$@"
+        jobid="${3:-}"
+        if serve_response scontrol "$jobid"; then
+            exit 0
+        fi
+        exit 1
+        ;;
+    *)
+        capture_call status "$@"
+        exit 1
+        ;;
+esac

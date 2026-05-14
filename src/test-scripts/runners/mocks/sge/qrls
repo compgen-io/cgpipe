@@ -1,0 +1,5 @@
+#!/bin/bash
+MOCK_NAME=qrls
+. "$(dirname "$0")/../lib.sh"
+capture_call release "$@"
+exit 0
