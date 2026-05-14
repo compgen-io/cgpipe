@@ -22,4 +22,9 @@ public class Not extends BasicOp {
 		return 150;
 	}
 
+	@Override
+	public boolean isUnary() {
+		return true;
+	}
+
 }

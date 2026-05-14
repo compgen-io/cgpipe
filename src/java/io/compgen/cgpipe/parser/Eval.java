@@ -391,6 +391,13 @@ public class Eval {
 				throw new ASTExecException("Too many tokens on line for operator: "+op.getSymbol()+ "("+left.size()+")");
 			}
 			return op.eval(context, left.get(0), evalTokenExpression(new TokenList(right, tokens.getLine()), context));
+		} else if (op.isUnary()) {
+			// Unary operators (e.g. `!`) take only a right operand; the
+			// left side is expected to be empty.
+			if (right.isEmpty()) {
+				throw new ASTExecException("Operator '" + op.getSymbol() + "' has no right operand", tokens);
+			}
+			return op.eval(context, (VarValue) null, evalTokenExpression(new TokenList(right, tokens.getLine()), context));
 		} else {
 			// Binary operators must have both sides. A bare leading `+` (e.g.
 			// the literal `+1.5`) lands here with an empty left side, which
