@@ -1,0 +1,2 @@
+# Multiplication overflow path.
+print 9000000000000000000 * 10
