@@ -392,6 +392,15 @@ public class Eval {
 			}
 			return op.eval(context, left.get(0), evalTokenExpression(new TokenList(right, tokens.getLine()), context));
 		} else {
+			// Binary operators must have both sides. A bare leading `+` (e.g.
+			// the literal `+1.5`) lands here with an empty left side, which
+			// used to NPE inside the operator's eval; report cleanly instead.
+			if (left.isEmpty()) {
+				throw new ASTExecException("Operator '" + op.getSymbol() + "' has no left operand", tokens);
+			}
+			if (right.isEmpty()) {
+				throw new ASTExecException("Operator '" + op.getSymbol() + "' has no right operand", tokens);
+			}
 			return op.eval(context, evalTokenExpression(new TokenList(left, tokens.getLine()), context), evalTokenExpression(new TokenList(right, tokens.getLine()), context));
 		}
 	

@@ -6,8 +6,8 @@
 #   - the literal parser is stricter than Float.parseFloat: it filters to
 #     [+-]?[0-9]*.?[0-9]* before calling parseDouble, so `1e3` / `Infinity`
 #     / `NaN` as source literals become *strings*, not floats
-#   - `+1.5` as a literal crashes (tokenizer treats it as binary `+` with
-#     missing lhs) — covered indirectly by NOT having a test for it
+#   - `+1.5` is invalid syntax — there is no unary `+` operator. Rejected
+#     cleanly with a "no left operand" error; see unary-plus.mvpt.
 #   - print formatting strips a trailing ".0" (so 3.0 prints as "3" and 1.
 #     prints as "1")
 #   - int/int division truncates; int/float widens to float
