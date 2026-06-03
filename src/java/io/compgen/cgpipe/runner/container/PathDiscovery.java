@@ -76,7 +76,7 @@ public final class PathDiscovery {
 			if (d == null || d.isEmpty() || !new File(d).isAbsolute()) {
 				continue;
 			}
-			String mount = trimTrailingSlash(d);
+			String mount = canonicalize(trimTrailingSlash(d));
 			if (!isDenylisted(mount)) {
 				dirs.add(mount);
 			}
@@ -92,12 +92,36 @@ public final class PathDiscovery {
 			} else {
 				mount = parentDir(p);
 			}
-			if (mount == null || mount.isEmpty() || isDenylisted(mount)) {
+			if (mount == null || mount.isEmpty()) {
+				continue;
+			}
+			mount = canonicalize(mount);
+			if (isDenylisted(mount)) {
 				continue;
 			}
 			dirs.add(mount);
 		}
 		return collapse(dirs);
+	}
+
+	/**
+	 * Resolve a path's symlinks if it exists on disk. This matters on macOS where /tmp is a
+	 * symlink to /private/tmp — Docker bind-mounts the canonical target, not the symlink, so
+	 * the host needs to write to the canonical path for the container to see the file.
+	 */
+	static String canonicalize(String path) {
+		if (path == null || path.isEmpty()) {
+			return path;
+		}
+		try {
+			File f = new File(path);
+			if (f.exists()) {
+				return trimTrailingSlash(f.getCanonicalPath());
+			}
+		} catch (java.io.IOException e) {
+			// fall through
+		}
+		return path;
 	}
 
 	private static String parentDir(String path) {

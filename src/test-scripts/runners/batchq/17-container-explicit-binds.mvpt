@@ -4,6 +4,7 @@
 # silently dropped if listed.
 
 cgpipe.container.engine = "docker"
+cgpipe.container.body_dir = "/cgpipe-bodydir"
 cgpipe.container.bind = ["/shared", "/etc/passwd"]
 job.container = "alpine:latest"
 

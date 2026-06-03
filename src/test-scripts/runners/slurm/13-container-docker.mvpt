@@ -3,6 +3,7 @@
 # template-agnostic — no SLURM template changes needed.
 
 cgpipe.container.engine = "docker"
+cgpipe.container.body_dir = "/cgpipe-bodydir"
 job.container = "alpine:latest"
 
 output.txt:

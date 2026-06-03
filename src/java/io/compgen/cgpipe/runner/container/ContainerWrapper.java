@@ -82,6 +82,11 @@ public final class ContainerWrapper {
 		if (bodyDir == null || bodyDir.isEmpty()) {
 			bodyDir = DEFAULT_BODY_DIR;
 		}
+		// Resolve symlinks: on macOS /tmp is a symlink to /private/tmp; mktemp on the host
+		// would write to the canonical path, but if we passed the symlinked path to mktemp
+		// the resulting shell variable would also point at the symlink, and the docker mount
+		// (which targets the canonical path) wouldn't expose that name inside the container.
+		bodyDir = PathDiscovery.canonicalize(bodyDir);
 
 		String workingDir = jobdef.getSetting("job.wd");
 		if (workingDir == null || workingDir.isEmpty()) {

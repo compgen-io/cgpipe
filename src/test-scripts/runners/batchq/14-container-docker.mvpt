@@ -3,6 +3,9 @@
 # directories, and /tmp (body_dir) are auto-mounted.
 
 cgpipe.container.engine = "docker"
+# Non-existent path so PathDiscovery.canonicalize is a no-op and the fixture renders
+# the same on macOS (where /tmp -> /private/tmp) and Linux.
+cgpipe.container.body_dir = "/cgpipe-bodydir"
 job.container = "alpine:latest"
 
 output.txt:

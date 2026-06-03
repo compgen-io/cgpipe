@@ -3,17 +3,18 @@
 #BATCHQ -output output.txt
 #BATCHQ -wd .
 set -eo pipefail
-__cgpipe_body=$(mktemp "/tmp/cgpipe-body.XXXXXX")
+__cgpipe_body=$(mktemp "/cgpipe-bodydir/cgpipe-body.XXXXXX")
 trap 'rm -f "$__cgpipe_body"' EXIT
 cat > "$__cgpipe_body" <<'__CGPIPE_BODY__'
 tool > output.txt
 __CGPIPE_BODY__
 
 docker run --rm \
-    -v /tmp:/tmp \
     -v /refs:/refs \
     -v /shared:/shared \
     -v /cgpipe-test:/cgpipe-test \
+    -v /cgpipe-bodydir:/cgpipe-bodydir \
+    -v /private/etc/passwd:/private/etc/passwd \
     -w /cgpipe-test \
     -u $(id -u):$(id -g) \
     alpine:latest \

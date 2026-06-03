@@ -3,6 +3,7 @@
 # closes at the right place.
 
 cgpipe.container.engine = "docker"
+cgpipe.container.body_dir = "/cgpipe-bodydir"
 job.container = "alpine:latest"
 
 output.txt:

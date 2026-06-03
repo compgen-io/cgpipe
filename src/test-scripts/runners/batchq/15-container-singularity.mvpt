@@ -3,6 +3,7 @@
 # docker:// prefix automatically so they pull from Docker Hub.
 
 cgpipe.container.engine = "singularity"
+cgpipe.container.body_dir = "/cgpipe-bodydir"
 job.container = "biocontainers/samtools:1.18"
 
 output.txt:
