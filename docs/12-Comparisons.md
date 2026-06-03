@@ -8,7 +8,7 @@ The short version:
 |---|---|---|---|---|
 | **Model** | Make-like (output-first) targets | Make-like (output-first) rules | Channel-based (data-flow) | Typed, call-based |
 | **Host language** | Custom DSL (`.cgp`) | Python + custom DSL | Groovy DSL | Custom DSL |
-| **Scheduler integration** | SGE / SLURM / PBS / BatchQ / SBS / bash | SLURM / SGE / PBS / Kubernetes / cloud (DRMAA-like) | SLURM / SGE / PBS / Kubernetes / AWS Batch / Google Batch / Azure | Cromwell / miniwdl / Terra back-ends |
+| **Scheduler integration** | SGE / SLURM / PBS / BatchQ / bash | SLURM / SGE / PBS / Kubernetes / cloud (DRMAA-like) | SLURM / SGE / PBS / Kubernetes / AWS Batch / Google Batch / Azure | Cromwell / miniwdl / Terra back-ends |
 | **Containers** | Manual via `__pre__`/`__post__` HEREDOC | First-class (`container:` directive) | First-class (`container` directive, profiles) | First-class (`runtime { docker: }`) |
 | **Cross-pipeline composition** | `include` (source-level) plus a persistent joblog (file-level coordination across unrelated pipelines) | Workflow imports (Python) | Pipeline subworkflows (Groovy) | Imported `.wdl` files |
 | **Typical scale** | Small to large pipelines, focus on HPC clusters | Same | Cloud-native and HPC | Typed, often used in large consortia (GATK, broadinstitute) |

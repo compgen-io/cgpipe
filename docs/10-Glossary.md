@@ -33,7 +33,7 @@ A short reference for terms used throughout this guide.
 
 **Opportunistic job.** A target with no outputs — just a leading colon and a list of inputs. Runs only if all inputs happen to be available (on disk, in the joblog, or submitted earlier in the same run). Never forces an input to be built. Used for cleanup, post-hoc reporting, optional bundling. See [Build Targets](05-Build_Targets.md#opportunistic-jobs).
 
-**Runner.** The backend that takes a rendered job script and submits it to a particular scheduler. CGPipe ships with runners for shell, SBS, SGE, SLURM, PBS, BatchQ, and Graphviz (graph rendering, not submission). Select with `cgpipe.runner`.
+**Runner.** The backend that takes a rendered job script and submits it to a particular scheduler. CGPipe ships with runners for shell, SGE, SLURM, PBS, BatchQ, and Graphviz (graph rendering, not submission). Select with `cgpipe.runner`.
 
 **Run ID.** A pipeline-wide identifier for all jobs from a single `cgpipe` invocation. Set via the `CGPIPE_RUN_ID` environment variable; exposed to scripts as `cgpipe.run_id`; passed through to BatchQ as `#BATCHQ -run-id`. Lets you group jobs from one pipeline even when they aren't dependent on each other.
 

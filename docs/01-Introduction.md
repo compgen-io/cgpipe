@@ -1,6 +1,6 @@
 # What is CGPipe?
 
-CGPipe is a language for building data-analysis pipelines. It's a declarative DSL with a Make-style syntax for defining targets, but instead of running them itself it submits each target as a job to a scheduler (SLURM, SGE, PBS, BatchQ, SBS). It also supports an export-as-shell-script mode for single-host work.
+CGPipe is a language for building data-analysis pipelines. It's a declarative DSL with a Make-style syntax for defining targets, but instead of running them itself it submits each target as a job to a scheduler (SLURM, SGE, PBS, BatchQ). It also supports an export-as-shell-script mode for single-host work.
 
 You define output files, which input files they need, and the script required to get from input > output. Each output file (or job) is defined separately. So what you end up with is a directed acyclic graph (DAG).
 
@@ -48,7 +48,7 @@ In this way, CGPipe is very similar to the `qmake` program that is available for
 
 * Build targets are scriptable with CGPipe templates
 
-* `qmake` is only available for SGE clusters and isn't available for other job schedulers. CGPipe pipelines can execute on SGE or SLURM systems as well as on single hosts with SBS or bash script exports (see below).
+* `qmake` is only available for SGE clusters and isn't available for other job schedulers. CGPipe pipelines can execute on SGE, SLURM, PBS, or BatchQ systems, as well as on single hosts via bash-script export (see below).
 
 * Multiple targets can be defined for the same output files, enabling multiple execution paths to build the same output files. This means that there can be multiple set of jobs defined to yield the same output file(s), based upon what input files are available. For example, you could have paired-end next-generation sequencing reads stored in two separate FASTQ files or one interleaved FASTQ file. Either of these inputs could be used in a read alignment step to produce a BAM file, but the arguments for the alignment program may be slightly different, depending on which type of input is used. With CGPipe, you can specify two different targets for the same output file, with the targets prioritized in the order they are defined in the pipeline. If the first target (or any of its inputs) can't be used, then the next target is attempted until all possible build-graphs are exhausted.
 
@@ -60,7 +60,7 @@ In this way, CGPipe is very similar to the `qmake` program that is available for
 
 ## Executing pipelines
 
-Jobs are normally run on an HPC cluster with a job scheduler (SLURM, SGE, PBS, or BatchQ). CGPipe sets up inter-job dependencies so each step waits for what it needs. For single-host work, use either the [SBS scheduler](http://compgen.io/sbs) or the default shell runner, which exports the entire pipeline as a single bash script.
+Jobs are normally run on an HPC cluster with a job scheduler (SLURM, SGE, PBS, or BatchQ). CGPipe sets up inter-job dependencies so each step waits for what it needs. For single-host work, use the default shell runner — it exports the entire pipeline as a single bash script.
 
 For more on selecting and configuring a runner, see [Running Jobs](07-Running_Jobs.md). For an exhaustive list of every variable and setting, see the [Configuration Reference](08-Configuration_Reference.md).
 

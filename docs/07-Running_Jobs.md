@@ -5,7 +5,6 @@ CGPipe doesn't execute target bodies itself. Instead, each rendered job script i
 | Runner | Used for | `cgpipe.runner` value |
 |--------|----------|-----------------------|
 | Shell | One-host execution; export to a single shell script | `shell` (default) |
-| SBS | Single-host queue (https://github.com/compgen-io/sbs) | `sbs` |
 | SGE / Open Grid Engine | Cluster | `sge` |
 | SLURM | Cluster | `slurm` |
 | PBS / Torque | Cluster | `pbs` |
@@ -23,36 +22,36 @@ Pick one with `cgpipe.runner = "..."`, usually in `~/.cgpiperc` or `/etc/cgpiper
 
 The following `job.*` variables are honored by the scheduler runners. Set them globally in the script, in `.cgpiperc`, or per-target inside a `<% %>` block.
 
-    job_setting       | description                            | sge | slurm | pbs | batchq | sbs | shell
-    ------------------+----------------------------------------+-----+-------+-----+--------+-----+------
-    job.name          | Display name for the job               |  X  |   X   |  X  |   X    |  X  |
-    job.procs         | CPUs per node                          |  X  |   X   |  X  |   X    |  X  |
-    job.walltime      | Wall-clock limit (HH:MM:SS or similar) |  X  |   X   |  X  |   X    |     |
-    job.mem           | Total RAM (e.g. "8G", "2048M")*        |  X  |   X   |  X  |   X    |  X  |
-    job.stack         | Stack size                             |  X  |       |     |        |     |
-    job.hold          | Submit with a user-hold                |  X  |   X   |  X  |   X    |  X  |
-    job.env           | Capture current env into the job       |  X  |   X   |  X  |   X    |     |
-    job.qos           | QoS request                            |     |   X   |  X  |        |     |
-    job.queue         | Queue name                             |     |       |  X  |        |     |
-    job.project       | Project tag                            |  X  |       |     |        |     |
-    job.priority      | Priority                               |  X  |       |     |        |     |
-    job.nice          | Niceness                               |     |       |  X  |        |     |
-    job.wd            | Working directory                      |  X  |   X   |  X  |   X    |  X  |
-    job.account       | Billing account                        |  X  |   X   |  X  |        |     |
-    job.mail          | Email for status                       |  X  |   X   |  X  |   X    |  X  |
-    job.mailtype      | When to mail                           |  X  |   X   |  X  |        |     |
-    job.stdout        | Capture stdout                         |  X  |   X   |  X  |   X    |  X  |
-    job.stderr        | Capture stderr                         |  X  |   X   |  X  |   X    |  X  |
-    job.shell         | Shell binary for the body              |  X  |   X   |  X  |   X    |     |
-    job.src           | Write the rendered script to this path |  X  |   X   |  X  |   X    |  X  |
-    job.setup         | Lines prepended to the job body        |  X  |   X   |  X  |   X    |  X  |
-    job.custom        | Extra lines added to the directive     |  X  |   X   |  X  |   X    |  X  |
-                      | block (#SBATCH, #PBS, etc.)            |     |       |     |        |     |
-    job.node.property | Node-property requirement              |     |       |  X  |        |     |
-    job.node.hostname | Specific host                          |     |       |  X  |        |     |
-    job.shexec        | Run directly on the submit host        |  X  |   X   |  X  |   X    |  X  |
-    job.nopre         | Skip global __pre__ for this target    |  X  |   X   |  X  |   X    |  X  |
-    job.nopost        | Skip global __post__ for this target   |  X  |   X   |  X  |   X    |  X  |
+    job_setting       | description                            | sge | slurm | pbs | batchq | shell
+    ------------------+----------------------------------------+-----+-------+-----+--------+------
+    job.name          | Display name for the job               |  X  |   X   |  X  |   X    |
+    job.procs         | CPUs per node                          |  X  |   X   |  X  |   X    |
+    job.walltime      | Wall-clock limit (HH:MM:SS or similar) |  X  |   X   |  X  |   X    |
+    job.mem           | Total RAM (e.g. "8G", "2048M")*        |  X  |   X   |  X  |   X    |
+    job.stack         | Stack size                             |  X  |       |     |        |
+    job.hold          | Submit with a user-hold                |  X  |   X   |  X  |   X    |
+    job.env           | Capture current env into the job       |  X  |   X   |  X  |   X    |
+    job.qos           | QoS request                            |     |   X   |  X  |        |
+    job.queue         | Queue name                             |     |       |  X  |        |
+    job.project       | Project tag                            |  X  |       |     |        |
+    job.priority      | Priority                               |  X  |       |     |        |
+    job.nice          | Niceness                               |     |       |  X  |        |
+    job.wd            | Working directory                      |  X  |   X   |  X  |   X    |
+    job.account       | Billing account                        |  X  |   X   |  X  |        |
+    job.mail          | Email for status                       |  X  |   X   |  X  |   X    |
+    job.mailtype      | When to mail                           |  X  |   X   |  X  |        |
+    job.stdout        | Capture stdout                         |  X  |   X   |  X  |   X    |
+    job.stderr        | Capture stderr                         |  X  |   X   |  X  |   X    |
+    job.shell         | Shell binary for the body              |  X  |   X   |  X  |   X    |
+    job.src           | Write the rendered script to this path |  X  |   X   |  X  |   X    |
+    job.setup         | Lines prepended to the job body        |  X  |   X   |  X  |   X    |
+    job.custom        | Extra lines added to the directive     |  X  |   X   |  X  |   X    |
+                      | block (#SBATCH, #PBS, etc.)            |     |       |     |        |
+    job.node.property | Node-property requirement              |     |       |  X  |        |
+    job.node.hostname | Specific host                          |     |       |  X  |        |
+    job.shexec        | Run directly on the submit host        |  X  |   X   |  X  |   X    |
+    job.nopre         | Skip global __pre__ for this target    |  X  |   X   |  X  |   X    |
+    job.nopost        | Skip global __post__ for this target   |  X  |   X   |  X  |   X    |
 
 \* Memory takes the total amount; CGPipe converts to per-slot units for runners that need them.
 
@@ -102,7 +101,7 @@ Each scheduler runner picks a shell for the rendered job body. The default looku
 
 ## Per-runner configuration
 
-Runners take settings under `cgpipe.runner.<name>.*`. All template-based runners (SGE/SLURM/PBS/SBS/BatchQ) share two:
+Runners take settings under `cgpipe.runner.<name>.*`. All template-based runners (SGE/SLURM/PBS/BatchQ) share two:
 
 - `cgpipe.runner.<name>.template` — path to a custom job template. The runner's built-in template covers most needs; override for cluster-specific quirks. Templates are themselves CGPipe code.
 - `cgpipe.runner.<name>.global_hold` — when `true`, every submitted job gets a user-hold. After the whole pipeline submits successfully, holds are released in order. This guarantees the pipeline only starts if all of it submitted cleanly, and protects against fast jobs finishing before their dependants are submitted.
@@ -115,13 +114,6 @@ There's also `cgpipe.runner.include_output_filenames = true`, which makes CGPipe
 
 - `cgpipe.runner.shell.filename` — write to this file instead. Repeated pipelines can append to the same file; CGPipe rewrites job names to avoid collisions.
 - `cgpipe.runner.shell.autoexec` — execute the generated script immediately instead of writing it. This makes `shell` behave like a fully local runner; only one job runs at a time.
-
-### SBS
-
-[SBS](https://github.com/compgen-io/sbs) is a lightweight scheduler for single-host use.
-
-- `cgpipe.runner.sbs.sbshome` — where SBS stores job state. Defaults to `./.sbs` or `$SBSHOME`.
-- `cgpipe.runner.sbs.path` — path to the `sbs` binary if it isn't on `$PATH`.
 
 ### SGE / OGE
 
@@ -177,7 +169,6 @@ A template is just a CGPipe file with the rendered directives at the top and `${
 * [SGETemplateRunner.template.cgp](https://github.com/compgen-io/cgpipe/blob/main/src/java/io/compgen/cgpipe/runner/SGETemplateRunner.template.cgp)
 * [SLURMTemplateRunner.template.cgp](https://github.com/compgen-io/cgpipe/blob/main/src/java/io/compgen/cgpipe/runner/SLURMTemplateRunner.template.cgp)
 * [BatchQTemplateRunner.template.cgp](https://github.com/compgen-io/cgpipe/blob/main/src/java/io/compgen/cgpipe/runner/BatchQTemplateRunner.template.cgp)
-* [SBSTemplateRunner.template.cgp](https://github.com/compgen-io/cgpipe/blob/main/src/java/io/compgen/cgpipe/runner/SBSTemplateRunner.template.cgp)
 
 Templates have access to every `job.*` value plus a few internal helpers (`job._body`, `job._inputs`, `job._outputs`).
 

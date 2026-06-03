@@ -76,7 +76,7 @@ Settings under the `cgpipe.*` namespace affect CGPipe itself (logging, runner ch
 
 | Variable | Type | Purpose |
 |----------|------|---------|
-| `cgpipe.runner` | string | Runner name: `shell`, `sbs`, `sge`, `slurm`, `pbs`, `batchq`, `graphviz`. |
+| `cgpipe.runner` | string | Runner name: `shell`, `sge`, `slurm`, `pbs`, `batchq`, `graphviz`. |
 | `cgpipe.runner.<name>.<setting>` | varies | Runner-specific. See [Running Jobs](07-Running_Jobs.md). |
 | `cgpipe.runner.include_output_filenames` | bool | Print output filenames alongside job ids on submission. |
 

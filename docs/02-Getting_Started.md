@@ -57,7 +57,7 @@ CGPipe can run on a single user workstation, server, or HPC cluster. If you want
 workflows by submitting jobs to a scheduler, it's necessary to configure CGPipe to use your scheduler. 
 In CGPipe job submission is handled by "job runners".
 
-The currently supported job schedulers are: SBS, SGE, SLURM, or PBS. For more information about available 
+The currently supported job schedulers are: SGE, SLURM, PBS, and BatchQ. For more information about available 
 runners, or the possible configuration settings, see "Running jobs".
 
 If no scheduler is configured, jobs will be written as a bash script to stdout.
