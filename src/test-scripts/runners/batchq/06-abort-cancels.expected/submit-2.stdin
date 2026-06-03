@@ -1,6 +1,8 @@
 #!/bin/bash
 #BATCHQ -name cgjob_stage2.txt
 #BATCHQ -afterok 10001
+#BATCHQ -input stage1.txt
+#BATCHQ -output stage2.txt
 #BATCHQ -wd .
 set -eo pipefail
 cat stage1.txt > stage2.txt

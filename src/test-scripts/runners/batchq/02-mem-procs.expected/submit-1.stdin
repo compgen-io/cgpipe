@@ -2,6 +2,7 @@
 #BATCHQ -name cgjob_output.txt
 #BATCHQ -procs 4
 #BATCHQ -mem 8G
+#BATCHQ -output output.txt
 #BATCHQ -wd .
 set -eo pipefail
 echo "hello" > output.txt

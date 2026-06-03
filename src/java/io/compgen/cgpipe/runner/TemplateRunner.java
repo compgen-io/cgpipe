@@ -73,7 +73,7 @@ public abstract class TemplateRunner extends JobRunner {
 		}
 
 		cxt.set("job._body", new VarString(jobdef.getBody()));
-		
+
 		VarList outputs = new VarList();
 		for (String out:jobdef.getOutputs()) {
 			try {
@@ -81,8 +81,18 @@ public abstract class TemplateRunner extends JobRunner {
 			} catch (VarTypeException e) {
 			}
 		}
-		
+
 		cxt.set("job._outputs", outputs);
+
+		VarList inputs = new VarList();
+		for (String in:jobdef.getInputs()) {
+			try {
+				inputs.add(new VarString(in));
+			} catch (VarTypeException e) {
+			}
+		}
+
+		cxt.set("job._inputs", inputs);
 		
 		if (!cxt.contains("job.wd")) {
 			try {
