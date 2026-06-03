@@ -1,6 +1,6 @@
 # What is CGPipe?
 
-CGPipe is a language for building data-analysis pipelines. It's a declarative DSL with a Make-style syntax for defining targets, but instead of running them itself it submits each target as a job to a scheduler (SLURM, SGE, PBS, BatchQ). It also supports an export-as-shell-script mode for single-host work.
+CGPipe is a language for building data-analysis pipelines. It's a small declarative DSL for defining build targets and their dependencies, but instead of running them itself it submits each target as a job to a scheduler (SLURM, SGE, PBS, BatchQ). It also supports an export-as-shell-script mode for single-host work.
 
 You define output files, which input files they need, and the script required to get from input > output. Each output file (or job) is defined separately. So what you end up with is a directed acyclic graph (DAG).
 

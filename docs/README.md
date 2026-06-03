@@ -1,6 +1,6 @@
 # CGPipe documentation
 
-CGPipe is a Make-like pipeline language that compiles target definitions into job-scheduler submissions (SLURM, SGE, PBS, BatchQ, or plain bash).
+CGPipe is a pipeline language that compiles target definitions into job-scheduler submissions (SLURM, SGE, PBS, BatchQ, or plain bash).
 
 | | Chapter | What's in it |
 |--|---|---|

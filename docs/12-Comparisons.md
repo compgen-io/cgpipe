@@ -6,7 +6,7 @@ The short version:
 
 | | CGPipe | Snakemake | Nextflow | WDL |
 |---|---|---|---|---|
-| **Model** | Make-like (output-first) targets | Make-like (output-first) rules | Channel-based (data-flow) | Typed, call-based |
+| **Model** | Output-first targets | Output-first rules (Make-like) | Channel-based (data-flow) | Typed, call-based |
 | **Host language** | Custom DSL (`.cgp`) | Python + custom DSL | Groovy DSL | Custom DSL |
 | **Scheduler integration** | SGE / SLURM / PBS / BatchQ / bash | SLURM / SGE / PBS / Kubernetes / cloud (DRMAA-like) | SLURM / SGE / PBS / Kubernetes / AWS Batch / Google Batch / Azure | Cromwell / miniwdl / Terra back-ends |
 | **Containers** | Manual via `__pre__`/`__post__` HEREDOC | First-class (`container:` directive) | First-class (`container` directive, profiles) | First-class (`runtime { docker: }`) |
@@ -49,6 +49,34 @@ This is fundamentally different from the alternatives:
 - **WDL** is the heaviest: you write a JSON inputs file with typed values and submit it to an engine (`cromwell run pipeline.wdl --inputs inputs.json`). Excellent for reproducibility at the cost of fluidity for ad-hoc work.
 
 When you're iterating on a new pipeline, writing a wrapper that submits N variations of one pipeline with different arguments, or composing several small pipelines into a project-level workflow, the executable-script model is dramatically lighter weight. When you're publishing a fixed pipeline for many users to run with rigorous reproducibility, the heavier alternatives offer guarantees CGPipe doesn't.
+
+### Dynamic structure at invocation time
+
+A corollary of the executable-script model: the *shape* of the pipeline can be computed at run time from whatever the script can see — environment variables, command-line arguments, shell-escape output, the size of an input file. The number of per-chunk jobs in a fan-out isn't baked into the source; it's whatever the user passes in or whatever the script discovers when it runs.
+
+A typical pattern:
+
+    chunks ?= $(nproc)      # default to host CPU count; user can override
+    for i in 1..chunks
+        ^shard.${i}.bam: ${bam}
+            <% job.name = "shard-${i}" %>
+            samtools view -h --subsample 0.${i} ${bam} > $>
+    done
+
+    merged.bam: @{shards}
+        samtools merge -o $> $<
+
+Run on a host with 4 cores → 4 shards. Run on a host with 32 cores → 32 shards. Pass `-chunks 16` → 16 shards. Same script.
+
+The alternatives handle this in different ways:
+
+- **Snakemake.** Same pattern works using Python at Snakefile-parse time. The Snakefile is re-executed by Python on every `snakemake` invocation, so reading `os.environ` or calling `os.cpu_count()` produces the right behavior. Capability is present; you're writing Python config that wraps the rules. For chunk counts that depend on the *output of an earlier job* (not knowable at parse time), Snakemake's `checkpoint` rules cover the case with notable boilerplate.
+
+- **Nextflow.** Channels are inherently runtime, and Groovy in the workflow definition can compute counts from environment. Comparable power; the channel-operator vocabulary is a separate learning curve.
+
+- **WDL.** Limited. WDL is statically typed and declarative — you can declare `Int nodes` as a workflow input and `scatter (i in range(nodes))`, but `nodes` itself can't be computed inside the workflow. In practice this means a wrapper script that calls `nproc` (or whatever), writes a JSON inputs file, then invokes Cromwell. Two files instead of one.
+
+The capability gap is mostly between WDL and the other three. The *ergonomic* difference between CGPipe, Snakemake, and Nextflow comes back to "script vs. config-for-an-engine." CGPipe reads `$(nproc)` the way bash does and constructs a `for` loop the way bash does; there's no separate Python layer or channel-DAG layer. When the script changes its mind about how many chunks to produce, you didn't have to think about which abstraction holds that state — the script just runs differently.
 
 ## vs. GNU Make and `qmake`
 
