@@ -2,6 +2,7 @@
 #BATCHQ -name cgjob_output.txt
 #BATCHQ -walltime 01:00:00
 #BATCHQ -mail alice@example.com
+#BATCHQ -output output.txt
 #BATCHQ -wd .
 set -eo pipefail
 echo hi > output.txt

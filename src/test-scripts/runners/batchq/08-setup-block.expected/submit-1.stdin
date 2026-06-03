@@ -1,5 +1,6 @@
 #!/bin/bash
 #BATCHQ -name cgjob_output.txt
+#BATCHQ -output output.txt
 #BATCHQ -wd .
 set -eo pipefail
 module load foo

@@ -26,6 +26,16 @@ if job.procs > 1 %>
 <% if job.stderr %>
 #BATCHQ -stderr ${job.stderr}
 <% endif %>
+<% for input in job._inputs %>
+<% if input %>
+#BATCHQ -input ${input}
+<% endif %>
+<% done %>
+<% for output in job._outputs %>
+<% if output %>
+#BATCHQ -output ${output}
+<% endif %>
+<% done %>
 <% for custom in job.custom %>
 <% if custom %>
 #BATCHQ ${custom}
