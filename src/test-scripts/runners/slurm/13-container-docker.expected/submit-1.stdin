@@ -1,0 +1,20 @@
+#!/bin/bash
+#SBATCH -Q
+#SBATCH -J cgjob_output.txt
+#SBATCH -D /cgpipe-test
+set -eo pipefail
+JOB_ID=$SLURM_JOB_ID
+__cgpipe_body=$(mktemp "/tmp/cgpipe-body.XXXXXX")
+trap 'rm -f "$__cgpipe_body"' EXIT
+cat > "$__cgpipe_body" <<'__CGPIPE_BODY__'
+echo "hello container" > output.txt
+__CGPIPE_BODY__
+
+docker run --rm \
+    -v /tmp:/tmp \
+    -v /cgpipe-test:/cgpipe-test \
+    -w /cgpipe-test \
+    -u $(id -u):$(id -g) \
+    alpine:latest \
+    bash "$__cgpipe_body"
+

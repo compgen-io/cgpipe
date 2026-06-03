@@ -1,0 +1,18 @@
+#!/bin/bash
+#BATCHQ -name cgjob_output.txt
+#BATCHQ -output output.txt
+#BATCHQ -wd .
+set -eo pipefail
+__cgpipe_body=$(mktemp "/tmp/cgpipe-body.XXXXXX")
+trap 'rm -f "$__cgpipe_body"' EXIT
+cat > "$__cgpipe_body" <<'__CGPIPE_BODY__'
+samtools --version > output.txt
+__CGPIPE_BODY__
+
+singularity exec \
+    -B /tmp:/tmp \
+    -B /cgpipe-test:/cgpipe-test \
+    --pwd /cgpipe-test \
+    docker://biocontainers/samtools:1.18 \
+    bash "$__cgpipe_body"
+

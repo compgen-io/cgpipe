@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 
 import io.compgen.cgpipe.exceptions.RunnerException;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.cgpipe.runner.container.ContainerWrapper;
 import io.compgen.common.StringUtils;
 
 public class ShellScriptRunner extends JobRunner {
@@ -101,7 +102,7 @@ public class ShellScriptRunner extends JobRunner {
 				preLines.add("");
 				preLines.add(job.getJobId() + "() {");
 				preLines.add("JOB_ID=\""+job.getJobId()+"\"");
-				preLines.add(job.getBody());
+				preLines.add(ContainerWrapper.maybeWrap(job, rootContext));
 				preLines.add("}");
 			}
 		}
