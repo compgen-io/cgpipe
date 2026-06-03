@@ -12,6 +12,10 @@ public interface Operator {
 	public String getSymbol();
 	public int getPriority();
 
+	// Unary operators (e.g. `!`) have no left operand and the eval should
+	// not insist on one. Default false; override to true.
+	default public boolean isUnary() { return false; }
+
 	public static final Operator RANGE = new Range(); // ..
 	public static final Operator NOT = new Not(); // !
 	public static final Operator EQ = new Eq(); // ==

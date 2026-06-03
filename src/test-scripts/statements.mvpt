@@ -1,0 +1,16 @@
+#help: Pipeline test for the silent / show-output statements.
+#: Verifies sleep, log, and showhelp parse and execute cleanly. The leading
+#: comment block also doubles as the input for showhelp.
+
+print "=== sleep ==="
+sleep 0
+print "sleep returned"
+
+print "=== log (silent with -nolog) ==="
+log "this goes to commons-logging, not stdout"
+log "interpolation works: ${1 + 1}"
+print "log returned"
+
+print "=== showhelp ==="
+showhelp
+print "after-showhelp"

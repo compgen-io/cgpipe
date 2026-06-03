@@ -1,0 +1,24 @@
+# VarBool semantics:
+#   - "true" / "false" literals print lowercase
+#   - bool + string → concat (string operand triggers implicit toString()
+#     on the bool, mirroring how int+string and float+string already behave)
+#   - bool + non-string (int, float, bool) → invalid-operation error
+
+print "=== print form ==="
+print true
+print false
+
+print "=== interpolation ==="
+x = true
+y = false
+print "${x}"
+print "[${y}]"
+
+print "=== bool + string ==="
+print true + "X"
+print false + "_done"
+print "X" + true
+print "found: " + true
+
+print "=== bool + non-string is an error (separate file documents this) ==="
+print "ok"

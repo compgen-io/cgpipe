@@ -1,0 +1,16 @@
+=== basic ===
+1 2 3 4 5
+5
+=== single element ===
+3
+1
+=== reverse (start > end) ===
+[]
+-3
+=== float endpoints get truncated to long ===
+1 2 3 4
+4
+=== interpolation matches toString (space-joined) ===
+scalar: 1 2 3
+list-style: 1 2 3
+=== unsupported operations error ===

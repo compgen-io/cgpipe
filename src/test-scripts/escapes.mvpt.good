@@ -1,0 +1,11 @@
+supported: a
+b
+tab: a	b
+quote: a"b
+backslash: a\b
+cr: ab
+backspace: abb
+formfeed: afb
+null: a0b
+hex-not-supported: ax41b
+dollar-escape: VALUE

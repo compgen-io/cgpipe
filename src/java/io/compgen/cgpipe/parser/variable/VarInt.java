@@ -32,7 +32,11 @@ public class VarInt extends VarValue {
 
 	public VarValue add(VarValue val) throws VarTypeException {
 		if (val.getClass().equals(VarInt.class)) {
-			return new VarInt((Long)obj + (Long)val.obj);
+			try {
+				return new VarInt(Math.addExact((Long)obj, (Long)val.obj));
+			} catch (ArithmeticException e) {
+				throw new VarTypeException("Integer overflow");
+			}
 		} else if (val.getClass().equals(VarFloat.class)) {
 			return new VarFloat((Long)obj + (Double)val.obj);
 		} else {
@@ -42,7 +46,11 @@ public class VarInt extends VarValue {
 
 	public VarValue sub(VarValue val) throws VarTypeException {
 		if (val.getClass().equals(VarInt.class)) {
-			return new VarInt((Long)obj - (Long)val.obj);
+			try {
+				return new VarInt(Math.subtractExact((Long)obj, (Long)val.obj));
+			} catch (ArithmeticException e) {
+				throw new VarTypeException("Integer overflow");
+			}
 		} else if (val.getClass().equals(VarFloat.class)) {
 			return new VarFloat((Long)obj - (Double)val.obj);
 		}
@@ -51,7 +59,11 @@ public class VarInt extends VarValue {
 
 	public VarValue mul(VarValue val) throws VarTypeException {
 		if (val.getClass().equals(VarInt.class)) {
-			return new VarInt((Long)obj * (Long)val.obj);
+			try {
+				return new VarInt(Math.multiplyExact((Long)obj, (Long)val.obj));
+			} catch (ArithmeticException e) {
+				throw new VarTypeException("Integer overflow");
+			}
 		} else if (val.getClass().equals(VarFloat.class)) {
 			return new VarFloat((Long)obj * (Double)val.obj);
 		} else if (val.getClass().equals(VarList.class)) {

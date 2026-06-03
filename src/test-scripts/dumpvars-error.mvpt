@@ -1,0 +1,3 @@
+# `dumpvars` rejects any arguments — pin the error path.
+
+dumpvars foo

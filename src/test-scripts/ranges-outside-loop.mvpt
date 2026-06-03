@@ -1,0 +1,35 @@
+# VarRange is a distinct lazy-iterable type, not a list. ranges.mvpt covers
+# the for-loop case; this file pins the behavior when a range is used as a
+# value: print form, .length(), interpolation, and what *doesn't* work.
+
+print "=== basic ==="
+r = 1..5
+print r
+print r.length()
+
+print "=== single element ==="
+r = 3..3
+print r
+print r.length()
+
+print "=== reverse (start > end) ==="
+# Reverse range iterates to nothing (the for-loop body never runs) and
+# length is end-start+1 → negative. The Go port can fix or mirror this;
+# either way it should not be a silent corruption source.
+r = 5..1
+print "[${r}]"
+print r.length()
+
+print "=== float endpoints get truncated to long ==="
+r = 1.7..4.2
+print r
+print r.length()
+
+print "=== interpolation matches toString (space-joined) ==="
+r = 1..3
+print "scalar: ${r}"
+print "list-style: @{r}"
+
+print "=== unsupported operations error ==="
+# Range is not a list — no indexing, no contains. The Go port can choose to
+# add these later (probably via a .toList() conversion).
