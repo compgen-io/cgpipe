@@ -10,11 +10,45 @@ The short version:
 | **Host language** | Custom DSL (`.cgp`) | Python + custom DSL | Groovy DSL | Custom DSL |
 | **Scheduler integration** | SGE / SLURM / PBS / BatchQ / SBS / bash | SLURM / SGE / PBS / Kubernetes / cloud (DRMAA-like) | SLURM / SGE / PBS / Kubernetes / AWS Batch / Google Batch / Azure | Cromwell / miniwdl / Terra back-ends |
 | **Containers** | Manual via `__pre__`/`__post__` HEREDOC | First-class (`container:` directive) | First-class (`container` directive, profiles) | First-class (`runtime { docker: }`) |
-| **Cross-pipeline composition** | Persistent joblog (file-based) | Workflow imports (Python) | Pipeline subworkflows (Groovy) | Imported `.wdl` files |
+| **Cross-pipeline composition** | `include` (source-level) plus a persistent joblog (file-level coordination across unrelated pipelines) | Workflow imports (Python) | Pipeline subworkflows (Groovy) | Imported `.wdl` files |
 | **Typical scale** | Small to large pipelines, focus on HPC clusters | Same | Cloud-native and HPC | Typed, often used in large consortia (GATK, broadinstitute) |
 | **Best at** | Lightweight, shell-script-feeling pipelines that integrate with existing scheduler/joblog | Reproducible scientific pipelines with strong defaults | Cloud-portable workflows with rich data-flow operators | Strict typing, sharing across institutions |
 
 The rest of this chapter walks through each tool in more depth and shows how a common pattern (per-chromosome variant calling) looks in each.
+
+## A distinguishing feature: pipelines are executable scripts
+
+The single largest day-to-day difference between CGPipe and the alternatives is that a CGPipe pipeline file *is* an executable script — same shebang line, same `chmod +x`, same argument handling as a bash or Python program:
+
+    #!/usr/bin/env cgpipe
+    #
+    # Options:
+    #     --bam FILE   input BAM
+    #     --out FILE   output VCF
+
+    if !bam
+        print "ERROR: --bam is required"
+        exit 1
+    endif
+    ...
+
+    $ ./call-variants -bam sample.bam -out sample.vcf
+
+That short detail has consequences:
+
+- **Arguments are first-class.** `-name value` pairs on the command line become CGPipe variables. No JSON inputs file, no YAML config, no `--config key=value` indirection. A user typing `./pipeline.cgp -reads sample.fq -ref hg38.fa` is using a normal Unix CLI.
+- **Pipelines compose like other Unix tools.** A CGPipe pipeline can be invoked from a shell loop, a Makefile, another CGPipe pipeline (via shell escape or `cgsub`), a CI job, or a wrapper script. There's nothing magical about it — it's just a program that happens to submit jobs.
+- **Conditional structure resolves at invocation time.** The same pipeline file can produce different build graphs depending on its arguments. `--by_chrom true` swaps the whole topology between a single job and a 24-way fan-out (see [Tutorial 4](tutorials/04-map-reduce.md)). The script *is* the pipeline; you're not editing a config to change behavior.
+- **Help text is just comments.** Leading `#` lines become `--help` output. No separate manifest. Authors get free documentation just by writing comments at the top.
+- **`?=` lets pipelines configure themselves.** Defaults fall back to environment variables, config files, or hard-coded values — but the invocation always wins. Composing pipelines into larger workflows means *passing arguments down*, not editing config files at each layer.
+
+This is fundamentally different from the alternatives:
+
+- **Snakemake** runs as `snakemake --config sample=foo` against a `Snakefile`, or via `--configfile config.yaml`. Workable, but invocation has the shape "tell snakemake about a workflow file" rather than "run this script."
+- **Nextflow** runs as `nextflow run pipeline.nf --reads sample.fq`. Better than Snakemake here, but the `nextflow` runtime is a layer in front of the pipeline.
+- **WDL** is the heaviest: you write a JSON inputs file with typed values and submit it to an engine (`cromwell run pipeline.wdl --inputs inputs.json`). Excellent for reproducibility at the cost of fluidity for ad-hoc work.
+
+When you're iterating on a new pipeline, writing a wrapper that submits N variations of one pipeline with different arguments, or composing several small pipelines into a project-level workflow, the executable-script model is dramatically lighter weight. When you're publishing a fixed pipeline for many users to run with rigorous reproducibility, the heavier alternatives offer guarantees CGPipe doesn't.
 
 ## vs. GNU Make and `qmake`
 
@@ -37,7 +71,7 @@ CGPipe started from Make's mental model: targets, prerequisites, recipes. The di
 - **Wildcard semantics.** Snakemake's `{wildcards}` are namespaced per-rule and matched by regex; CGPipe's `%` is a single stem captured into `$%`. Snakemake's approach is more flexible at the cost of more cognitive overhead.
 - **Configuration.** Snakemake reads YAML/JSON configs by convention. CGPipe uses `.cgpiperc` files and command-line `-name value` pairs. CGPipe doesn't have a built-in config-schema concept.
 - **Containers.** Snakemake has first-class container support (`container: "docker://..."` per rule, plus Singularity profiles). In CGPipe you wire containers through `__pre__`/`__post__` HEREDOCs — flexible but more verbose. See [Tutorial 9](tutorials/09-containers.md).
-- **Cross-pipeline composition.** Snakemake composes via Python `include:` and subworkflows. CGPipe composes through a shared joblog: separate pipelines that all write to the same joblog automatically coordinate without code changes. See [Running Jobs §Joblogs](07-Running_Jobs.md#joblogs).
+- **Cross-pipeline composition: two mechanisms.** Snakemake composes via Python `include:` and subworkflows. CGPipe has both `include` (source-level inlining — same idea as Snakemake's `include:`; see [Tutorial 8](tutorials/08-include.md)) *and* a persistent joblog. The joblog is the part Snakemake doesn't have: pipelines that don't share source — written separately, maybe by different people, run at different times — still coordinate as long as they point at the same joblog file. See [Running Jobs §Joblogs](07-Running_Jobs.md#joblogs).
 - **Reports and DAG visualization.** Snakemake ships rich HTML reports and DAG renderers. CGPipe has a `graphviz` runner that emits a `.dot` file; for richer reporting you compose external tools.
 
 ### Same pattern, different tools
@@ -84,7 +118,7 @@ The Snakemake equivalent:
 
 ### When to pick which
 
-- **Pick CGPipe** when your environment already has a working scheduler, you want a small DSL that reads almost like shell, and you value the cross-pipeline joblog as a coordination mechanism (multiple short pipelines composing through shared state).
+- **Pick CGPipe** when your environment already has a working scheduler, you want a small DSL that reads almost like shell, you value being able to compose pipelines both ways (`include` for source-level reuse *and* a shared joblog for coordinating pipelines you don't want to merge into one source file).
 - **Pick Snakemake** when you want Python in the pipeline (data structures, helper functions, complex parameter logic), when you need first-class container support, or when you're going to share the pipeline with a wider community where Snakemake is the lingua franca.
 
 ## vs. Nextflow
@@ -237,9 +271,10 @@ CGPipe can interoperate with the others in three useful ways:
 
 CGPipe's distinguishing features compared to the alternatives:
 
+- **Pipelines are executable scripts.** Shebang line, command-line arguments, help text from comments — the same shape as bash or Python. Composable into wrappers, shell loops, and other pipelines without any runtime indirection.
 - **Small DSL, low ceremony.** No host language to learn, no type system to satisfy.
-- **Persistent joblog.** Cross-pipeline composition without an external workflow daemon.
+- **Two composition models.** `include` (source-level) is familiar from Make, Snakemake, Nextflow. The persistent joblog is the part you don't get elsewhere — pipelines that don't share source can coordinate through a shared joblog file, without an external workflow daemon.
 - **Job scripts are first-class.** The rendered script is what the scheduler sees; `-dr` shows it before submission and `job.src` saves it after.
-- **Targeted at HPC clusters.** Cloud back-ends aren't the focus.
+- **Targeted at HPC clusters today.** Cloud and K8s back-ends are on the roadmap (see the project plan for the WDL and K8s runner sketches) but not first-class yet.
 
-When that's the right shape for your work, CGPipe is the smallest tool that does the job. When you need typed contracts, cloud portability, or rich data-flow abstractions, one of the alternatives will fit better.
+When that's the right shape for your work — small-to-medium pipelines, fast iteration, HPC infrastructure you control — CGPipe is the smallest tool that does the job. When you need typed contracts, cloud portability, rich data-flow abstractions, or rigorous reproducibility guarantees for many external users, one of the alternatives will fit better.
