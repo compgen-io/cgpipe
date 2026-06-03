@@ -1,0 +1,8 @@
+#!/bin/bash
+#BATCHQ -name cgjob_output.txt
+#BATCHQ -run-id test-run-42
+#BATCHQ -output output.txt
+#BATCHQ -wd .
+set -eo pipefail
+echo "hello" > output.txt
+

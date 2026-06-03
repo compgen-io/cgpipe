@@ -1,5 +1,8 @@
 #!${job.shell}
 #BATCHQ -name ${job.name}
+<% if cgpipe.run_id %>
+#BATCHQ -run-id ${cgpipe.run_id}
+<% endif %>
 <% if job.hold %>
 #BATCHQ -hold
 <% endif %>

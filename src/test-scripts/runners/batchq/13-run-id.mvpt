@@ -1,0 +1,5 @@
+# 13-run-id: CGPIPE_RUN_ID env var surfaces as cgpipe.run_id and the BatchQ
+# template emits it as `#BATCHQ -run-id <id>` right after the name directive.
+
+output.txt:
+    echo "hello" > output.txt

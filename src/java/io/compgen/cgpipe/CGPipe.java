@@ -464,6 +464,10 @@ public class CGPipe {
 				Parser.eval(env.get(k).split(";"), root);
 			}
 		}
+		String runId = env.get("CGPIPE_RUN_ID");
+		if (runId != null && !runId.equals("")) {
+			root.set("cgpipe.run_id", new VarString(runId));
+		}
 		log.trace("Init context:");
 		Map<String,VarValue> tmp = root.cloneValues();
 		for (String s: tmp.keySet()) {
