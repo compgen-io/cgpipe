@@ -1,576 +1,302 @@
-
 # Language syntax
 
-The CGPipe language has a simple syntax that is similar to many other languages, so there shouldn't be too much of a learning curve.
+CGPipe is a small interpreted language built around the goal of generating job scripts. Files have a `.cgp`, `.cgpipe`, or `.mvp` extension. A pipeline file is read top-to-bottom in *global* context: every uncommented line is CGPipe code. Target definitions inside that file open a separate *target* context for the body — see [Build Targets](#build-targets).
 
-The source repository contains a set of test scripts that have examples of all statements and operations available. These test scripts are the definitive source for the language syntax. These are the test scripts that are run to verify each build of CGPipe. In any case where this documentation conflicts with the test scripts, the test scripts are correct.
+The test suite under `src/test-scripts/` is the definitive reference. When this document conflicts with a test, the test is correct.
 
-Test scripts are available in the `src/test-scripts` directory and are named `*.cgpt or *.cgpipe`.
+## Comments and help text
 
-## Contexts
+`#` starts a comment that runs to the end of the line.
 
-There are two contexts in a CGPipe pipeline: "global" and "target". In the "global"
-context, all uncommented lines are evaluated and treated as CGPipe code. The
-"target" context is how job commands are defined. 
-
-Within a target context, the code is interpreted in "template" mode, where only areas 
-wrapped in `<% %>` are evalutated as CGPipe code. The areas not wrapped in `<% %>` 
-are treated as the body of the job script to execute. Any whitespace present in the 
-target body is kept and not stripped. In a target, any print statements will be added 
-to the target body, not written to the console.
-
-When a target is defined, it captures the existing global context *at
-definition* (like a closure). During execution, target contexts are therefore disconnected
-from the global context. In practice, this means that a target can read a global variable (if it has been set prior
-to the build-target definition), however, a target can not set a global variable
-and have the new value be visible outside or it's own context.
-
-A target is defined using the format:
-
-    output_file1 {output_file2 ... } : {input_file1 input_file2 ...}
-        # indent to establish the target-context
-        script body snippet
-        <% cgpipe-expression %>
-        script body snippet
-        script body snippet
-        <% 
-            cgpipe-expression
-            cgpipe-expression
-        %>
-        ...
-    # ends with outdent
-
-
-## Data types
-
-There are 6 primary data types in CGPipe: boolean, float, integer, list, range
-and string. Booleans are either `true` or `false` (case-sensitive). Strings must be enclosed in
-double quotes. Lists are initialized using the syntax "[]". Ranges can be used
-to iterate over a list of numbers using the syntax "from..to".
-
-Here are some examples:
-
-    foo = "Hello world"
-    foo = 1
-    foo = 1.0
-
-    isvalid = true
-
-    list = []
-    list += "one"
-    list += "two"
-
-    range = 1..10
-
-## Variables
-
-`foo = "val"` Set a variable
-
-`foo ?= "val"` Set a variable if it hasn't already been set
-
-`foo += "val"` Append a value to a list (if the variable has already been set,
-then this will convert that variable to a list)
-
-`unset foo` Unsets a variable. Note: if the variable was used by a target,
-it will still be set within the context of the target.
-
-Variables may also be set at the command-line like this: `cgpipe -foo bar -baz 1 -baz 2`.
-This is the same as saying:
-
-    foo = "bar"
-    bar = 2.59
-
-## Lists
-
-You can also create and access elements in a list using the [] splice operator. List items don't have to be of the same data type, but 
-it is recommended that they are. List indexing starts at zero. Negative indexes are treated as relative to the end of the list.
-
-    foo = []
-    foo = [1, 2, "three"]
-
-    print foo[2]
-    >>> "three"
-    print foo[-1]
-    >>> "three"
-
-You can also append to lists:
-
-    foo = ["foo"]
-    foo += "bar"
-    foo += "baz"
-
-    print foo
-    >>> "foo bar baz"
-
-List elements can be sliced using the same [start:end] syntax as in Python. If start or end is omitted, it is assumed to be the 0 or len(list), respectively.
-
-    foo = ["one", "two", "three"]
-    print foo[1:]
-    >>> two three
-    print foo[:2]
-    >>> one two
-    print foo[:-1]
-    >>> one two
-
-
-## Math
-
-You can perform basic arithmetic on integer and float variables. Available
-operations are:
-
-* `+` add
-* `-` subtract
-* `*` multiplication
-* `/` divide (integer division if on an integer)
-* `%` remainder
-* `**` power (2**3 = 8)
-
-Operations are performed in standard order; however, you can also add also parentheses
-around clauses to process things in a different order. For example:
-
-    8 + 2 * 10 = 28
-    (8 + 2) * 10 = 100
-    8 + (2 * 10) = 28
-
-
-## Logic
-
-You can perform basic logic operations as well. This will most commonly be used in the context of an if-else condition.
-
-* `&&` and
-* `||` or
-* `!` not (or is unset)
-* `==` equals
-* `!=` not equals
-* `<` less than
-* `<=` less than or equals
-* `>` greater than
-* `>=` greater than or equals
-
-You can chain these together to form more complex conditions. For example:
-
-    foo = "bar"
-    baz = 12
-
-    if foo == "bar" && baz < 20
-        print "test"
-    endif
-
-
-## Variable substitution
-Inside of strings, variables can be substituted. Each string (including build script snippets)
-will be evaluated for variable substitutions.
-
-    ${var}          - Variable named "var". If "var" is a list, ${var} will
-                      be replaced with a space-separated string with all
-                      members of the list. **If "var" hasn't been set, then this
-                      will throw a ParseError exception.**
-
-    ${var?}         - Optional variable substitution. This is the same as
-                      above, except that if "var" hasn't been set, then it
-                      will be replaced with an empty string: ''.
-
-    foo_@{var}_bar  - A replacement list, capturing the surrounding context.
-                      For each member of list, the following will be returned:
-                      foo_one_bar, foo_two_bar, foo_three_bar, etc...
-
-    foo_@{n..m}_bar - A replacement range, capturing the surrounding context.
-                      For each member of range ({n} to {m}, the following will
-                      be returned: foo_1_bar, foo_2_bar, foo_3_bar, etc...
-
-                      {n} and {m} may be variables or integers
-
-## Shell escaping
-You may also include the results from shell commands as well using the syntax
-`$(command)`. Anything surrounded by `$()` will be executed in the current shell.
-Anything written to stdout can be captured as a variable. The shell command will
-be evaluated as a CGPipe string and any variables substituted.
-
-Example:
-
-    submit_host = $(hostname)
-    submit_date = $(date)
-
-Shell escaping can also be used within strings, such as:
-
-	print "The current time is: $(date)"
-
-## Printing
-
-You can output arbitrary messages using the "print" statement. The default output is stdout, but this can be silenced using the `-s` command-line argument.
-
-Example:
-
-    print "Hello world"
-
-    foo = "bar"
-    print "foo${bar}"
-
-
-
-## If/Else/Endif
-Basic syntax:
-
-    if [condition]
-       do something...
-    elif [condition]
-       do something...
-    else
-       do something else...
-    endif
-
-
-### Conditions
-`if foo` - if the variable ${foo} was set
-`if !foo` - if the variable ${foo} was not set or is false
-
-`if foo == "bar"` - if the variable `foo` equals the string "bar"
-`if foo != "bar"` - if the variable `foo` doesn't equal the string "bar"
-
-`if foo < 1`    
-`if foo <= 1`    
-`if foo > 1`    
-`if foo >= 1`    
-
-
-## For loops
-Basic syntax:
-
-    for i in {start}..{end}
-       do something...
-    done
-
-    for i in 1..10
-        do something...
-    done
-
-    for i in list
-       do something...
-    done
-
-    for val
-       do something...    # while-style loop; runs while val is true
-
-
-## Build target definitions
-Targets are the files that you want to create. They are defined on a single
-line listing the outputs of the target, a colon (:), and any inputs that
-are needed to build the outputs.
-
-Any text (indented) after the target definition will be included in the
-script used to build the outputs. The indentation for the first line will be
-removed from all subsequent lines, in case there is a need for indentation to
-be maintained. The indentation can be any number of tabs or spaces. The first
-(non-blank) line that is at the *same* indentation level as the target
-definition line marks the end of the target definition.
-
-CGPipe expressions can also be evaluated within the target definition. These
-will only be evaluated if the target needs to be built and can be used to 
-dynamically alter the build script. Any variables that are defined within the
-target can only be used within the target. Any global variables are captured
-at the point *when the target is defined*. Global variables may not altered
-within a target, but they can be reset within the context of the target
-itself.
-
-Example:
-
-    output1.txt.gz output2.txt.gz : input1.txt input2.txt
-        gzip -c input1.txt > output1.txt.gz
-        gzip -c input2.txt > output2.txt.gz
-
-You may also have more than one target definition for any given output
-file(s). In the event that there is more than one way to build an ouput,
-the first listed build definition will be tried first. If the needed inputs
-(or dependencies) aren't available for the first definition, then the next
-will be tried until all methods are exhausted.
-
-In the event that a complete build tree can't be found, a ParseError will be
-thrown.
-
-### Wildcards in targets
-Using wildcards, the above could also be rewritten like this:
-
-    %.gz: %
-        gzip -c $< > $>
-
-Note: The '%' is only valid as a wildcard placeholder for inputs / outputs.
-To use the wildcard in the body of the target, use `$%`.
-
-### Target substitutions
-In addition to global variable substitutions, within a target these
-additional substitutions are available. Targets may also have their own
-local variables.
-
-Note: For global variables, their values are captured when a target is
-defined.
-
-    $>              - The list of all outputs
-    $>num           - The {num}'th output (starts at 1)
-
-    $<              - The list of all inputs
-    $<num           - The {num}'th input (starts at 1)
-    
-    $%              - The wildcard match
-
-
-### Special targets
-There are five special target names that can be added for any pipeline: 
-`__pre__`, `__post__`, `__setup__`, `__teardown__`, and `__postsubmit__`. 
-These are target definitions that accept no input dependencies. `__pre__` 
-is automatically added to the start of the body for all targets.  `__post__` is automatically
-added to the end of the body for all targets. `__setup__` and `__teardown__`
-will always run as the first and last job in the pipeline. `__postsubmit__` is
-a new job that is run after each other job has been submitted. There will be only one `__teardown__`
-job for the entire pipeline, but a separate `__postsubmit__` job for each other job submitted.
-`__postsubmit__` is **always** a shexec block and can be used to add monitoring based on the newly submitted job-id. For example,
-if you'd like to keep track of jobs that were submitted, this could be used to 
-add the new job's info (and job-id) to a database.
-
-You can selectively disable `__pre__` and `__post__` for any job by setting
-the variable `job.nopre` and `job.nopost`.
-
-### Temporary outputs
-Temporary outputs are intermediate files that are only needed to produce
-downstream targets. They are defined by prefixing an output filename with a
-caret (`^`):
-
-    ^intermediate.txt: input.txt
-        process input.txt > intermediate.txt
-
-    final.txt: intermediate.txt
-        summarize intermediate.txt > final.txt
-
-The `^` is not part of the actual filename -- it is stripped internally and
-serves only as a marker that the output is temporary.
-
-Temporary outputs behave differently from regular outputs in several ways:
-
-* **Not required to exist on disk** -- if the downstream target is already
-  satisfied, the temporary job is skipped entirely, even if the temporary file
-  has been deleted.
-* **Not checked for file modification time** -- only non-temporary outputs are
-  compared against the filesystem when calculating whether a target is
-  up-to-date.
-* **Tracked separately** in the job log and shown as `TEMP` in pending job
-  status output.
-
-Temporary outputs are useful for pipeline steps that produce large intermediate
-files (e.g. an alignment file that is only needed to produce a final variant
-call). If the final output already exists and is current, cgpipe will not waste
-time recreating intermediates that are no longer needed.
-
-Wildcards and list expansions work with temporary outputs just like regular
-targets:
-
-    ^chr.%:
-        process $%
-
-    ^foo: chr.@{samples}
-        merge $< > $>
-
-    bar: foo
-        finalize $< > $>
-
-### Opportunistic jobs
-Opportunistic jobs are targets that have **no outputs** -- only inputs. They
-are defined with a leading colon and a list of input dependencies:
-
-    :input1.txt input2.txt
-        echo "both inputs are available"
-
-Opportunistic jobs run **after** the main pipeline has been submitted. Unlike
-regular targets, they will **not** cause their dependencies to be built. Instead,
-they only run if all of their inputs are already available -- either existing on
-disk, submitted by other jobs in the current run, or recorded in the job log
-from a previous run. If any input is missing and no job has been submitted to
-create it, the opportunistic job is silently skipped.
-
-This makes opportunistic jobs useful for optional post-processing steps that
-should run when certain files happen to be available, but should not force
-those files to be created.
-
-Example:
-
-    all: foo
-
-    foo: input.txt
-        process input.txt > foo
-
-    bar: foo
-        summarize foo > bar
-
-    input.txt:
-        generate > input.txt
-
-    :input.txt foo bar
-        echo "all three files are available -- run extra QC"
-
-In this example, the opportunistic job will run only if `input.txt`, `foo`, and
-`bar` are all available. It will not cause `bar` to be built if it was not
-already part of the pipeline.
-
-Opportunistic jobs can also be combined with temporary outputs. If a temporary
-intermediate has been skipped (because the downstream target is already
-satisfied), then an opportunistic job that depends on that intermediate will
-also be skipped, since the temporary file does not exist on disk:
-
-    all: final.txt
-
-    final.txt: intermediate.txt
-        summarize intermediate.txt > final.txt
-
-    ^intermediate.txt:
-        generate > intermediate.txt
-
-    :final.txt intermediate.txt
-        echo "only runs if both files exist"
-
-
-## Including other files
-Other Pipeline files can be imported into the currently running Pipeline by
-using the `include filename` statement. In this case, the directory of the
-current Pipeline file will be searched for 'filename'. If it isn't found, 
-then the current working directory will be searched. If it still isn't found,
-then an ParseError will be thrown.
-
-## Logging
-You can define a log file to use within the Pipeline file. You can do this
-with the `log filename` directive. If an existing log file is active, then
-it will be closed and the new log file used. By default all output from the
-Pipeline will be written to the last log file specified.
-
-You may also specify a log file from the command-line with the `-l logfile`
-command-line argument.
-
-## Output logs
-You can keep track of which files are scheduled to be created using an output log.
-Do use this, you'll need to set the `cgpipe.joblog` variable. If you set a joblog,
-then in addition to checking the local filesystem to see if a target already exists,
-the joblog will also be consulted. This file keeps track of outputs that have already
-been submitted to the job scheduler. CGPipe will also check with the job runner,
-to verify that the job is still valid (running or queued).
-
-This way you can avoid re-submitting the same jobs over and over again if you re-run
-the pipeline. This output log enables the ability to have multiple pipelines coordinate
-common dependencies or chaining without requiring an external management daemon. This
-also allows you to write smaller separate (composable) pipelines instead of large 
-monolithic ones.
-
-
-## Comments
-Comments are started with a `#` character. You may also include the '$' and '@'
-characters in strings or evaluated lines by escaping them with a '\' character before 
-them, such as `\$`. If they will be evaluated twice, you will need to escape them twice
-(as is the case with shell evaluated strings).
-
-## Help text
-The user can request to disply help/usage text for any given pipeline. Any comment
-lines at the start of the file will be used as the help/usage text. The first non-comment
-line (including blank lines) will terminate the help text. If the script starts with a
-shebang (#!), then that line will not be included in the help text.
-
-Example:
+The leading run of comment lines at the top of a script (excluding the shebang) is treated as *help text* and displayed when the user passes `-h`:
 
     #!/usr/bin/env cgpipe
     #
-    # This is a pipeline
+    # Align reads to a reference and call variants.
     #
     # Options:
-    #    --gzip              compress output
-    #    --input filename    input filename
+    #     --reads FILE      input FASTQ
+    #     --ref FILE        reference FASTA
+    #     --out FILE        output VCF
     #
-    # (end of the help text)
 
+    # rest of the pipeline
+
+The first blank or non-comment line ends the help block.
+
+## Data types
+
+There are six data types: `bool`, `int`, `float`, `string`, `list`, `range`.
+
+    flag = true            # bool — true or false (case-sensitive)
+    count = 10             # int
+    rate = 0.5             # float
+    name = "sample-1"      # string — always double-quoted
+    samples = []           # list
+    samples = [1, 2, "x"]  # lists can mix types but usually shouldn't
+    chunks = 1..100        # range — produces 1, 2, ..., 100 when iterated
+
+The type a value carries is mostly invisible — arithmetic, comparisons, and string substitution work the way you'd expect. Use `.type()` to ask explicitly (see [Methods Reference](04-Methods_Reference.md)).
+
+## Variables
+
+A variable is set with `=`:
+
+    sample = "patient_42"
+    threads = 8
+
+There are no declarations and no scopes other than the global/target split. A variable exists from the line that first sets it.
+
+| Form | Meaning |
+|------|---------|
+| `foo = expr` | Set `foo` to `expr` |
+| `foo ?= expr` | Set `foo` only if it isn't already set (defaults) |
+| `foo += expr` | Append to `foo` (converts to a list if `foo` was scalar) |
+| `unset foo` | Remove the variable from scope |
+
+`?=` is the workhorse for defaults — let the user override on the command line, otherwise fall back:
+
+    threads ?= 4
+    method ?= "fast"
+
+### Command-line variables
+
+Any `-name value` pair on the command line is the same as `name = "value"` at the top of the script:
+
+    $ cgpipe pipeline.cgp -sample patient_42 -threads 16
+
+is equivalent to:
+
+    sample = "patient_42"
+    threads = 16
+
+CGPipe parses numbers and booleans from the strings when possible. CLI values arrive *before* the script runs, so `?=` defaults set in the script don't override them.
+
+## Operators
+
+### Arithmetic
+
+`+`, `-`, `*`, `/`, `%`, `**` (power). Standard precedence; parenthesize for clarity.
+
+    print 8 + 2 * 10       # 28
+    print (8 + 2) * 10     # 100
+    print 2 ** 10          # 1024
+
+`+` also concatenates strings, and `*` repeats strings and lists:
+
+    print "ab" + "cd"      # abcd
+    print "x" * 3          # xxx
+    print [0] * 5          # 0 0 0 0 0
+
+### Comparison and logic
+
+`==`, `!=`, `<`, `<=`, `>`, `>=`, `&&` (and), `||` (or), `!` (not).
+
+    if count > 0 && method == "fast"
+        ...
+    endif
+
+`!foo` is also used as "is the variable unset or false," which is the idiom for argument-validation guards:
+
+    if !sample
+        print "ERROR: --sample is required"
+        exit 1
+    endif
+
+### Conditional assignment chain
+
+    threads ?= 4
+
+Equivalent to `if !threads; threads = 4; endif`, but written inline.
+
+## Strings and substitution
+
+String literals use double quotes. Inside a string, two forms substitute CGPipe values:
+
+| Form | Behavior |
+|------|----------|
+| `${var}` | Substitute `var`. Throws an error if `var` is unset. If `var` is a list, joins with spaces. |
+| `${var?}` | Like `${var}` but yields `""` when `var` is unset. |
+| `@{list}` | List expansion — produces one copy per element (see below). |
+| `@{N..M}` | Range expansion — produces one copy per integer in the range. |
+| `${{var}}` | *Double evaluation* — substitute `var`, then evaluate the result again. |
+| `$(cmd)` | Run `cmd` in the shell at parse time; substitute its stdout. |
+
+Examples:
+
+    sample = "patient_42"
+    out = "results/${sample}/variants.vcf"           # "results/patient_42/variants.vcf"
+    out_opt = "results/${dir?}/variants.vcf"         # "results//variants.vcf" if dir unset
+    host = $(hostname)                                # shell-captured
+
+    # list expansion in a string
+    samples = ["a","b","c"]
+    print "out_@{samples}.txt"                        # "out_a.txt out_b.txt out_c.txt"
+
+### Double-evaluation
+
+`${{var}}` reads `var`, then evaluates the result as if it were source. Use it when the *content* of a variable is itself a template:
+
+    cmd_template = "echo ${greeting}"
+    greeting = "hello"
+
+    target_a:
+        ${{cmd_template}}    # body becomes:  echo hello
+
+Pure `${cmd_template}` would substitute the literal string `"echo ${greeting}"`. The extra evaluation re-runs CGPipe over it, so the inner `${greeting}` gets resolved too.
+
+### Shell command substitution
+
+`$(cmd)` runs in the current shell at parse time and captures stdout:
+
+    submit_time = $(date)
+    revision = $(git rev-parse HEAD)
+
+The `cmd` itself is a CGPipe string and is variable-substituted first.
+
+### Escaping
+
+To get a literal `$` or `@` into the output, prefix it with `\`. If the same string will be evaluated again (template body, shell command), you'll need to escape twice: `\\$`.
+
+## Lists
+
+Lists are zero-indexed; negative indices count from the end. Slicing uses Python-style `[start:end]`:
+
+    foo = ["one", "two", "three"]
+    print foo[0]      # one
+    print foo[-1]     # three
+    print foo[1:]     # two three
+    print foo[:2]     # one two
+
+Append with `+=`:
+
+    samples = []
+    samples += "A"
+    samples += "B"
+    samples += "C"
+
+Common list operations are methods (`length`, `contains`, `join`) — see [Methods Reference](04-Methods_Reference.md).
+
+Lists print with elements space-separated.
+
+## Ranges
+
+`from..to` defines an inclusive range:
+
+    for i in 1..10
+        print i
+    done
+
+Endpoints can be variables. Ranges are iterable and have a `.length()` method.
+
+## Control flow
+
+### if / elif / else / endif
+
+    if count > 100
+        print "many"
+    elif count > 0
+        print "some"
+    else
+        print "none"
+    endif
+
+`!` works as expected for negation, including `if !foo` for "unset or false".
+
+### for / done
+
+Three forms:
+
+    for i in 1..10           # range
+        print i
+    done
+
+    for sample in samples    # list
+        print sample
+    done
+
+    for cond                 # while-style (runs while `cond` is true)
+        ...
+    done
+
+Loop variables are scoped like any other — they remain set after the loop.
+
+### exit
+
+Stop the pipeline with an optional status code:
+
+    if !ref
+        print "ERROR: --ref is required"
+        exit 1
+    endif
+
+`exit` (no argument) is `exit 0`.
+
+## Statements
+
+Beyond control flow, the language has a small set of statement keywords.
+
+| Statement | Purpose |
+|-----------|---------|
+| `print expr [, expr ...]` | Write to stdout. Inside a target body, appends to the script instead. |
+| `log filename` | Open a log file. Subsequent CGPipe output is mirrored there. |
+| `include "path"` | Inline another `.cgp` file at this point. Searched relative to the current file, then the working directory. |
+| `import name` | (Inside a target body only) inline an importable target snippet. |
+| `eval expr` | Evaluate the string-valued `expr` as CGPipe source at run time. |
+| `unset name` | Remove a variable from scope. |
+| `dumpvars` | Print every variable currently in scope. Debugging aid. |
+| `showhelp` | Print the script's help-text block. Same as the `-h` flag. |
+| `sleep seconds` | Pause for the given number of seconds. Rarely needed. |
+
+### include vs. import
+
+- **`include`** runs in the global context. The included file's top-level statements and target definitions become part of the current pipeline. Use it for shared configuration and shared target libraries.
+- **`import`** runs only inside a target body. The named importable snippet (a target written with `name::`) is inlined into the current body. Use it for shared script fragments — see [Build Targets](05-Build_Targets.md#importable-target-snippets).
+
+### eval
+
+`eval s` parses and runs the string `s` as if it were a line of source:
+
+    i = 1
+    code = "i = i + 1"
+    eval code
+    print i      # 2
+
+Most pipelines don't need `eval`; it's useful for building per-environment variable assignments from a configuration string, or for tests of the language itself.
+
+## Logging
+
+Inside a script, `log filename` opens a new log file. If a log was already active it's closed first. From the command line, `-l filename` does the same thing.
+
+Independently of `log`, the joblog tracks *submitted jobs* (their ids, outputs, and runner state). Set it with `cgpipe.joblog = "path/to/joblog.txt"`. With a joblog in place, CGPipe consults it before deciding to build a target — it won't resubmit a job whose output is already pending in the scheduler, even across separate `cgpipe` invocations. See [Running Jobs](07-Running_Jobs.md) for joblog mechanics.
+
+## Including other files
+
+    include "shared/defaults.cgp"
+    include "shared/targets.cgp"
+
+The path is resolved relative to the file that contains the `include` line, then relative to the working directory. A failing lookup is a parse error.
+
+`include` is commonly used to share a set of default `job.*` settings across many pipelines:
+
+    # shared/defaults.cgp
+    job.stdout = "logs/"
+    job.stderr = "logs/"
+    job.env = true
+
+    # pipeline.cgp
+    include "shared/defaults.cgp"
     ...
 
-    # rest of the script
+`include` is the way you compose pipelines — the included file runs as if its contents were pasted in.
 
+## Build targets
 
-## Job execution options
+Targets are the heart of a pipeline and have their own chapter — see [Build Targets](05-Build_Targets.md).
 
-### Specifying the shell to use
-CGPipe will attempt to find the correct shell interpreter to use for executing
-scripts. By default it will look for `/bin/bash`, `/usr/bin/bash`, 
-`/usr/local/bin/bash`, or `/bin/sh` (in order of preference). Alternatively,
-you may set the config value `cgpipe.shell` in the `$HOME/.cgpiperc` file to
-set a specific shell binary.
+## Where to look next
 
-The shell may also be chosen on a per-job basis by setting the `job.shell`
-variable for each job.
-
-### Direct execution of jobs
-Certain jobs can also be directly executed as part of the pipeline building process. 
-Instead of submitting these jobs to a scheduler, the jobs can be put into a
-temporary shell script and executed directly. The global shell will be used
-to run the script. Only jobs without any dependencies can be executed in this manner.
-If you would like a job to just run directly without being scheduled, set the variable 
-`job.shexec=true`. Also, the `__setup__` and `__teardown__` can be executed as `shexec`.
-
-One use for this is to setup any output folders that may be required. For example:
-
-    __setup__:
-        <% job.shexec = true %>
-        mkdir -p output
-
-
-Another common use-case for this is having a `clean` target to remove all
-output files to perform a fresh set of calculations. For example:
-
-    clean:
-        <% job.shexec = true %>
-        rm *.bam
-
-# Experimental cgpipe features
-
-The following features are experimental. Syntax for the below may change in 
-future versions of CGPipe (or be removed entirely).
-
-## Target snippets imports
-Sometimes you might have more than one target definition that has the same (or
-similar) job body. In this case, you might want to have only one copy of
-the source snippet and import that copy into each separate build-target script.
-
-You can do this with an "importable" target definition. This is one way
-to include a common snippet into a target script that isn't `__pre__` or
-`__post__`. Importable target definitions are targets that have only one
-output (the name), followed by two colons. That snippet can then be imported
-into the body of a target definition using the `import` statement. 
-
-(Note: the `import` statement only works within the context of a build-target.
-If you need something like import in a Pipeline, try the `include` statement.)
-
-Here's an example:
-
-    common::
-        echo "this is the common snippet"
-        
-    out.txt: input.txt
-        <% import common %>
-
-    out2.txt: input2.txt
-        <% import common %>
-
-
-## Eval statement
-
-The eval statment lets us eval a string at runtime
-
-    i=1
-    a="i=i+1"
-    eval a
-
-    i => 2
-
-## Double evaluated variables 
-
-Double var eval is useful in targets to include chunks of text based on
-a var:
-
-    foo="echo \"$>\""
-
-    target: 
-        ${{foo}} 
-
-will result in this being added to the body:
-
-    echo "target"
+- [Methods Reference](04-Methods_Reference.md) — the methods available on each type.
+- [Build Targets](05-Build_Targets.md) — defining what gets built and how.
+- [Pipeline Tutorials](06-Pipeline_Tutorials.md) — worked examples.
+- [Configuration Reference](08-Configuration_Reference.md) — every `cgpipe.*` and `job.*` setting.
