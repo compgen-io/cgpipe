@@ -15,17 +15,19 @@ CGPipe is a Make-like pipeline language that compiles target definitions into jo
 | 9 | [Remote Pipelines](09-Remote_Pipelines.md) | Loading scripts from URLs, named remotes, hash pinning |
 | 10 | [Glossary](10-Glossary.md) | Terminology used throughout |
 | 11 | [Troubleshooting](11-Troubleshooting.md) | Debugging tools, common errors, recovery |
+| 12 | [Comparisons](12-Comparisons.md) | How CGPipe compares to Snakemake, Nextflow, and WDL |
 
 ## I want to…
 
-- **…write my first pipeline.** [Getting Started](02-Getting_Started.md) → [Tutorial 1](06-Pipeline_Tutorials.md#tutorial-1-hello-target).
+- **…write my first pipeline.** [Getting Started](02-Getting_Started.md) → [Tutorial 1: Hello, target](tutorials/01-hello.md).
 - **…look up a syntax detail.** [Language Syntax](03-Language_Syntax.md), [Build Targets](05-Build_Targets.md), [Methods Reference](04-Methods_Reference.md).
-- **…fan out work over chromosomes / samples / lanes.** [Tutorial 4](06-Pipeline_Tutorials.md#tutorial-4-map-reduce-across-chromosomes) and [Dynamic target generation](05-Build_Targets.md#dynamic-target-generation).
-- **…clean up intermediates without breaking restarts.** [Tutorial 5](06-Pipeline_Tutorials.md#tutorial-5-opportunistic-cleanup-for-storage-efficiency).
-- **…run jobs inside Docker or Singularity containers.** [Tutorial 9](06-Pipeline_Tutorials.md#tutorial-9-containerized-jobs-docker-and-singularity).
+- **…fan out work over chromosomes / samples / lanes.** [Tutorial 4: Map-reduce across chromosomes](tutorials/04-map-reduce.md) and [Dynamic target generation](05-Build_Targets.md#dynamic-target-generation).
+- **…clean up intermediates without breaking restarts.** [Tutorial 5: Opportunistic cleanup](tutorials/05-opportunistic-cleanup.md).
+- **…run jobs inside Docker or Singularity containers.** [Tutorial 9: Containerized jobs](tutorials/09-containers.md).
 - **…set up a cluster.** [Running Jobs](07-Running_Jobs.md), [Configuration Reference](08-Configuration_Reference.md).
 - **…coordinate multiple pipelines.** [Joblogs](07-Running_Jobs.md#joblogs).
 - **…debug a misbehaving pipeline.** [Troubleshooting](11-Troubleshooting.md).
+- **…decide whether to use CGPipe vs. Snakemake/Nextflow/WDL.** [Comparisons](12-Comparisons.md).
 
 ## Building the PDF / single-page HTML
 
