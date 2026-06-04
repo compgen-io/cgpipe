@@ -21,6 +21,10 @@ endif
 
 tmp += ":ppn="+job.procs
 
+if job.gpu
+    tmp += ":gpus="+job.gpu
+endif
+
 if job.node.property
     tmp += ":"+job.node.property
 endif

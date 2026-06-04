@@ -1,0 +1,8 @@
+# 13-gpu-basic: `job.gpu = 1` appends `:gpus=1` to the nodes resource spec
+# (Torque syntax — `-l nodes=1:ppn=N:gpus=M`).
+
+output.txt:
+    <%
+        job.gpu = 1
+    %>
+    cuda-program > output.txt

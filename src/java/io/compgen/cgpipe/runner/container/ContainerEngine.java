@@ -22,12 +22,16 @@ interface ContainerEngine {
 	 * @param extraOpts      Engine-specific raw flags appended verbatim before the image.
 	 * @param shell          Shell binary used to execute the body inside the container
 	 *                       (e.g. {@code "sh"}, {@code "bash"}).
+	 * @param gpuSpec        Resolved GPU spec ({@code "1"}, {@code "2"}, {@code "all"},
+	 *                       {@code "device=0,1"}, …) or {@code null} for "no GPU." Engines
+	 *                       that don't support granular control (singularity) treat any
+	 *                       non-null value as "enable GPU access."
 	 * @param bodyVar        Shell variable name (without leading {@code $}) that holds the
 	 *                       path to the temp body file written by the wrapper preamble.
 	 */
 	String render(String image, List<String> mounts, String workingDir,
 	              List<String> envPassThrough, boolean userMap,
-	              List<String> extraOpts, String shell, String bodyVar);
+	              List<String> extraOpts, String shell, String gpuSpec, String bodyVar);
 
 	/**
 	 * Engine-specific normalisation of an image reference. Most engines accept the raw string;

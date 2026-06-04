@@ -1,0 +1,8 @@
+# 16-gpu-type: string form passes through unchanged. SLURM's --gres=gpu:type:count
+# syntax for requesting specific GPU models works directly.
+
+output.txt:
+    <%
+        job.gpu = "v100:2"
+    %>
+    cuda-program > output.txt

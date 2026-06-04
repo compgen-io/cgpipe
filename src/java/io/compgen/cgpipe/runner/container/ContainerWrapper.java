@@ -115,6 +115,10 @@ public final class ContainerWrapper {
 			shell = DEFAULT_SHELL;
 		}
 
+		// GPU spec is also unified across schedulers — same `job.gpu` setting that the
+		// scheduler templates read. Here we just thread the resolved value into the engine.
+		String gpuSpec = resolveGpuSpec(jobdef, globalCtx);
+
 		String marker = pickHeredocMarker(body);
 		String bodyVar = "__cgpipe_body";
 
@@ -133,7 +137,7 @@ public final class ContainerWrapper {
 		}
 		sb.append(marker).append("\n");
 		sb.append("\n");
-		sb.append(engine.render(image, mounts, workingDir, envList, userMap, extraOpts, shell, bodyVar));
+		sb.append(engine.render(image, mounts, workingDir, envList, userMap, extraOpts, shell, gpuSpec, bodyVar));
 		sb.append("\n");
 		return sb.toString();
 	}
@@ -187,6 +191,34 @@ public final class ContainerWrapper {
 	// ------------------------------------------------------------------
 	// Heredoc marker selection
 	// ------------------------------------------------------------------
+
+	/**
+	 * Normalize the unified `job.gpu` setting into the string representation engines accept.
+	 *
+	 *   unset / "false" / "0"   -> null (no GPU)
+	 *   "true"                  -> "1"
+	 *   integer / numeric string -> the literal string ("2", "4", ...)
+	 *   any other string        -> passed through as-is ("device=0,1", "v100:2", ...)
+	 *
+	 * Per-target {@code job.gpu} overrides global {@code cgpipe.gpu}.
+	 */
+	static String resolveGpuSpec(JobDef jobdef, RootContext globalCtx) {
+		String raw = jobdef.getSetting("job.gpu");
+		if (raw == null || raw.isEmpty()) {
+			raw = configString(globalCtx, "cgpipe.gpu");
+		}
+		if (raw == null || raw.isEmpty()) {
+			return null;
+		}
+		String trimmed = raw.trim();
+		if (trimmed.equalsIgnoreCase("false") || trimmed.equals("0")) {
+			return null;
+		}
+		if (trimmed.equalsIgnoreCase("true")) {
+			return "1";
+		}
+		return trimmed;
+	}
 
 	private static String pickHeredocMarker(String body) {
 		if (!body.contains(HEREDOC_MARKER_BASE)) {

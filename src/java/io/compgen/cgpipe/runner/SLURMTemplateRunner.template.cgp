@@ -20,6 +20,9 @@ if job.procs > 1
 <% if job.mem %>
 #SBATCH --mem=${job.mem}
 <% endif %>
+<% if job.gpu %>
+#SBATCH --gres=gpu:${job.gpu}
+<% endif %>
 <% if job.slurm.depids %>
 #SBATCH -d afterok:${job.slurm.depids}
 <% endif %>

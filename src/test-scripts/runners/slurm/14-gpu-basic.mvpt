@@ -1,0 +1,7 @@
+# 14-gpu-basic: `job.gpu = 1` emits `#SBATCH --gres=gpu:1` in the directive block.
+
+output.txt:
+    <%
+        job.gpu = 1
+    %>
+    cuda-program > output.txt

@@ -7,7 +7,7 @@ final class SingularityEngine implements ContainerEngine {
 	@Override
 	public String render(String image, List<String> mounts, String workingDir,
 	                     List<String> envPassThrough, boolean userMap,
-	                     List<String> extraOpts, String shell, String bodyVar) {
+	                     List<String> extraOpts, String shell, String gpuSpec, String bodyVar) {
 		// userMap is ignored — singularity already runs as the submitting user.
 		StringBuilder sb = new StringBuilder();
 		sb.append("singularity exec");
@@ -16,6 +16,13 @@ final class SingularityEngine implements ContainerEngine {
 		}
 		if (workingDir != null && !workingDir.isEmpty()) {
 			sb.append(" \\\n    --pwd ").append(workingDir);
+		}
+		if (gpuSpec != null && !gpuSpec.isEmpty()) {
+			// Singularity's GPU flag is binary — count and device specs from cgpipe's
+			// `job.gpu` are ignored here. The scheduler-side request (SLURM
+			// `--gres=gpu:N`, PBS `ngpus=N`) handles the count; --nv just exposes the
+			// allocated GPUs to the container.
+			sb.append(" \\\n    --nv");
 		}
 		if (envPassThrough != null) {
 			for (String env : envPassThrough) {
