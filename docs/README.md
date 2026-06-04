@@ -9,7 +9,7 @@ CGPipe is a pipeline language that compiles target definitions into job-schedule
 | 3 | [Language Syntax](03-Language_Syntax.md) | Types, variables, operators, control flow, statements |
 | 4 | [Methods Reference](04-Methods_Reference.md) | Per-type methods (string, list, range, etc.) |
 | 5 | [Build Targets](05-Build_Targets.md) | Target syntax, wildcards, temp outputs, opportunistic jobs, special targets, dynamic generation |
-| 6 | [Pipeline Tutorials](06-Pipeline_Tutorials.md) | Nine worked examples: hello-world, map-reduce, storage-efficient cleanup, containerized jobs, more |
+| 6 | [Pipeline Tutorials](06-Pipeline_Tutorials.md) | Ten worked examples: hello-world, map-reduce, storage-efficient cleanup, containerized jobs, custom job-submission templates, more |
 | 7 | [Running Jobs](07-Running_Jobs.md) | Runners, `job.*` settings, joblogs, dry runs |
 | 8 | [Configuration Reference](08-Configuration_Reference.md) | Every `cgpipe.*` and `job.*` variable; env vars; precedence |
 | 9 | [Remote Pipelines](09-Remote_Pipelines.md) | Loading scripts from URLs, named remotes, hash pinning |
@@ -24,6 +24,8 @@ CGPipe is a pipeline language that compiles target definitions into job-schedule
 - **…fan out work over chromosomes / samples / lanes.** [Tutorial 4: Map-reduce across chromosomes](tutorials/04-map-reduce.md) and [Dynamic target generation](05-Build_Targets.md#dynamic-target-generation).
 - **…clean up intermediates without breaking restarts.** [Tutorial 5: Opportunistic cleanup](tutorials/05-opportunistic-cleanup.md).
 - **…run jobs inside Docker or Singularity containers.** [Tutorial 9: Containerized jobs](tutorials/09-containers.md).
+- **…request GPUs.** [Tutorial 9 § Running on GPUs](tutorials/09-containers.md#running-on-gpus) — unified `job.gpu` setting that drives both scheduler and container.
+- **…customize the job-submission template for your cluster.** [Tutorial 10: Custom job-submission templates](tutorials/10-custom-templates.md).
 - **…set up a cluster.** [Running Jobs](07-Running_Jobs.md), [Configuration Reference](08-Configuration_Reference.md).
 - **…coordinate multiple pipelines.** [Joblogs](07-Running_Jobs.md#joblogs).
 - **…debug a misbehaving pipeline.** [Troubleshooting](11-Troubleshooting.md).

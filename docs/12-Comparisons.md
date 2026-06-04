@@ -9,7 +9,8 @@ The short version:
 | **Model** | Output-first targets | Output-first rules (Make-like) | Channel-based (data-flow) | Typed, call-based |
 | **Host language** | Custom DSL (`.cgp`) | Python + custom DSL | Groovy DSL | Custom DSL |
 | **Scheduler integration** | SGE / SLURM / PBS / BatchQ / bash | SLURM / SGE / PBS / Kubernetes / cloud (DRMAA-like) | SLURM / SGE / PBS / Kubernetes / AWS Batch / Google Batch / Azure | Cromwell / miniwdl / Terra back-ends |
-| **Containers** | Manual via `__pre__`/`__post__` HEREDOC | First-class (`container:` directive) | First-class (`container` directive, profiles) | First-class (`runtime { docker: }`) |
+| **Containers** | First-class (`job.container` directive, engine via config) | First-class (`container:` directive) | First-class (`container` directive, profiles) | First-class (`runtime { docker: }`) |
+| **GPU support** | Unified `job.gpu` drives scheduler + container | `resources: gpu=N` + `--use-singularity` | `accelerator N` | `runtime { gpuCount: N }` |
 | **Cross-pipeline composition** | `include` (source-level) plus a persistent joblog (file-level coordination across unrelated pipelines) | Workflow imports (Python) | Pipeline subworkflows (Groovy) | Imported `.wdl` files |
 | **Typical scale** | Small to large pipelines, focus on HPC clusters | Same | Cloud-native and HPC | Typed, often used in large consortia (GATK, broadinstitute) |
 | **Best at** | Lightweight, shell-script-feeling pipelines that integrate with existing scheduler/joblog | Reproducible scientific pipelines with strong defaults | Cloud-portable workflows with rich data-flow operators | Strict typing, sharing across institutions |
@@ -98,7 +99,7 @@ CGPipe started from Make's mental model: targets, prerequisites, recipes. The di
 - **Host language.** Snakemake rules live inside a Python file (`Snakefile`); top-level statements are real Python. CGPipe pipelines are written in a small DSL that doesn't embed a host language. Python is more powerful; the CGPipe DSL is smaller and easier to keep in your head.
 - **Wildcard semantics.** Snakemake's `{wildcards}` are namespaced per-rule and matched by regex; CGPipe's `%` is a single stem captured into `$%`. Snakemake's approach is more flexible at the cost of more cognitive overhead.
 - **Configuration.** Snakemake reads YAML/JSON configs by convention. CGPipe uses `.cgpiperc` files and command-line `-name value` pairs. CGPipe doesn't have a built-in config-schema concept.
-- **Containers.** Snakemake has first-class container support (`container: "docker://..."` per rule, plus Singularity profiles). In CGPipe you wire containers through `__pre__`/`__post__` HEREDOCs — flexible but more verbose. See [Tutorial 9](tutorials/09-containers.md).
+- **Containers.** Both have first-class support. Snakemake uses `container: "docker://..."` per rule, with engine choice driven by CLI flag (`--use-singularity`, `--use-apptainer`). CGPipe uses `job.container = "..."` per target with engine choice driven by config (`cgpipe.container.engine = "docker"` / `"singularity"`) — same mental model, different stylistic choice for the engine selection. See [Tutorial 9](tutorials/09-containers.md).
 - **Cross-pipeline composition: two mechanisms.** Snakemake composes via Python `include:` and subworkflows. CGPipe has both `include` (source-level inlining — same idea as Snakemake's `include:`; see [Tutorial 8](tutorials/08-include.md)) *and* a persistent joblog. The joblog is the part Snakemake doesn't have: pipelines that don't share source — written separately, maybe by different people, run at different times — still coordinate as long as they point at the same joblog file. See [Running Jobs §Joblogs](07-Running_Jobs.md#joblogs).
 - **Reports and DAG visualization.** Snakemake ships rich HTML reports and DAG renderers. CGPipe has a `graphviz` runner that emits a `.dot` file; for richer reporting you compose external tools.
 
@@ -221,7 +222,7 @@ The Snakemake equivalent:
 
 - **Types.** WDL is statically typed; CGPipe is dynamically typed. WDL's type discipline is what makes it readable and shareable at scale; it also makes quick iteration heavier (more boilerplate per task).
 - **Execution engine.** WDL workflows don't run themselves — you submit them to Cromwell (or another WDL engine). CGPipe is the engine *and* the language.
-- **Containers.** WDL tasks declare `runtime { docker: "..." }` and the engine handles invocation. In CGPipe you wrap with `__pre__`/`__post__`.
+- **Containers.** WDL tasks declare `runtime { docker: "..." }` and the engine handles invocation. CGPipe has first-class `job.container = "..."` that produces equivalent wrapping at submit time — different layer (CGPipe wraps the body before submission; WDL's runtime block is interpreted by Cromwell at execution time) but the user experience is similar.
 - **Where it shines.** Cross-institutional collaboration. WDL files are intended to be shared and re-run on someone else's infrastructure with minimal modification. CGPipe is more lightweight but assumes you're running on infrastructure you control.
 
 ### Same fan-out in WDL

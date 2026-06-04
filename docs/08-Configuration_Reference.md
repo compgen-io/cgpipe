@@ -92,6 +92,23 @@ Settings under the `cgpipe.*` namespace affect CGPipe itself (logging, runner ch
 | Variable | Type | Purpose |
 |----------|------|---------|
 | `cgpipe.ignore_missing_inputs` | bool | When `true`, missing input dependencies don't error — useful for partial-rebuild scenarios where some inputs exist only in the joblog. |
+| `cgpipe.gpu` | bool / int / string | Global default GPU spec applied to every job (also see `job.gpu`). |
+
+### Containers
+
+When `cgpipe.container.engine` is set, every target whose `job.container` is set has its body wrapped in a container invocation. See [Running Jobs § Containers](07-Running_Jobs.md#containers) for behavior.
+
+| Variable | Type | Purpose |
+|----------|------|---------|
+| `cgpipe.container.engine` | string | `docker`, `singularity`, or `apptainer` (alias). Unset disables wrapping. |
+| `cgpipe.container.body_dir` | string | Where the temp body file is written and bind-mounted from. Default `/tmp`. |
+| `cgpipe.container.shell` | string | Shell used to execute the body inside the container. Default `sh`. |
+| `cgpipe.container.bind` | list | Extra bind mounts applied to every container job. |
+| `cgpipe.container.env` | list | Names of host env vars to pass through. |
+| `cgpipe.container.docker_opts` | list | Raw flags appended to every `docker run`. |
+| `cgpipe.container.singularity_opts` | list | Same, for `singularity exec`. |
+| `cgpipe.container.user_map` | bool | Docker only: add `-u $(id -u):$(id -g)` (default `true`). |
+| `cgpipe.container.cache_dir` | string | Where Singularity caches SIF files (`SINGULARITY_CACHEDIR`). Default `~/.singularity/cache`. |
 
 ### Remote pipelines
 
@@ -124,6 +141,17 @@ The full table is in [Running Jobs](07-Running_Jobs.md#job-settings). The short 
 - Set globally to apply defaults to every target.
 - Override inside a target's `<% %>` block to scope per-target.
 - A handful (`job.shexec`, `job.nopre`, `job.nopost`) are flags rather than scheduler directives — they control how CGPipe assembles the job, not what it asks the scheduler for.
+
+### Container settings (per-target)
+
+| Variable | Type | Purpose |
+|----------|------|---------|
+| `job.container` | string | Image reference (`biocontainers/bwa:0.7.17`, `docker://...`, `*.sif`). Unset means "don't wrap." |
+| `job.container.bind` | list | Extra bind mounts beyond auto-discovered, per-target. |
+| `job.container.env` | list | Extra env vars passed through, per-target. |
+| `job.container.opts` | list | Engine-specific raw flags, per-target. |
+| `job.container.shell` | string | Per-target shell override (default `sh`, or whatever `cgpipe.container.shell` is set to). |
+| `job.gpu` | bool / int / string | GPU spec — drives both scheduler directive and container engine flag. See [Running Jobs § GPUs](07-Running_Jobs.md#gpus). |
 
 ### Reserved internal names
 
