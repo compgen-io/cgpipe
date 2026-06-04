@@ -1,0 +1,10 @@
+# 20-container-shell-global-override: cgpipe.container.shell overrides the sh default
+# for the whole pipeline.
+
+cgpipe.container.engine = "docker"
+cgpipe.container.body_dir = "/cgpipe-bodydir"
+cgpipe.container.shell = "bash"
+job.container = "bash:latest"
+
+output.txt:
+    echo hello > output.txt

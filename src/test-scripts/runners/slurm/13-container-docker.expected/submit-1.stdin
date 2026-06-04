@@ -16,5 +16,5 @@ docker run --rm \
     -w /cgpipe-test \
     -u $(id -u):$(id -g) \
     alpine:latest \
-    bash "$__cgpipe_body"
+    sh "$__cgpipe_body"
 

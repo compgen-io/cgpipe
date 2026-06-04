@@ -6,17 +6,14 @@ set -eo pipefail
 __cgpipe_body=$(mktemp "/cgpipe-bodydir/cgpipe-body.XXXXXX")
 trap 'rm -f "$__cgpipe_body"' EXIT
 cat > "$__cgpipe_body" <<'__CGPIPE_BODY__'
-tool > output.txt
+echo hello > output.txt
 __CGPIPE_BODY__
 
 docker run --rm \
-    -v /refs:/refs \
-    -v /shared:/shared \
     -v /cgpipe-test:/cgpipe-test \
     -v /cgpipe-bodydir:/cgpipe-bodydir \
-    -v /private/etc/passwd:/private/etc/passwd \
     -w /cgpipe-test \
     -u $(id -u):$(id -g) \
     alpine:latest \
-    sh "$__cgpipe_body"
+    bash "$__cgpipe_body"
 

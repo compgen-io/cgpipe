@@ -20,12 +20,14 @@ interface ContainerEngine {
 	 * @param userMap        When true and the engine supports it, map the container user
 	 *                       to the host UID/GID (docker only).
 	 * @param extraOpts      Engine-specific raw flags appended verbatim before the image.
+	 * @param shell          Shell binary used to execute the body inside the container
+	 *                       (e.g. {@code "sh"}, {@code "bash"}).
 	 * @param bodyVar        Shell variable name (without leading {@code $}) that holds the
 	 *                       path to the temp body file written by the wrapper preamble.
 	 */
 	String render(String image, List<String> mounts, String workingDir,
 	              List<String> envPassThrough, boolean userMap,
-	              List<String> extraOpts, String bodyVar);
+	              List<String> extraOpts, String shell, String bodyVar);
 
 	/**
 	 * Engine-specific normalisation of an image reference. Most engines accept the raw string;

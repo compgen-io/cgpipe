@@ -7,7 +7,7 @@ final class DockerEngine implements ContainerEngine {
 	@Override
 	public String render(String image, List<String> mounts, String workingDir,
 	                     List<String> envPassThrough, boolean userMap,
-	                     List<String> extraOpts, String bodyVar) {
+	                     List<String> extraOpts, String shell, String bodyVar) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("docker run --rm");
 		for (String mount : mounts) {
@@ -30,7 +30,7 @@ final class DockerEngine implements ContainerEngine {
 			}
 		}
 		sb.append(" \\\n    ").append(normalizeImage(image));
-		sb.append(" \\\n    bash \"$").append(bodyVar).append("\"");
+		sb.append(" \\\n    ").append(shell).append(" \"$").append(bodyVar).append("\"");
 		return sb.toString();
 	}
 

@@ -22,6 +22,9 @@ public final class ContainerWrapper {
 
 	private static final String HEREDOC_MARKER_BASE = "__CGPIPE_BODY__";
 	private static final String DEFAULT_BODY_DIR = "/tmp";
+	// Default container shell. sh is almost universally available; users with bash-specific
+	// body syntax opt up via cgpipe.container.shell / job.container.shell.
+	private static final String DEFAULT_SHELL = "sh";
 
 	private ContainerWrapper() {}
 
@@ -102,6 +105,16 @@ public final class ContainerWrapper {
 		List<String> extraOpts = computeExtraOpts(globalCtx, jobdef, engineName);
 
 		boolean userMap = configBool(globalCtx, "cgpipe.container.user_map", true);
+
+		// Per-target overrides global, which overrides the built-in sh default.
+		String shell = jobdef.getSetting("job.container.shell");
+		if (shell == null || shell.isEmpty()) {
+			shell = configString(globalCtx, "cgpipe.container.shell");
+		}
+		if (shell == null || shell.isEmpty()) {
+			shell = DEFAULT_SHELL;
+		}
+
 		String marker = pickHeredocMarker(body);
 		String bodyVar = "__cgpipe_body";
 
@@ -120,7 +133,7 @@ public final class ContainerWrapper {
 		}
 		sb.append(marker).append("\n");
 		sb.append("\n");
-		sb.append(engine.render(image, mounts, workingDir, envList, userMap, extraOpts, bodyVar));
+		sb.append(engine.render(image, mounts, workingDir, envList, userMap, extraOpts, shell, bodyVar));
 		sb.append("\n");
 		return sb.toString();
 	}

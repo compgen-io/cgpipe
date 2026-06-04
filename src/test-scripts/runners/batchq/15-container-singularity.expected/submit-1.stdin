@@ -14,5 +14,5 @@ singularity exec \
     -B /cgpipe-bodydir:/cgpipe-bodydir \
     --pwd /cgpipe-test \
     docker://biocontainers/samtools:1.18 \
-    bash "$__cgpipe_body"
+    sh "$__cgpipe_body"
 
