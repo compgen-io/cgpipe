@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH -Q
+#SBATCH -J cgjob_output.txt
+#SBATCH --gres=gpu:2
+#SBATCH -D /cgpipe-test
+set -eo pipefail
+JOB_ID=$SLURM_JOB_ID
+__cgpipe_body=$(mktemp "/cgpipe-bodydir/cgpipe-body.XXXXXX")
+trap 'rm -f "$__cgpipe_body"' EXIT
+cat > "$__cgpipe_body" <<'__CGPIPE_BODY__'
+nvidia-smi > output.txt
+__CGPIPE_BODY__
+
+docker run --rm \
+    -v /cgpipe-test:/cgpipe-test \
+    -v /cgpipe-bodydir:/cgpipe-bodydir \
+    -w /cgpipe-test \
+    -u $(id -u):$(id -g) \
+    --gpus 2 \
+    nvidia/cuda:12.0-base \
+    sh "$__cgpipe_body"
+

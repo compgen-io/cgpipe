@@ -22,6 +22,9 @@ if job.procs > 1 && job.sge.parallelenv %>
 <% if job.mem %>
 #$ -l h_vmem=${job.mem}
 <% endif %>
+<% if job.gpu %>
+#$ -l gpu=${job.gpu}
+<% endif %>
 <% if job.sge.depids %>
 #$ -hold_jid ${job.sge.depids}
 <% endif %>

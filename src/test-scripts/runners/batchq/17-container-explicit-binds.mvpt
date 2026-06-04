@@ -1,0 +1,15 @@
+# 17-container-explicit-binds: cgpipe.container.bind and job.container.bind add
+# extra mounts beyond the auto-discovered set. /shared appears via the global list;
+# /refs appears via the per-target list. /etc/passwd is on the denylist and is
+# silently dropped if listed.
+
+cgpipe.container.engine = "docker"
+cgpipe.container.body_dir = "/cgpipe-bodydir"
+cgpipe.container.bind = ["/shared", "/etc/passwd"]
+job.container = "alpine:latest"
+
+output.txt:
+    <%
+        job.container.bind = ["/refs"]
+    %>
+    tool > output.txt

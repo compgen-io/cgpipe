@@ -1,0 +1,10 @@
+# 18-container-marker-collision: when the body literally contains the default HEREDOC
+# marker (__CGPIPE_BODY__), the wrapper picks a non-colliding suffix so the heredoc
+# closes at the right place.
+
+cgpipe.container.engine = "docker"
+cgpipe.container.body_dir = "/cgpipe-bodydir"
+job.container = "alpine:latest"
+
+output.txt:
+    echo "__CGPIPE_BODY__ appears inline" > output.txt

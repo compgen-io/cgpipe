@@ -12,7 +12,8 @@ Nine worked examples that build on each other, each in its own page. They're syn
 | 6 | [Shared `__pre__` and `__post__`](tutorials/06-pre-post.md) | Per-job timing and log preamble, `__setup__` with `job.shexec`, escaping `\$` to defer evaluation |
 | 7 | [Importable snippets](tutorials/07-importable-snippets.md) | `safe::` snippet with `<% import safe %>`; difference vs. `include` |
 | 8 | [Composing pipelines via include](tutorials/08-include.md) | Shared `defaults.cgp` for cluster/project defaults; pipeline-level `include` |
-| 9 | [Containerized jobs (Docker and Singularity)](tutorials/09-containers.md) | The HEREDOC trick in `__pre__`/`__post__`, volume mounts, the Singularity equivalent |
+| 9 | [Containerized jobs (Docker and Singularity)](tutorials/09-containers.md) | First-class `job.container` directive, auto-derived bind mounts, picking the shell, GPU support, Singularity parity |
+| 10 | [Custom job-submission templates](tutorials/10-custom-templates.md) | When and how to override the bundled scheduler templates — non-standard directives, site-mandated billing, environment setup |
 
 ## Where next
 

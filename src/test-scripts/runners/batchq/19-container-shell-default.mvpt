@@ -1,0 +1,9 @@
+# 19-container-shell-default: the default container shell is `sh`, not bash. This is
+# what makes alpine:latest (and other minimal images) work out of the box.
+
+cgpipe.container.engine = "docker"
+cgpipe.container.body_dir = "/cgpipe-bodydir"
+job.container = "alpine:latest"
+
+output.txt:
+    echo hello > output.txt

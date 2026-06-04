@@ -25,6 +25,7 @@ import io.compgen.cgpipe.parser.variable.VarBool;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.cgpipe.runner.container.ContainerWrapper;
 import io.compgen.cgpipe.runner.joblog.JobLog;
 import io.compgen.cgpipe.runner.joblog.JobLogRecord;
 import io.compgen.cgpipe.support.FileUtils;
@@ -154,17 +155,18 @@ public abstract class JobRunner {
 	}
 
 	protected void shexec(JobDef jobdef) throws RunnerException {
+		String body = ContainerWrapper.maybeWrap(jobdef, rootContext);
 		if (dryrun) {
 			System.err.println("[dryrun." + jobdef.getSafeName() +"]");
-			for (String line: jobdef.getBody().split("\n")) {
+			for (String line: body.split("\n")) {
 				System.err.println("> " + line);
 			}
 		} else {
 			try {
 				log.trace("shexec: "+jobdef.getSafeName());
-	
+
 				Process proc = Runtime.getRuntime().exec(new String[] { defaultShell });
-				proc.getOutputStream().write(jobdef.getBody().getBytes(Charset.forName("UTF8")));
+				proc.getOutputStream().write(body.getBytes(Charset.forName("UTF8")));
 				proc.getOutputStream().close();
 	
 				InputStream is = proc.getInputStream();
@@ -186,7 +188,7 @@ public abstract class JobRunner {
 				es.close();
 	
 				if (retcode != 0) {
-					throw new RunnerException("Error running job via shexec: "+jobdef.getName()+" $? = "+retcode+"\n"+jobdef.getBody());
+					throw new RunnerException("Error running job via shexec: "+jobdef.getName()+" $? = "+retcode+"\n"+body);
 				}
 	
 			} catch (IOException | InterruptedException e) {

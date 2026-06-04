@@ -1,0 +1,10 @@
+# 15-container-singularity: cgpipe.container.engine = "singularity" produces the
+# singularity exec form instead of docker run. Bare Docker Hub references get a
+# docker:// prefix automatically so they pull from Docker Hub.
+
+cgpipe.container.engine = "singularity"
+cgpipe.container.body_dir = "/cgpipe-bodydir"
+job.container = "biocontainers/samtools:1.18"
+
+output.txt:
+    samtools --version > output.txt

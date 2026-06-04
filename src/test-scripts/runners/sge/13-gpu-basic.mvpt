@@ -1,0 +1,9 @@
+# 13-gpu-basic: `job.gpu = 1` emits `#$ -l gpu=1`. SGE has no portable GPU
+# complex name — sites with a non-standard name override via job.custom or
+# a custom template.
+
+output.txt:
+    <%
+        job.gpu = 1
+    %>
+    cuda-program > output.txt

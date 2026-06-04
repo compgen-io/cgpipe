@@ -1,0 +1,13 @@
+# 21-container-shell-per-target: job.container.shell inside a target's <% %> block beats
+# the global default. Useful when one stage of a multi-image pipeline needs bash and
+# the rest are fine with sh.
+
+cgpipe.container.engine = "docker"
+cgpipe.container.body_dir = "/cgpipe-bodydir"
+job.container = "alpine:latest"
+
+output.txt:
+    <%
+        job.container.shell = "bash"
+    %>
+    echo hello > output.txt

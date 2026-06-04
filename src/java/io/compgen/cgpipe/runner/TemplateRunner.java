@@ -23,6 +23,7 @@ import io.compgen.cgpipe.parser.context.RootContext;
 import io.compgen.cgpipe.parser.variable.VarList;
 import io.compgen.cgpipe.parser.variable.VarString;
 import io.compgen.cgpipe.parser.variable.VarValue;
+import io.compgen.cgpipe.runner.container.ContainerWrapper;
 import io.compgen.common.IterUtils;
 import io.compgen.common.IterUtils.EachPair;
 import io.compgen.common.StringUtils;
@@ -72,7 +73,7 @@ public abstract class TemplateRunner extends JobRunner {
 			cxt.set("job.shell", new VarString(shell));
 		}
 
-		cxt.set("job._body", new VarString(jobdef.getBody()));
+		cxt.set("job._body", new VarString(ContainerWrapper.maybeWrapForTemplate(jobdef, rootContext)));
 
 		VarList outputs = new VarList();
 		for (String out:jobdef.getOutputs()) {

@@ -28,6 +28,7 @@ The following `job.*` variables are honored by the scheduler runners. Set them g
     job.procs         | CPUs per node                          |  X  |   X   |  X  |   X    |
     job.walltime      | Wall-clock limit (HH:MM:SS or similar) |  X  |   X   |  X  |   X    |
     job.mem           | Total RAM (e.g. "8G", "2048M")*        |  X  |   X   |  X  |   X    |
+    job.gpu           | GPU count or spec (see "GPUs" below)   |  X  |   X   |  X  |        |
     job.stack         | Stack size                             |  X  |       |     |        |
     job.hold          | Submit with a user-hold                |  X  |   X   |  X  |   X    |
     job.env           | Capture current env into the job       |  X  |   X   |  X  |   X    |
@@ -157,20 +158,89 @@ The BatchQ template emits a couple of directives that the other schedulers don't
 
 Cross-pipeline edges from the joblog aren't yet represented.
 
+## Containers
+
+Set the engine in `.cgpiperc` and the image per pipeline (or per target). CGPipe wraps every job in `docker run` or `singularity exec` automatically; no pipeline edits required to switch engines.
+
+    # ~/.cgpiperc
+    cgpipe.container.engine = "singularity"     # or "docker" / "apptainer"
+
+    # in your pipeline
+    job.container = "biocontainers/samtools:1.18"
+
+    ${out}: ${bam}
+        samtools flagstat ${bam} > $>
+
+The full container settings:
+
+| Setting | Type | Purpose |
+|---|---|---|
+| `cgpipe.container.engine` | string | `docker`, `singularity`, `apptainer` (alias for singularity). Unset disables wrapping. |
+| `cgpipe.container.body_dir` | string | Where the temp body file is written and mounted from. Default `/tmp`. |
+| `cgpipe.container.shell` | string | Shell used inside the container. Default `sh`. Set to `bash` for bash-only syntax. |
+| `cgpipe.container.bind` | list | Extra bind mounts applied to every container job. |
+| `cgpipe.container.env` | list | Names of host env vars passed through. |
+| `cgpipe.container.docker_opts` | list | Raw flags appended to `docker run` (e.g. `--shm-size=4g`). |
+| `cgpipe.container.singularity_opts` | list | Same, for `singularity exec`. |
+| `cgpipe.container.user_map` | bool | When `true` (default) and engine is docker, add `-u $(id -u):$(id -g)`. |
+| `job.container` | string | Image reference. Unset means "don't wrap this target." |
+| `job.container.bind` | list | Extra binds beyond auto-discovered, per-target. |
+| `job.container.env` | list | Extra env vars to pass through, per-target. |
+| `job.container.opts` | list | Engine-specific raw flags, per-target. |
+| `job.container.shell` | string | Per-target shell override. |
+
+CGPipe auto-derives the bind-mount set from the working directory, declared inputs/outputs, body-discovered absolute paths, and the body-file directory. The denylist (`/`, `/bin`, `/sbin`, `/usr`, `/etc`, `/lib`, `/var`, `/proc`, `/sys`, `/dev`, `/boot`, `/root`) keeps system paths off the mount list — those should come from the image.
+
+For the full story including per-target image overrides, the shell choice, GPU support, the macOS Docker Desktop file-sharing caveat, and the inspect-via-shell-runner workflow, see [Tutorial 9](tutorials/09-containers.md).
+
+## GPUs
+
+One setting, `job.gpu`, drives both the scheduler request and (when containers are in use) the container engine's GPU flag:
+
+    aligned.bam: reads.fq ref.fa
+        <%
+            job.container = "nvidia/cuda:12.0-base"
+            job.gpu = 2
+        %>
+        cuda-aligner ${ref} ${reads} > $>
+
+Renders into both:
+
+- A scheduler directive (`#SBATCH --gres=gpu:2`, PBS appends `:gpus=2` to the resource spec, `#$ -l gpu=2` for SGE).
+- A container flag (`--gpus 2` for docker, `--nv` for singularity).
+
+| Setting | Type | Purpose |
+|---|---|---|
+| `cgpipe.gpu` | bool / int / string | Global default applied to every job. |
+| `job.gpu` | bool / int / string | Per-target spec. Overrides the global. |
+
+Values:
+
+| Value | What it means |
+|---|---|
+| unset / `false` / `0` | No GPU. |
+| `true` | Equivalent to `1`. |
+| Integer N (`2`, `4`, …) | Request N GPUs. |
+| String (`"v100:2"`, `"device=0,1"`) | Passed through to whichever engines accept the syntax (SLURM uses GPU type:count; docker uses `--gpus device=…`). |
+
+NVIDIA only in v1. Docker needs `nvidia-container-toolkit`; Singularity needs the NVIDIA driver on the host and uses `--nv` to bind in the libraries. ROCm and other accelerators are future work.
+
+Cluster syntax that doesn't match the bundled rendering — SGE complex named `nvgpu` instead of `gpu`, PBS Pro using `select=…:ngpus=N` instead of Torque's `nodes=…:gpus=N` — overrides via a custom template (next section).
+
 ## Custom templates
 
-For finer-grained control over what each scheduler sees, point a runner at a custom template:
+The bundled templates handle common cases. When your cluster does something unusual — non-standard directive names, site-mandated billing, required module-loads — you point CGPipe at your own template instead:
 
-    cgpipe.runner.slurm.template = "/etc/cgpipe/slurm.template.cgp"
+    cgpipe.runner.slurm.template = "${HOME}/cgpipe/templates/site-slurm.template.cgp"
 
-A template is just a CGPipe file with the rendered directives at the top and `${job._body}` somewhere near the bottom. The defaults are a good starting point:
+A template is a CGPipe script that emits the scheduler directives at the top, optional setup lines next, and `${job._body}` at the bottom. The bundled templates are a good starting point:
 
-* [PBSTemplateRunner.template.cgp](https://github.com/compgen-io/cgpipe/blob/main/src/java/io/compgen/cgpipe/runner/PBSTemplateRunner.template.cgp)
-* [SGETemplateRunner.template.cgp](https://github.com/compgen-io/cgpipe/blob/main/src/java/io/compgen/cgpipe/runner/SGETemplateRunner.template.cgp)
 * [SLURMTemplateRunner.template.cgp](https://github.com/compgen-io/cgpipe/blob/main/src/java/io/compgen/cgpipe/runner/SLURMTemplateRunner.template.cgp)
+* [SGETemplateRunner.template.cgp](https://github.com/compgen-io/cgpipe/blob/main/src/java/io/compgen/cgpipe/runner/SGETemplateRunner.template.cgp)
+* [PBSTemplateRunner.template.cgp](https://github.com/compgen-io/cgpipe/blob/main/src/java/io/compgen/cgpipe/runner/PBSTemplateRunner.template.cgp)
 * [BatchQTemplateRunner.template.cgp](https://github.com/compgen-io/cgpipe/blob/main/src/java/io/compgen/cgpipe/runner/BatchQTemplateRunner.template.cgp)
 
-Templates have access to every `job.*` value plus a few internal helpers (`job._body`, `job._inputs`, `job._outputs`).
+Templates see every `job.*` value plus internal helpers (`job._body`, `job._inputs`, `job._outputs`). For a full worked example — taking the SLURM template and modifying it for a hypothetical site with a custom GPU complex, billing requirements, and a site-wide module-load — see [Tutorial 10](tutorials/10-custom-templates.md).
 
 ## Dry runs
 

@@ -1,0 +1,12 @@
+# 16-container-auto-binds: absolute paths in the body get scanned and their parent
+# directories auto-mounted. Body references /data/in/sample.bam and /scratch/work.tmp,
+# so the wrap includes -v /data/in:/data/in and -v /scratch:/scratch in addition to
+# the always-mounted /tmp and wd. /usr is on the denylist so /usr/local/bin/tool
+# doesn't trigger a mount.
+
+cgpipe.container.engine = "docker"
+cgpipe.container.body_dir = "/cgpipe-bodydir"
+job.container = "alpine:latest"
+
+output.txt:
+    /usr/local/bin/tool /data/in/sample.bam --tmp /scratch/work.tmp > output.txt

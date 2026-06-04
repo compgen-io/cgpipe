@@ -1,0 +1,7 @@
+# 15-gpu-count: integer count flows through to the SLURM directive.
+
+output.txt:
+    <%
+        job.gpu = 4
+    %>
+    multi-gpu-program > output.txt

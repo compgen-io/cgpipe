@@ -4,7 +4,9 @@ A short reference for terms used throughout this guide.
 
 **Accumulator list.** A list (usually named `*_acc`, `out*`, `per_chrom`, etc.) populated inside a `for` loop with `+=`, then consumed by a downstream target via `@{accumulator}` expansion. The core idiom for dynamic target generation. See [Build Targets](05-Build_Targets.md#dynamic-target-generation).
 
-**Body.** The shell script lines that appear after a target's `:` and indentation. Submitted to the runner as the actual job script (after CGPipe substitutes `${var}`, `$<`, `$>`, etc.).
+**Bind mount.** A host directory mounted into a container at the same path. CGPipe auto-derives the set from the working directory, declared inputs and outputs, and absolute paths found in the body, then collapses by common parent. Users add escape-hatch binds via `cgpipe.container.bind` (global) or `job.container.bind` (per-target). See [Tutorial 9 § What gets bind-mounted](tutorials/09-containers.md#what-gets-bind-mounted).
+
+**Body.** The shell script lines that appear after a target's `:` and indentation. Submitted to the runner as the actual job script (after CGPipe substitutes `${var}`, `$<`, `$>`, etc.). With container support enabled, the body is also wrapped in `docker run` or `singularity exec` automatically.
 
 **Build graph / DAG.** The directed acyclic graph of file dependencies CGPipe computes from your target definitions. A target's inputs are its parents in the graph; a target's outputs are its children's parents. CGPipe walks the graph backwards from the requested output to figure out what needs to be submitted.
 
@@ -17,6 +19,12 @@ A short reference for terms used throughout this guide.
 **`cgsub`.** The standalone job-submission tool that ships with CGPipe. Uses the same runner and joblog as `cgpipe` but submits one job at a time without parsing a pipeline file. Useful for ad-hoc submissions that should still appear in the joblog.
 
 **Closure / capture.** When a target is defined, it captures the surrounding global context — variable values, settings, the current `__pre__`/`__post__` — at that point. The target body sees those captured values at job-render time, not the values current at execution time. This is what makes per-iteration targets work cleanly inside a `for` loop.
+
+**Container engine.** The runtime that executes a container — `docker`, `singularity`, or `apptainer` (alias for singularity). Selected via `cgpipe.container.engine`. Per the Snakemake/Nextflow model, the engine is a property of the run (config-time decision); the image is a property of the script (`job.container`).
+
+**Container image.** The packaged filesystem and tools the container runs. Set per-target via `job.container = "biocontainers/bwa:0.7.17"` or globally as a pipeline default. Bare Docker Hub references work for both Docker and Singularity — Singularity gets a `docker://` prefix prepended automatically. See [Tutorial 9](tutorials/09-containers.md).
+
+**Custom template.** A user-supplied CGPipe script that replaces the bundled scheduler template. Wired in via `cgpipe.runner.<name>.template = "..."`. The right answer for clusters whose syntax diverges from the defaults (non-standard GPU complexes, site-mandated billing, required module-loads). See [Tutorial 10](tutorials/10-custom-templates.md).
 
 **Dry run.** Submission mode where rendered job scripts are printed to stdout instead of sent to the scheduler. Enabled with `-dr` or `CGPIPE_DRYRUN=1`. The fastest way to verify substitution and resource settings before tying up cluster quota.
 

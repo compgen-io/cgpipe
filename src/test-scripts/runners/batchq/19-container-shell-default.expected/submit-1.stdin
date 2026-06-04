@@ -1,0 +1,19 @@
+#!/bin/bash
+#BATCHQ -name cgjob_output.txt
+#BATCHQ -output output.txt
+#BATCHQ -wd .
+set -eo pipefail
+__cgpipe_body=$(mktemp "/cgpipe-bodydir/cgpipe-body.XXXXXX")
+trap 'rm -f "$__cgpipe_body"' EXIT
+cat > "$__cgpipe_body" <<'__CGPIPE_BODY__'
+echo hello > output.txt
+__CGPIPE_BODY__
+
+docker run --rm \
+    -v /cgpipe-test:/cgpipe-test \
+    -v /cgpipe-bodydir:/cgpipe-bodydir \
+    -w /cgpipe-test \
+    -u $(id -u):$(id -g) \
+    alpine:latest \
+    sh "$__cgpipe_body"
+

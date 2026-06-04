@@ -1,0 +1,10 @@
+# 13-container-docker (slurm): the SLURM template emits its directive block and then
+# ${job._body}, which now contains the container wrapping. Confirms wrapping is
+# template-agnostic — no SLURM template changes needed.
+
+cgpipe.container.engine = "docker"
+cgpipe.container.body_dir = "/cgpipe-bodydir"
+job.container = "alpine:latest"
+
+output.txt:
+    echo "hello container" > output.txt

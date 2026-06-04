@@ -1,0 +1,14 @@
+# 24-container-gpu-singularity: singularity has no granular GPU control — any
+# truthy `job.gpu` value just emits `--nv`. The count (4 here) is discarded
+# at the container layer; the scheduler-side request (not exercised in this
+# BatchQ test) is where count actually matters.
+
+cgpipe.container.engine = "singularity"
+cgpipe.container.body_dir = "/cgpipe-bodydir"
+job.container = "nvidia/cuda:12.0-base"
+
+output.txt:
+    <%
+        job.gpu = 4
+    %>
+    nvidia-smi > output.txt
