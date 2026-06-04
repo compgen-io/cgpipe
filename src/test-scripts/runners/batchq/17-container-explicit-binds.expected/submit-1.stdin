@@ -14,7 +14,6 @@ docker run --rm \
     -v /shared:/shared \
     -v /cgpipe-test:/cgpipe-test \
     -v /cgpipe-bodydir:/cgpipe-bodydir \
-    -v /private/etc/passwd:/private/etc/passwd \
     -w /cgpipe-test \
     -u $(id -u):$(id -g) \
     alpine:latest \

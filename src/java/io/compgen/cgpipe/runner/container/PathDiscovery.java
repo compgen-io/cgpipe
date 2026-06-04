@@ -76,10 +76,18 @@ public final class PathDiscovery {
 			if (d == null || d.isEmpty() || !new File(d).isAbsolute()) {
 				continue;
 			}
-			String mount = canonicalize(trimTrailingSlash(d));
-			if (!isDenylisted(mount)) {
-				dirs.add(mount);
+			String trimmed = trimTrailingSlash(d);
+			// Apply the denylist to the *logical* path the user supplied, before
+			// canonicalization. Otherwise paths like /etc/passwd slip past the
+			// /etc rule on systems where /etc is a symlink to /private/etc (macOS).
+			if (isDenylisted(trimmed)) {
+				continue;
 			}
+			String mount = canonicalize(trimmed);
+			if (isDenylisted(mount)) {
+				continue;
+			}
+			dirs.add(mount);
 		}
 		for (String p : discovered) {
 			if (p == null || p.isEmpty() || !new File(p).isAbsolute()) {
@@ -93,6 +101,9 @@ public final class PathDiscovery {
 				mount = parentDir(p);
 			}
 			if (mount == null || mount.isEmpty()) {
+				continue;
+			}
+			if (isDenylisted(mount)) {
 				continue;
 			}
 			mount = canonicalize(mount);
