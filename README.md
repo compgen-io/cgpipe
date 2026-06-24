@@ -4,6 +4,20 @@ cgpipe - minimum viable pipeline
 Make for HPC analysis pipelines
 ----
 
+Run a pipeline directly:
+
+    $ cgpipe pipeline.cgp
+
+Or make the pipeline script itself executable with a shebang line — just like
+bash, perl, or python — and run it like any other script:
+
+    #!/usr/bin/env cgpipe
+
+    # ...pipeline targets...
+
+    $ chmod +x pipeline.cgp
+    $ ./pipeline.cgp
+
 CGPipe is a replacement for the venerable "make" that aims to automate
 the process of running complex analysis pipelines on high-throughput clusters.
 Make is a standard build tool for compiling software. The power of make is
